@@ -17,7 +17,7 @@ Dynamic Difficulty adjustment aided by Reinforcement Learning in Strategy games.
 
 - Create the terrain - Effort : 0.5 - Mon - Done
 
-- Create the player moving script with a 3rd person locked top down perspective (or follow camera if time allows), including animations - Effort : 2-3 - Mon-Tue - (Free one used that comes with animations and everything. Just need to make a mixamo skeleton and animations work with the script)
+- Create the player moving script with a 3rd person locked top down perspective (or follow camera if time allows), including animations - Effort : 2-3 - Mon-Tue - Done since animations work with free one even with another model
 
 - Create the score and hunger gamedata - Effort : 0.5 - TODO if it needs to be separate and not like the previous one
 
