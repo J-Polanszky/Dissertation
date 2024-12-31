@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Pickaxe_Handle
+  - Item
+  - Gold
+  - Silver
+  - Iron
   layers:
   - Default
   - TransparentFX
@@ -12,7 +16,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Ore
   - 
   - 
   - 
