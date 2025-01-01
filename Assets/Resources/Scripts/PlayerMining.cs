@@ -17,6 +17,7 @@ public enum OreMiningTime
 public class PlayerMining : MonoBehaviour
 {
     public Transform headTransform;
+    public Transform[] bodyTransforms;
     public LayerMask oreLayer;
 
     private GameObject pickaxeHandle;
@@ -31,7 +32,7 @@ public class PlayerMining : MonoBehaviour
         { "Iron", (int)OreMiningTime.Iron }
     };
 
-    Rigidbody rigidbody;
+    Rigidbody playerRigidbody;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -42,7 +43,7 @@ public class PlayerMining : MonoBehaviour
         pickaxeHandle.SetActive(false);
         input = GetComponent<vThirdPersonInput>();
         animator = GetComponent<Animator>();
-        rigidbody = GetComponent<Rigidbody>();
+        playerRigidbody = GetComponent<Rigidbody>();
     }
 
     GameObject CheckForOre()
@@ -55,24 +56,40 @@ public class PlayerMining : MonoBehaviour
             Debug.Log("Ore found: " + hit.collider.gameObject.name);
             return hit.collider.gameObject;
         }
-        else
+
+        for (int i = 0; i < bodyTransforms.Length; i++)
         {
-            Debug.Log("No ore found within distance.");
-            return null;
+            Ray newRay = new Ray(bodyTransforms[i].position, bodyTransforms[i].forward);
+            RaycastHit newHit;
+            
+            if (Physics.Raycast(newRay, out newHit, 0.75f, oreLayer))
+            {
+                Debug.Log("Ore found: " + newHit.collider.gameObject.name);
+                return newHit.collider.gameObject;
+            }
         }
+        
+        Debug.Log("No Ore Found");
+        return null;
     }
 
-    // private void Update()
-    // {
-    //     DrawRay();
-    // }
+    private void Update()
+    {
+        DrawRay();
+    }
 
-    // void DrawRay()
-    // {
-    //     Ray ray = new Ray(headTransform.position, Camera.main.transform.forward);
-    //     Vector3 endPosition = ray.origin + (ray.direction * 1.2f);
-    //     Debug.DrawLine(ray.origin, endPosition, Color.red);
-    // }
+    void DrawRay()
+    {
+        Ray ray = new Ray(headTransform.position, Camera.main.transform.forward);
+        Vector3 endPosition = ray.origin + (ray.direction * 1.2f);
+        Debug.DrawLine(ray.origin, endPosition, Color.red);
+        ray = new Ray(bodyTransforms[0].position, bodyTransforms[0].forward);
+        endPosition = ray.origin + (ray.direction * 0.75f);
+        Debug.DrawLine(ray.origin, endPosition, Color.green);
+        ray = new Ray(bodyTransforms[1].position, bodyTransforms[1].forward);
+        endPosition = ray.origin + (ray.direction * 0.75f);
+        Debug.DrawLine(ray.origin, endPosition, Color.blue);
+    }
 
     IEnumerator MiningCoroutine()
     {
@@ -84,13 +101,14 @@ public class PlayerMining : MonoBehaviour
         float timeToMine = (float) oreMiningTime[currentOre.tag] / 10;
 
         print("Mining");
+        currentOre.GetComponent<OreScript>().playerMined = true;
         pickaxeHandle.SetActive(true);
         input.enabled = false;
         input.cc.input.x = 0;
         input.cc.input.z = 0;
         isMining = true;
         animator.SetBool("Mining", true);
-        rigidbody.linearVelocity = Vector3.zero;
+        playerRigidbody.linearVelocity = Vector3.zero;
 
         yield return new WaitForSeconds(timeToMine);
 
