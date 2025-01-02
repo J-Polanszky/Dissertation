@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ground Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 8957304962413023527, guid: 3f9b178ccd3b86f4ebbfc1f5a2815e56, type: 3}
+      propertyPath: m_TagString
+      value: Ground
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -95,8 +99,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainPopulatorPrefab: {fileID: 0}
   grassPrefabs:
-  - {fileID: 8903058273634794869, guid: f1fc5bb90ac285e4486771552d63bcb8, type: 3}
-  - {fileID: 3356751432538110193, guid: ffbddc4ef9676cc419e81e06aaa836d8, type: 3}
+  - {fileID: 1958457545962375555, guid: 6fa1c0949fc243b45b1cec9cc758dd70, type: 3}
+  - {fileID: 2779578432359927172, guid: ad8dfb7dbb9a93742b8171c637fdbaa8, type: 3}
   bushPrefabs:
   - {fileID: 4263922822445002727, guid: 3cdafb3c2f54d434894928d72d282874, type: 3}
   - {fileID: 6239969156481229051, guid: b71b0f8d2f881c743a85228f3030d1cb, type: 3}
@@ -108,6 +112,7 @@ MonoBehaviour:
   - {fileID: 2807449429036958551, guid: f0c16f0ea935ea64297ca1d4d55d9746, type: 3}
   - {fileID: 9069115365609291303, guid: 60f79905accf3b24fa0114b941f1aac0, type: 3}
   terrainMesh: {fileID: 0}
-  grassCount: 100
-  bushCount: 20
-  treeCount: 10
+  grassCount: 10000
+  bushCount: 50
+  treeCount: 25
+  OreClusterPrefab: {fileID: 6431826082362203988, guid: 63a3c3d5c46f0084aa2404f745428f4a, type: 3}

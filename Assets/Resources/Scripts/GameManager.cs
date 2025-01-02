@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    
     private void Awake()
     {
         if (instance == null)
@@ -24,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        StartCoroutine(LoadGameSceneAsync("GameScene"));
+        StartCoroutine(LoadGameSceneAsync("GameScene", SpawnOres));
     }
     
     public void QuitGame()
@@ -35,8 +36,25 @@ public class GameManager : MonoBehaviour
     Application.Quit();
 #endif
     }
+
+    void SpawnOres()
+    {
+        TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
+        
+        // Easy
+        if (GameData.Difficulty == 3)
+            terrainPopulator.SetOreSpawns(40, 33,33,34);
+        
+        // Normal
+        else if (GameData.Difficulty == 2)
+            terrainPopulator.SetOreSpawns(30, 30, 35, 35);
+        
+        // Hard
+        else
+            terrainPopulator.SetOreSpawns(20, 20, 30, 40);
+    }
     
-    IEnumerator LoadGameSceneAsync(string sceneName)
+    IEnumerator LoadGameSceneAsync(string sceneName, System.Action callback = null)
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
         asyncLoad.allowSceneActivation = false;
@@ -55,5 +73,7 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        if (callback != null)
+            callback();
     }
 }

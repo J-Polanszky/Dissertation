@@ -9,6 +9,7 @@ TagManager:
   - Gold
   - Silver
   - Iron
+  - Ground
   layers:
   - Default
   - TransparentFX

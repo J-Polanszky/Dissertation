@@ -4,6 +4,7 @@ public class OreScript : MonoBehaviour
 {
     protected int oreScore = 0;
     public bool playerMined = false;
+    public System.Action destroyedCallback;
     
     void OnDestroy()
     {
@@ -15,5 +16,7 @@ public class OreScript : MonoBehaviour
         
         print("Machine score: " + GameData.MachineScore);
         print("Player Score: " + GameData.PlayerScore); 
+        
+        destroyedCallback?.Invoke();
     }
 }

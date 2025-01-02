@@ -10,6 +10,17 @@ public class TerrainPopulator : MonoBehaviour
     public int grassCount = 150;
     public int bushCount = 30;
     public int treeCount = 20;
+    
+    public GameObject OreClusterPrefab;
+    
+    int oreClusterCount = 0;
+    
+    // Percentage out of 100 based on difficulty
+    int goldCount = 0;
+    int silverCount = 0;
+    int ironCount = 0;
+
+    private float edgeBuffer = 12;
     void Start()
     {
         terrainMesh = GetComponent<MeshRenderer>();
@@ -23,30 +34,63 @@ public class TerrainPopulator : MonoBehaviour
         for (int i = 0; i < grassCount; i++)
         {
             int randomIndex = UnityEngine.Random.Range(0, grassPrefabs.Length);
-            PlacePrefabRandomly(grassPrefabs[randomIndex], bounds);
+            PlacePrefabRandomly(grassPrefabs[randomIndex], bounds, 1.5f);
         }
 
         for (int i = 0; i < bushCount; i++)
         {
             int randomIndex = UnityEngine.Random.Range(0, bushPrefabs.Length);
-            PlacePrefabRandomly(bushPrefabs[randomIndex], bounds);
+            PlacePrefabRandomly(bushPrefabs[randomIndex], bounds, edgeBuffer);
         }
 
         for (int i = 0; i < treeCount; i++)
         {
             int randomIndex = UnityEngine.Random.Range(0, treePrefab.Length);
-            PlacePrefabRandomly(treePrefab[randomIndex], bounds);
+            PlacePrefabRandomly(treePrefab[randomIndex], bounds, edgeBuffer);
         }
     }
-
-    void PlacePrefabRandomly(GameObject prefab, Bounds bounds)
+    
+    bool IsInCorner(Vector3 position, Bounds bounds)
     {
-        Vector3 randomPosition = new Vector3(
-            Random.Range(bounds.min.x, bounds.max.x - 1.5f),
-            bounds.min.y,
-            Random.Range(bounds.min.z, bounds.max.z - 1.5f)
-        );
+        bool inXCorner = (position.x < bounds.min.x + edgeBuffer) || (position.x > bounds.max.x - edgeBuffer);
+        bool inZCorner = (position.z < bounds.min.z + edgeBuffer) || (position.z > bounds.max.z - edgeBuffer);
 
-        Instantiate(prefab, randomPosition, Quaternion.identity, TerrainPopulatorPrefab);
+        return inXCorner && inZCorner;
+    }
+
+    GameObject PlacePrefabRandomly(GameObject prefab, Bounds bounds, float buffer)
+    {
+        Vector3 randomPosition;
+        do {
+            randomPosition = new Vector3(
+            Random.Range(bounds.min.x + buffer, bounds.max.x - buffer),
+            bounds.min.y,
+            Random.Range(bounds.min.z + buffer, bounds.max.z - buffer)
+        );
+            
+        } while (IsInCorner(randomPosition, bounds));
+
+        return Instantiate(prefab, randomPosition, Quaternion.identity, TerrainPopulatorPrefab);
+    }
+
+   
+    
+    public void SpawnOreCluster()
+    {
+        print("Spawning Ore Cluster");
+        GameObject clusterObject = PlacePrefabRandomly(OreClusterPrefab, terrainMesh.bounds, edgeBuffer);
+        
+        clusterObject.GetComponent<ClusterOreScript>().SpawnOres(goldCount, silverCount, ironCount, SpawnOreCluster);
+    }
+    
+    public void SetOreSpawns(int oreCluster, int gold, int silver, int iron)
+    {
+        oreClusterCount = oreCluster;
+        goldCount = gold;
+        silverCount = silver;
+        ironCount = iron;
+        
+        for (int i = 0; i < oreClusterCount; i++)
+            SpawnOreCluster();
     }
 }
