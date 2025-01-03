@@ -42,6 +42,8 @@ public class ClusterOreScript : MonoBehaviour
 
     void OnDestroy()
     {
-        destroyedCallback?.Invoke();
+        // Stops the game from freezing when exiting
+        if (destroyedOreCount >= 3)
+            destroyedCallback?.Invoke();
     }
 }
