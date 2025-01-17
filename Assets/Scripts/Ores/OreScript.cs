@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class OreScript : MonoBehaviour
@@ -8,15 +9,21 @@ public class OreScript : MonoBehaviour
     
     void OnDestroy()
     {
-        if (playerMined)
-            GameData.AddToPlayerInventory(gameObject.name, oreScore * GameData.Difficulty);
+        try
+        {
+            if (playerMined)
+                GameData.AddToPlayerInventory(gameObject.name.Substring(0, gameObject.name.Length - 7),
+                    oreScore * GameData.Difficulty);
 
-        else
-            GameData.AddToMachineInventory(gameObject.name, oreScore * GameData.Difficulty);
-        
-        print("Machine inventory: " + GameData.MachineInventory);
-        print("Player inventory: " + GameData.PlayerInventory); 
-        
-        destroyedCallback?.Invoke();
+            else
+                GameData.AddToMachineInventory(gameObject.name.Substring(0, gameObject.name.Length - 7),
+                    oreScore * GameData.Difficulty);
+
+            destroyedCallback?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.Message);
+        }
     }
 }
