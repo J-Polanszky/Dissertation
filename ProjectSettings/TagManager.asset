@@ -10,6 +10,8 @@ TagManager:
   - Silver
   - Iron
   - Ground
+  - Deposit
+  - Agent
   layers:
   - Default
   - TransparentFX
