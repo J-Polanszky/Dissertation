@@ -1,10 +1,30 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+
+    private TextMeshProUGUI playerText, machineText, timeText;
+
+    void UpdatePlayerScore(int score)
+    {
+        playerText.text = score.ToString();
+    }
+
+    void UpdateMachineScore(int score)
+    {
+        machineText.text = score.ToString();
+    }
+
+    void UpdateTime(int timeInSeconds)
+    {
+        int minutes = timeInSeconds / 60;
+        int seconds = timeInSeconds % 60;
+        timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
+    }
     
     private void Awake()
     {
@@ -25,7 +45,7 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        StartCoroutine(LoadGameSceneAsync("GameScene", SpawnOres));
+        StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
     }
     
     public void QuitGame()
@@ -37,6 +57,41 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
+    void RunGameStartFunctions()
+    {
+        Debug.Log("Game started");
+        Transform canvas = GameObject.Find("Canvas").transform;
+        Debug.Log("Canvas found" + canvas.childCount);
+        timeText = canvas.Find("Time").GetComponent<TextMeshProUGUI>();
+        machineText = canvas.Find("EnemyScore").GetComponent<TextMeshProUGUI>();
+        playerText = canvas.Find("Score").GetComponent<TextMeshProUGUI>();
+        
+        Debug.Log("Player text found" + playerText.text);
+        Debug.Log("Machine text found" + machineText.text);
+        Debug.Log("Time text found" + timeText.text);
+        
+        // Set callbacks
+        GameData.PlayerData.onScoreUpdated += UpdatePlayerScore;
+        GameData.MachineData.onScoreUpdated += UpdateMachineScore;
+        
+        SpawnOres();
+        UpdatePlayerScore(0);
+        UpdateMachineScore(0);
+        StartCoroutine(CountDown());
+    }
+
+    IEnumerator CountDown()
+    {
+        int durationInSeconds = 600;
+        UpdateTime(durationInSeconds);
+
+        while (durationInSeconds > 0)
+        {
+            yield return new WaitForSeconds(1);
+            UpdateTime(--durationInSeconds);
+        }
+    }
+    
     void SpawnOres()
     {
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
@@ -76,4 +131,6 @@ public class GameManager : MonoBehaviour
         if (callback != null)
             callback();
     }
+    
+    
 }

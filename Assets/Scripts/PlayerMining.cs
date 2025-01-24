@@ -6,13 +6,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 1.6s per swing
-public enum OreMiningTime
-{
-    Gold = 160,
-    Silver = 96,
-    Iron = 48,
-}
+// 1.6s per swing animation. multiply the amount below with the anim speed.
+// public enum OreMiningTime
+// {
+//     Gold = 160,
+//     Silver = 96,
+//     Iron = 48,
+// }
 
 public class PlayerMining : MonoBehaviour
 {
@@ -24,12 +24,14 @@ public class PlayerMining : MonoBehaviour
     vThirdPersonInput input;
     Animator animator;
     bool isMining = false;
+    
+    static float animSpeed = 1.3f;
 
-    private Dictionary<string, int> oreMiningTime = new()
+    private Dictionary<string, float> oreMiningTime = new()
     {
-        { "Gold", (int)OreMiningTime.Gold },
-        { "Silver", (int)OreMiningTime.Silver },
-        { "Iron", (int)OreMiningTime.Iron }
+        { "Gold", 160f / animSpeed },
+        { "Silver", 96f / animSpeed },
+        { "Iron", 48f / animSpeed }
     };
 
     Rigidbody playerRigidbody;

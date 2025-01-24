@@ -24,7 +24,7 @@ public class DepositBuilding : MonoBehaviour
                 continue;
             
             Debug.Log("Depositing: " + key + "with value: " + value[1]);
-            data.score += value[1];
+            data.Score += value[1];
             value[0] = 0;
             value[1] = 0;
         }

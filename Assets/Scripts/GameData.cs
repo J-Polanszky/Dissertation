@@ -10,7 +10,10 @@ public class AgentData
         { "Iron", new List<int>() {0,0} }
     };
 
-    public int score = 0;
+    public System.Action<int> onScoreUpdated;
+    private int score = 0;
+    
+    public int Score { get { return score; } set { score = value; onScoreUpdated?.Invoke(value); } }
 }
 
 public static class GameData
