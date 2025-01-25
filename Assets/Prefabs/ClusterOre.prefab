@@ -84,7 +84,7 @@ MonoBehaviour:
   - {fileID: 6325991612003070715}
   goldOrePrefab: {fileID: 8438042226857148958, guid: e8b964aa61d0f4047b9543fbb3c1374f, type: 3}
   silverOrePrefab: {fileID: 4635865988157365782, guid: 2343d5d2af822dc47a6ba5f1789d987f, type: 3}
-  ironOrePrefab: {fileID: 3111520046318658422, guid: ba54ab1bf7947e94ba850bf3f27acb9c, type: 3}
+  copperOrePrefab: {fileID: 3482053470985528269, guid: d49ab36f8214e5a4d81ca4aa6e2f7cec, type: 3}
 --- !u!1 &6718316846865806540
 GameObject:
   m_ObjectHideFlags: 0

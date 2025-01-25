@@ -9,24 +9,22 @@ public class DepositBuilding : MonoBehaviour
     
     // Changed idea and made them universal for both player and agent.
     public string agentTag;
-    public AgentData agentData;
     bool agentCooldown = false;
 
     public string playerTag;
-    public AgentData playerData;
     bool playerCooldown = false;
     
     void Deposit(AgentData data)
     {
         foreach (var (key, value) in data.inventory)
         {
-            if (value[0] == 0)
+            if (value.Quantity == 0)
                 continue;
             
-            Debug.Log("Depositing: " + key + "with value: " + value[1]);
-            data.Score += value[1];
-            value[0] = 0;
-            value[1] = 0;
+            Debug.Log("Depositing: " + key + "with value: " + value.Score);
+            data.Score += value.Score;
+            value.Quantity = 0;
+            value.Score = 0;
         }
     }
 
@@ -48,14 +46,14 @@ public class DepositBuilding : MonoBehaviour
             // Check if the collided object is a player or State machine
             if (col.gameObject.CompareTag(agentTag) && agentCooldown == false)
             {
-                Deposit(agentData);
+                Deposit(GameData.MachineData);
                 agentCooldown = true;
                 StartCoroutine(CountDown(false));
             }
 
             if (col.gameObject.CompareTag(playerTag) && playerCooldown == false)
             {
-                Deposit(playerData);
+                Deposit(GameData.PlayerData);
                 playerCooldown = true;
                 StartCoroutine(CountDown(true));
             }

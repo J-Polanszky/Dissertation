@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Iron : OreScript
+public class Copper : OreScript
 {
     void Awake()
     { 

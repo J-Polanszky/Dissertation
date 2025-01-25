@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    private TextMeshProUGUI playerText, machineText, timeText;
+    private TextMeshProUGUI playerText, machineText, timeText, goldText, silverText, copperText;
 
     void UpdatePlayerScore(int score)
     {
@@ -24,6 +24,21 @@ public class GameManager : MonoBehaviour
         int minutes = timeInSeconds / 60;
         int seconds = timeInSeconds % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
+    }
+
+    void UpdateGold(int gold)
+    {
+        goldText.text = "x" + gold;
+    }
+
+    void UpdateSilver(int silver)
+    {
+        silverText.text = "x" + silver;
+    }
+
+    void UpdateCopper(int copper)
+    {
+        copperText.text = "x" + copper;
     }
     
     private void Awake()
@@ -61,23 +76,30 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Game started");
         Transform canvas = GameObject.Find("Canvas").transform;
-        Debug.Log("Canvas found" + canvas.childCount);
         timeText = canvas.Find("Time").GetComponent<TextMeshProUGUI>();
         machineText = canvas.Find("EnemyScore").GetComponent<TextMeshProUGUI>();
         playerText = canvas.Find("Score").GetComponent<TextMeshProUGUI>();
-        
-        Debug.Log("Player text found" + playerText.text);
-        Debug.Log("Machine text found" + machineText.text);
-        Debug.Log("Time text found" + timeText.text);
+        Transform inventory = canvas.Find("Inventory");
+        goldText = inventory.Find("Gold").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
+        silverText = inventory.Find("Silver").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
+        copperText = inventory.Find("Copper").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
         
         // Set callbacks
         GameData.PlayerData.onScoreUpdated += UpdatePlayerScore;
+        GameData.PlayerData.inventory["Gold"].onQuantityUpdated += UpdateGold;
+        GameData.PlayerData.inventory["Silver"].onQuantityUpdated += UpdateSilver;
+        GameData.PlayerData.inventory["Copper"].onQuantityUpdated += UpdateCopper;
         GameData.MachineData.onScoreUpdated += UpdateMachineScore;
         
         SpawnOres();
         UpdatePlayerScore(0);
         UpdateMachineScore(0);
         StartCoroutine(CountDown());
+    }
+
+    void GameOver()
+    {
+        Debug.Log("Game over");
     }
 
     IEnumerator CountDown()
@@ -90,6 +112,8 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(1);
             UpdateTime(--durationInSeconds);
         }
+
+        StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
     }
     
     void SpawnOres()

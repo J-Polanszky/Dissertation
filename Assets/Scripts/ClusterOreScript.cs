@@ -6,7 +6,7 @@ public class ClusterOreScript : MonoBehaviour
     
     public GameObject goldOrePrefab;
     public GameObject silverOrePrefab;
-    public GameObject ironOrePrefab;
+    public GameObject copperOrePrefab;
 
     int destroyedOreCount = 0;
     System.Action destroyedCallback;
@@ -19,7 +19,7 @@ public class ClusterOreScript : MonoBehaviour
             Destroy(gameObject);
     }
     
-    public void SpawnOres(int goldCount, int silverCount, int ironCount, System.Action callback)
+    public void SpawnOres(int goldCount, int silverCount, int copperCount, System.Action callback)
     {
         destroyedCallback = callback;
         for (int i = 0; i < spawnpoints.Length; i++)
@@ -27,10 +27,10 @@ public class ClusterOreScript : MonoBehaviour
             int randomNum = UnityEngine.Random.Range(1, 101);
             GameObject spawnedOre;
             
-            if (randomNum <= ironCount)
-                spawnedOre = Instantiate(ironOrePrefab, spawnpoints[i].transform.position, Quaternion.identity, transform);
+            if (randomNum <= copperCount)
+                spawnedOre = Instantiate(copperOrePrefab, spawnpoints[i].transform.position, Quaternion.identity, transform);
             
-            else if (randomNum <= ironCount + silverCount)
+            else if (randomNum <= copperCount + silverCount)
                 spawnedOre = Instantiate(silverOrePrefab, spawnpoints[i].transform.position, Quaternion.identity, transform);
             
             else

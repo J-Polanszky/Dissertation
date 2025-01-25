@@ -18,7 +18,7 @@ public class TerrainPopulator : MonoBehaviour
     // Percentage out of 100 based on difficulty
     int goldCount = 0;
     int silverCount = 0;
-    int ironCount = 0;
+    int copperCount = 0;
 
     private float edgeBuffer = 12;
     void Start()
@@ -69,8 +69,10 @@ public class TerrainPopulator : MonoBehaviour
         );
             
         } while (IsInCorner(randomPosition, bounds));
+        
+        Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
 
-        return Instantiate(prefab, randomPosition, Quaternion.identity, TerrainPopulatorPrefab);
+        return Instantiate(prefab, randomPosition, randomRotation, TerrainPopulatorPrefab);
     }
 
    
@@ -80,15 +82,15 @@ public class TerrainPopulator : MonoBehaviour
         print("Spawning Ore Cluster");
         GameObject clusterObject = PlacePrefabRandomly(OreClusterPrefab, terrainMesh.bounds, edgeBuffer);
         
-        clusterObject.GetComponent<ClusterOreScript>().SpawnOres(goldCount, silverCount, ironCount, SpawnOreCluster);
+        clusterObject.GetComponent<ClusterOreScript>().SpawnOres(goldCount, silverCount, copperCount, SpawnOreCluster);
     }
     
-    public void SetOreSpawns(int oreCluster, int gold, int silver, int iron)
+    public void SetOreSpawns(int oreCluster, int gold, int silver, int copper)
     {
         oreClusterCount = oreCluster;
         goldCount = gold;
         silverCount = silver;
-        ironCount = iron;
+        copperCount = copper;
         
         for (int i = 0; i < oreClusterCount; i++)
             SpawnOreCluster();

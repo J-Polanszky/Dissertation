@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 52b131a92e215c84484bbcd5ae277f60
+guid: b3e9f93dcaf0d3745ae7c9989fa499e2
 PrefabImporter:
   externalObjects: {}
   userData: 
@@ -10,5 +10,5 @@ AssetOrigin:
   productId: 285315
   packageName: Simple Ores, Chunks, and Bars
   packageVersion: 1.0.0
-  assetPath: Assets/Simple Ores, Chunks, and Bars/Prefabs/Silver Chunk.prefab
+  assetPath: Assets/Simple Ores, Chunks, and Bars/Prefabs/Copper Ore.prefab
   uploadId: 670193

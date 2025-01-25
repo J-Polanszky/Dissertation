@@ -1,8 +1,7 @@
 fileFormatVersion: 2
-guid: 2ed1d607ef201bb4299a5f68db0ea6d0
-NativeFormatImporter:
+guid: a1f49e5fa8f7fa447bdd6cf36b9c6114
+PrefabImporter:
   externalObjects: {}
-  mainObjectFileID: 2100000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -11,5 +10,5 @@ AssetOrigin:
   productId: 285315
   packageName: Simple Ores, Chunks, and Bars
   packageVersion: 1.0.0
-  assetPath: Assets/Simple Ores, Chunks, and Bars/Materials/Silver Chunk Mat.mat
+  assetPath: Assets/Simple Ores, Chunks, and Bars/Prefabs/Copper Bar.prefab
   uploadId: 670193

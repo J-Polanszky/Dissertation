@@ -8,10 +8,10 @@ TagManager:
   - Item
   - Gold
   - Silver
-  - Iron
   - Ground
   - Deposit
   - Agent
+  - Copper
   layers:
   - Default
   - TransparentFX

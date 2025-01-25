@@ -3,11 +3,22 @@ using UnityEngine;
 
 public class AgentData
 {
-    public Dictionary<string, List<int>> inventory = new()
+    // Updated it to use a class to make it more readable than a simple list, even if it makes it a bit less efficient.
+    public class InventoryClass
     {
-        { "Gold", new List<int>() {0,0} },
-        { "Silver", new List<int>() {0,0} },
-        { "Iron", new List<int>() {0,0} }
+        private int quantity, score = 0;
+        
+        public System.Action<int> onQuantityUpdated = null;
+        
+        public int Quantity { get { return quantity; } set { quantity = value;  if(onQuantityUpdated != null) onQuantityUpdated?.Invoke(value); } }
+        public int Score { get { return score; } set { score = value; } }
+    }
+    
+    public Dictionary<string, InventoryClass> inventory = new()
+    {
+        { "Gold", new InventoryClass() },
+        { "Silver", new InventoryClass() },
+        { "Copper", new InventoryClass() }
     };
 
     public System.Action<int> onScoreUpdated;
@@ -31,7 +42,7 @@ public static class GameData
     {
         { "Gold", 3 },
         { "Silver", 5 },
-        { "Iron", 7 }
+        { "Copper", 7 }
     };
 
     public static int Difficulty { get => difficulty; set => difficulty = value; }
@@ -42,13 +53,13 @@ public static class GameData
 
     private static void AddToInventory(AgentData agentData, string oreName, int oreScore)
     {
-        if (agentData.inventory[oreName][0] >= invLimits[oreName])
+        if (agentData.inventory[oreName].Quantity >= invLimits[oreName])
             throw new System.Exception("Inventory is full");
         
-        agentData.inventory[oreName][0]++;
-        agentData.inventory[oreName][1] += oreScore;
+        agentData.inventory[oreName].Quantity++;
+        agentData.inventory[oreName].Score += oreScore;
         
-        Debug.Log(agentData.inventory[oreName][0] + " " + agentData.inventory[oreName][1]);
+        Debug.Log(agentData.inventory[oreName].Quantity + " " + agentData.inventory[oreName].Score);
     }
     
     public static void AddToPlayerInventory(string oreName, int oreScore)

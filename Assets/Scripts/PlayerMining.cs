@@ -11,7 +11,7 @@ using UnityEngine.InputSystem;
 // {
 //     Gold = 160,
 //     Silver = 96,
-//     Iron = 48,
+//     Copper = 48,
 // }
 
 public class PlayerMining : MonoBehaviour
@@ -31,7 +31,7 @@ public class PlayerMining : MonoBehaviour
     {
         { "Gold", 160f / animSpeed },
         { "Silver", 96f / animSpeed },
-        { "Iron", 48f / animSpeed }
+        { "Copper", 48f / animSpeed }
     };
 
     Rigidbody playerRigidbody;

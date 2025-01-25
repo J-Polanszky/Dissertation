@@ -1,7 +1,8 @@
 fileFormatVersion: 2
-guid: 774952a2e2d59db4197cf3216ecfadd8
-PrefabImporter:
+guid: 64008c216f1895a4d9409ed710c3344b
+NativeFormatImporter:
   externalObjects: {}
+  mainObjectFileID: 2100000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +11,5 @@ AssetOrigin:
   productId: 285315
   packageName: Simple Ores, Chunks, and Bars
   packageVersion: 1.0.0
-  assetPath: Assets/Simple Ores, Chunks, and Bars/Prefabs/Iron Chunk.prefab
+  assetPath: Assets/Simple Ores, Chunks, and Bars/Materials/Copper Ore Mat.mat
   uploadId: 670193
