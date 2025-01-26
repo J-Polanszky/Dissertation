@@ -9,8 +9,8 @@ using UnityEngine.InputSystem;
 // 1.6s per swing animation. multiply the amount below with the anim speed.
 // public enum OreMiningTime
 // {
-//     Gold = 160,
-//     Silver = 96,
+//     Gold = 128,
+//     Silver = 80,
 //     Copper = 48,
 // }
 
@@ -27,8 +27,8 @@ public class Mining : MonoBehaviour
 
     protected Dictionary<string, float> oreMiningTime = new()
     {
-        { "Gold", 160f / animSpeed },
-        { "Silver", 96f / animSpeed },
+        { "Gold", 128f / animSpeed },
+        { "Silver", 80f / animSpeed },
         { "Copper", 48f / animSpeed }
     };
 
@@ -52,9 +52,10 @@ public class Mining : MonoBehaviour
         
     }
 
-    protected IEnumerator MiningCoroutine(GameObject currentOre, float timeToMine)
+    protected IEnumerator MiningCoroutine(GameObject currentOre)
     {
         print("Mining");
+        float timeToMine = (float) oreMiningTime[currentOre.tag] / 10;
         currentOre.GetComponent<OreScript>().isBeingMined = true;
         pickaxeHandle.SetActive(true);
         PreMine(currentOre);

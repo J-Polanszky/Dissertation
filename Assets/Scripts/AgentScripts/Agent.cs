@@ -19,6 +19,7 @@ public class Agent : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.isStopped = true;
+        navMeshAgent.speed += GameData.Difficulty;
         agentMining = GetComponent<AgentMining>();
         animator = GetComponent<Animator>();
         // Take world position

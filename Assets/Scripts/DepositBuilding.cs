@@ -7,7 +7,8 @@ public class DepositBuilding : MonoBehaviour
 {
     public float depositCooldown = 5f;
     
-    // Changed idea and made them universal for both player and agent.
+    // Changed idea and made them universal for both player and agent, as it reduces the amount of code needed.
+    // If time allows, I will split it to use a base system for both player and agent.
     public string agentTag;
     bool agentCooldown = false;
 

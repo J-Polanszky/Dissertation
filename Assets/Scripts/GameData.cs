@@ -4,6 +4,7 @@ using UnityEngine;
 public class AgentData
 {
     // Updated it to use a class to make it more readable than a simple list, even if it makes it a bit less efficient.
+    // Old quantity code parts will be kept since if the old inventory display is used, it will be needed.
     public class InventoryClass
     {
         private int quantity, score = 0;
@@ -21,6 +22,7 @@ public class AgentData
         { "Copper", new InventoryClass() }
     };
 
+    public int totalInventory = 0;
     public System.Action<int> onScoreUpdated;
     private int score = 0;
     
@@ -29,20 +31,23 @@ public class AgentData
 
 public static class GameData
 {
-    // Easy - 3
-    // Medium - 2
-    // Hard - 1
-    private static int difficulty = 3;
+    // Easy - 0
+    // Medium - 1
+    // Hard - 2
+    private static int difficulty = 0;
 
     private static AgentData playerData = new();
     
     private static AgentData machineData = new();
 
-    private static Dictionary<string, int> invLimits = new()
+    // TODO: Make inventory limits a total weight and assign weight to each one instead. Figure out how to display it to the user.
+    // Save current UI for inventory, and instead use a combined image with the ores, with the number of inv used / total inv.
+    // Ask others if this is fine, or if they prefer having the old one and then have the new one next to it to show total.
+    private static Dictionary<string, int> invStorageQty = new()
     {
-        { "Gold", 3 },
-        { "Silver", 5 },
-        { "Copper", 7 }
+        { "Gold", 5 },
+        { "Silver", 3 },
+        { "Copper", 1 }
     };
 
     public static int Difficulty { get => difficulty; set => difficulty = value; }
@@ -53,11 +58,12 @@ public static class GameData
 
     private static void AddToInventory(AgentData agentData, string oreName, int oreScore)
     {
-        if (agentData.inventory[oreName].Quantity >= invLimits[oreName])
-            throw new System.Exception("Inventory is full");
+        if (agentData.totalInventory + invStorageQty[oreName] >= 20)
+            throw new System.Exception("Inventory will be too full");
         
         agentData.inventory[oreName].Quantity++;
         agentData.inventory[oreName].Score += oreScore;
+        agentData.totalInventory += invStorageQty[oreName];
     }
     
     public static void AddToPlayerInventory(string oreName, int oreScore)

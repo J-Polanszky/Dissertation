@@ -95,9 +95,7 @@ public class PlayerMining : Mining
         
         if (currentOre == null || !oreMiningTime.ContainsKey(currentOre.tag))
             return;
-
-        float timeToMine = (float) oreMiningTime[currentOre.tag] / 10;
         
-        StartCoroutine(MiningCoroutine(currentOre, timeToMine));
+        StartCoroutine(MiningCoroutine(currentOre));
     }
 }

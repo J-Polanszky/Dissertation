@@ -16,10 +16,8 @@ public class AgentMining : Mining
     {
         if (ore.GetComponent<OreScript>().isBeingMined || !oreMiningTime.ContainsKey(ore.tag))
             return;
-
-        float timeToMine = (float) oreMiningTime[ore.tag] / 10;
         
-        StartCoroutine(MiningCoroutine(ore, timeToMine));
+        StartCoroutine(MiningCoroutine(ore));
     }
 
     private void FaceOre(GameObject ore)

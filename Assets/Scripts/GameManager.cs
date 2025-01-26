@@ -54,8 +54,8 @@ public class GameManager : MonoBehaviour
     
     public void ChangeDifficulty(int difficulty)
     {
-        Debug.Log("Difficulty changed to " + (difficulty + 1));
-        GameData.Difficulty = 3 - difficulty;
+        Debug.Log("Difficulty changed to " + difficulty);
+        GameData.Difficulty = difficulty;
     }
 
     public void StartGame()
@@ -86,10 +86,12 @@ public class GameManager : MonoBehaviour
         
         // Set callbacks
         GameData.PlayerData.onScoreUpdated += UpdatePlayerScore;
+        GameData.MachineData.onScoreUpdated += UpdateMachineScore;
+        
+        // TODO: Comment out if the old inventory ui is not in use.
         GameData.PlayerData.inventory["Gold"].onQuantityUpdated += UpdateGold;
         GameData.PlayerData.inventory["Silver"].onQuantityUpdated += UpdateSilver;
         GameData.PlayerData.inventory["Copper"].onQuantityUpdated += UpdateCopper;
-        GameData.MachineData.onScoreUpdated += UpdateMachineScore;
         
         SpawnOres();
         UpdatePlayerScore(0);
@@ -122,15 +124,15 @@ public class GameManager : MonoBehaviour
         
         // Easy
         if (GameData.Difficulty == 3)
-            terrainPopulator.SetOreSpawns(40, 33,33,34);
+            terrainPopulator.SetOreSpawns(40, 10,30,60);
         
         // Normal
         else if (GameData.Difficulty == 2)
-            terrainPopulator.SetOreSpawns(30, 30, 35, 35);
+            terrainPopulator.SetOreSpawns(30, 5, 25, 70);
         
         // Hard
         else
-            terrainPopulator.SetOreSpawns(20, 20, 30, 40);
+            terrainPopulator.SetOreSpawns(20, 5, 20, 75);
     }
     
     IEnumerator LoadGameSceneAsync(string sceneName, System.Action callback = null)
