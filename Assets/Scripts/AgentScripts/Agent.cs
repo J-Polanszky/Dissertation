@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,14 +8,36 @@ public class Agent : MonoBehaviour
     
     NavMeshAgent navMeshAgent;
     Animator animator;
-    private Vector3 barn;
+    AgentMining agentMining;
+    private GameObject goldObject, silverObject, copperObject;
+    private Vector3 barn, gold, silver, copper;
+
+    private bool startAgent = false;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        navMeshAgent.isStopped = true;
+        agentMining = GetComponent<AgentMining>();
         animator = GetComponent<Animator>();
+        // Take world position
         barn = GameObject.Find("barn_example").transform.position;
-        navMeshAgent.destination = barn;
+        StartCoroutine(WaitAndChangeDestination());
+    }
+    
+    IEnumerator WaitAndChangeDestination()
+    {
+        yield return new WaitForSeconds(1);
+        goldObject = GameObject.FindWithTag("Gold");
+        silverObject = GameObject.FindWithTag("Silver");
+        copperObject = GameObject.FindWithTag("Copper");
+        gold = goldObject.transform.position;
+        silver = silverObject.transform.position;
+        copper = copperObject.transform.position;
+        navMeshAgent.destination = gold;
+        navMeshAgent.isStopped = false;
+        startAgent = true;
     }
 
     // Update is called once per frame
@@ -23,11 +46,45 @@ public class Agent : MonoBehaviour
         // This is just a debug before developing the state machine since having the entire navmesh working would hasten development
         //Check if agent collided with barn, if so change target to be player, and keep chasing the player.
         //When set as destination, the y may change.
-        if (navMeshAgent.destination.x == barn.x && navMeshAgent.destination.z == barn.z)
+        
+        if(!startAgent)
+            return;
+        
+        if (navMeshAgent.destination.x == gold.x && navMeshAgent.destination.z == gold.z)
+        {
+            Debug.Log("Destination is Gold");
+            if (!navMeshAgent.isStopped && navMeshAgent.remainingDistance < 1f)
+            {
+                Debug.Log("Destination Reached, changing to silver");
+                agentMining.onMine += () => navMeshAgent.destination = silver;
+                agentMining.Mine(goldObject);
+            }
+        }
+        else if (navMeshAgent.destination.x == silver.x && navMeshAgent.destination.z == silver.z)
+        {
+            Debug.Log("Destination is Silver");
+            if (!navMeshAgent.isStopped && navMeshAgent.remainingDistance < 1f)
+            {
+                Debug.Log("Destination Reached, changing to copper");
+                agentMining.onMine += () => navMeshAgent.destination = copper;
+                agentMining.Mine(silverObject);
+            }
+        }
+        else if (navMeshAgent.destination.x == copper.x && navMeshAgent.destination.z == copper.z)
+        {
+            Debug.Log("Destination is Copper");
+            if (!navMeshAgent.isStopped && navMeshAgent.remainingDistance < 1f)
+            {
+                Debug.Log("Destination Reached, changing to barn");
+                agentMining.onMine += () => navMeshAgent.destination = barn;
+                agentMining.Mine(copperObject);
+            }
+        }
+        else if (navMeshAgent.destination.x == barn.x && navMeshAgent.destination.z == barn.z)
         {
             Debug.Log("Destination is Barn");
-            // Barn needs a smaller remaining distance
-            if (navMeshAgent.remainingDistance < 7f)
+            // Barn needs a larger remaining distance
+            if (!navMeshAgent.isStopped && navMeshAgent.remainingDistance < 7f)
             {
                 Debug.Log("Destination Reached, changing to player");
                 navMeshAgent.destination = GameObject.FindWithTag("Player").transform.position;
@@ -39,6 +96,8 @@ public class Agent : MonoBehaviour
             if (navMeshAgent.remainingDistance < 1f)
             {
                 navMeshAgent.isStopped = true;
+                // Destroying to allow testing other game changes without having agent push and take up resources.
+                // Destroy(gameObject);
             }else{
                 navMeshAgent.isStopped = false;
             }
@@ -58,11 +117,6 @@ public class Agent : MonoBehaviour
             animator.SetFloat(vAgentAnimatorParameters.InputVertical, speed);
             animator.SetFloat(vAgentAnimatorParameters.InputMagnitude, speed);
             animator.SetBool(vAgentAnimatorParameters.IsGrounded, true); // Assuming the agent is always grounded
-        }
-
-        public void TriggerMiningAnimation()
-        {
-            animator.SetTrigger("Mine"); // Assuming you have a trigger parameter named "Mine" in your Animator
         }
 }
 

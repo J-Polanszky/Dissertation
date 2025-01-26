@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1173522666420968482, guid: 2003ceecb5aa6554aa2a1281d4e635f6, type: 3}
       propertyPath: m_Name
-      value: Silver Ore Variant
+      value: Silver
       objectReference: {fileID: 0}
     - target: {fileID: 1173522666420968482, guid: 2003ceecb5aa6554aa2a1281d4e635f6, type: 3}
       propertyPath: m_Layer
@@ -70,6 +70,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1173522666420968482, guid: 2003ceecb5aa6554aa2a1281d4e635f6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5557615455348169801}
+    - targetCorrespondingSourceObject: {fileID: 1173522666420968482, guid: 2003ceecb5aa6554aa2a1281d4e635f6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2731100185902402230}
   m_SourcePrefab: {fileID: 100100000, guid: 2003ceecb5aa6554aa2a1281d4e635f6, type: 3}
 --- !u!1 &4635865988157365782 stripped
 GameObject:
@@ -110,3 +113,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerMined: 0
+  isBeingMined: 0
+--- !u!208 &2731100185902402230
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4635865988157365782}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.107, y: 1.0530001, z: 1.107}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.009000001, y: 1.051, z: 0.004}
+  m_TimeToStationary: 0.5

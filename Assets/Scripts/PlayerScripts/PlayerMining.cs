@@ -6,46 +6,33 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 1.6s per swing animation. multiply the amount below with the anim speed.
-// public enum OreMiningTime
-// {
-//     Gold = 160,
-//     Silver = 96,
-//     Copper = 48,
-// }
-
-public class PlayerMining : MonoBehaviour
+public class PlayerMining : Mining
 {
     public Transform headTransform;
     public Transform[] bodyTransforms;
-    public LayerMask oreLayer;
-
-    private GameObject pickaxeHandle;
     vThirdPersonInput input;
-    Animator animator;
-    bool isMining = false;
-    
-    static float animSpeed = 1.3f;
-
-    private Dictionary<string, float> oreMiningTime = new()
-    {
-        { "Gold", 160f / animSpeed },
-        { "Silver", 96f / animSpeed },
-        { "Copper", 48f / animSpeed }
-    };
-
-    Rigidbody playerRigidbody;
+    Rigidbody agentRigidbody;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        pickaxeHandle = GameObject.FindGameObjectWithTag("Pickaxe_Handle");
-        pickaxeHandle.SetActive(false);
+        base.Start();
         input = GetComponent<vThirdPersonInput>();
-        animator = GetComponent<Animator>();
-        playerRigidbody = GetComponent<Rigidbody>();
+        agentRigidbody = GetComponent<Rigidbody>();
+    }
+    
+    protected override void PreMine(GameObject ore)
+    {
+        input.enabled = false;
+        input.cc.input.x = 0;
+        input.cc.input.z = 0;
+        agentRigidbody.linearVelocity = Vector3.zero;
+        ore.GetComponent<OreScript>().playerMined = true;
+    }
+
+    protected override void PostMine()
+    {
+        input.enabled = true;
     }
 
     GameObject RaycastCheck(int layerMask)
@@ -74,7 +61,7 @@ public class PlayerMining : MonoBehaviour
         Debug.Log("Raycast found nothing");
         return null;
     }
-
+    
     // private void Update()
     // {
     //     DrawRay();
@@ -92,35 +79,7 @@ public class PlayerMining : MonoBehaviour
     //     endPosition = ray.origin + (ray.direction * 0.75f);
     //     Debug.DrawLine(ray.origin, endPosition, Color.blue);
     // }
-
-    IEnumerator MiningCoroutine()
-    {
-        GameObject currentOre = RaycastCheck(oreLayer);
-        
-        if (currentOre == null || !oreMiningTime.ContainsKey(currentOre.tag))
-            yield break;
-
-        float timeToMine = (float) oreMiningTime[currentOre.tag] / 10;
-
-        print("Mining");
-        currentOre.GetComponent<OreScript>().playerMined = true;
-        pickaxeHandle.SetActive(true);
-        input.enabled = false;
-        input.cc.input.x = 0;
-        input.cc.input.z = 0;
-        isMining = true;
-        animator.SetBool("Mining", true);
-        playerRigidbody.linearVelocity = Vector3.zero;
-
-        yield return new WaitForSeconds(timeToMine);
-
-        animator.SetBool("Mining", false);
-        Destroy(currentOre);    
-        input.enabled = true;
-        isMining = false;
-        pickaxeHandle.SetActive(false);
-    }
-
+    
     public void Mine(InputAction.CallbackContext context)
     {
         if (isMining)
@@ -132,7 +91,13 @@ public class PlayerMining : MonoBehaviour
         if (!input.cc.isGrounded)
             return;
 
+        GameObject currentOre = RaycastCheck(oreLayer);
+        
+        if (currentOre == null || !oreMiningTime.ContainsKey(currentOre.tag))
+            return;
 
-        StartCoroutine(MiningCoroutine());
+        float timeToMine = (float) oreMiningTime[currentOre.tag] / 10;
+        
+        StartCoroutine(MiningCoroutine(currentOre, timeToMine));
     }
 }

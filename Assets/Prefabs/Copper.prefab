@@ -86,6 +86,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5393308719901107826, guid: b3e9f93dcaf0d3745ae7c9989fa499e2, type: 3}
       insertIndex: -1
       addedObject: {fileID: -4191050830655708368}
+    - targetCorrespondingSourceObject: {fileID: 5393308719901107826, guid: b3e9f93dcaf0d3745ae7c9989fa499e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 248612745419545441}
   m_SourcePrefab: {fileID: 100100000, guid: b3e9f93dcaf0d3745ae7c9989fa499e2, type: 3}
 --- !u!1 &3482053470985528269 stripped
 GameObject:
@@ -126,3 +129,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerMined: 0
+  isBeingMined: 0
+--- !u!208 &248612745419545441
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3482053470985528269}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.107, y: 1.0530001, z: 1.107}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.009000001, y: 1.051, z: 0.004}
+  m_TimeToStationary: 0.5

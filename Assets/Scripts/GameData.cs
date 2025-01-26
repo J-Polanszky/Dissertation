@@ -58,8 +58,6 @@ public static class GameData
         
         agentData.inventory[oreName].Quantity++;
         agentData.inventory[oreName].Score += oreScore;
-        
-        Debug.Log(agentData.inventory[oreName].Quantity + " " + agentData.inventory[oreName].Score);
     }
     
     public static void AddToPlayerInventory(string oreName, int oreScore)
@@ -69,7 +67,7 @@ public static class GameData
 
     public static void AddToMachineInventory(string oreName, int oreScore)
     {
-        AddToInventory(playerData, oreName, oreScore);
+        AddToInventory(machineData, oreName, oreScore);
     }
     
 }
