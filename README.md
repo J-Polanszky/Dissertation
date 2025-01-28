@@ -4,5 +4,5 @@ Dynamic Difficulty adjustment aided by Reinforcement Learning in Strategy games.
 
 # TODO List
 
-- Create the state machine logic using the existing working functionality - 1.5-3hrs.
-- Make the state machines search bubble larger for more informed decisions in higher difficulties - < 0.5hrs
+- Fix collision issues and add end of match logic: - 1-2 hours
+- Make proper end game scenes: - 30 mins

@@ -27,6 +27,8 @@ public class DepositBuilding : MonoBehaviour
             value.Quantity = 0;
             value.Score = 0;
         }
+        
+        data.totalInventory = 0;
     }
 
     IEnumerator CountDown(bool isPlayer)

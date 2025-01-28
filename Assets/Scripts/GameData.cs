@@ -50,6 +50,11 @@ public static class GameData
         { "Copper", 1 }
     };
 
+    public static Dictionary<string, int> InvStorageQty
+    {
+        get => invStorageQty;
+    }
+
     public static int Difficulty { get => difficulty; set => difficulty = value; }
     
     public static AgentData PlayerData { get => playerData; set => playerData = value; }

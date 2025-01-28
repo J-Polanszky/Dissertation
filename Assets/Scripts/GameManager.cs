@@ -106,7 +106,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountDown()
     {
-        int durationInSeconds = 60;
+        int durationInSeconds = 120;
         UpdateTime(durationInSeconds);
 
         while (durationInSeconds > 0)
