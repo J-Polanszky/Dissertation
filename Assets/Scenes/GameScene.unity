@@ -2949,10 +2949,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ground
       objectReference: {fileID: 0}
-    - target: {fileID: 1505406768030142878, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 8766691602725864969, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
       propertyPath: TerrainPopulatorPrefab
       value: 
@@ -2960,48 +2956,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1505406768030142878, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3552028617441560825}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
---- !u!1 &3552028617441560824 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1505406768030142878, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
-  m_PrefabInstance: {fileID: 3552028617441560823}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &3552028617441560825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3552028617441560824}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_AgentTypeID: 0
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 8
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 7a2b1d546ac80e94eb351e91f2845ac6, type: 2}
-  m_BuildHeightMesh: 0
 --- !u!1001 &4711039747793238992
 PrefabInstance:
   m_ObjectHideFlags: 0

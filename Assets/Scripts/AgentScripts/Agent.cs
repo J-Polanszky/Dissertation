@@ -98,7 +98,7 @@ public class Agent : MonoBehaviour
             {
                 navMeshAgent.isStopped = true;
                 // Destroying to allow testing other game changes without having agent push and take up resources.
-                // Destroy(gameObject);
+                Destroy(gameObject);
             }else{
                 navMeshAgent.isStopped = false;
             }
