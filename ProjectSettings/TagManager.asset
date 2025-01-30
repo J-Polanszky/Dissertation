@@ -12,6 +12,7 @@ TagManager:
   - Deposit
   - Agent
   - Copper
+  - Canvas
   layers:
   - Default
   - TransparentFX

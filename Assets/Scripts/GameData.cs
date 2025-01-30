@@ -36,6 +36,8 @@ public static class GameData
     // Hard - 2
     private static int difficulty = 0;
 
+    private static int timeLeft = 600;
+
     private static AgentData playerData = new();
     
     private static AgentData machineData = new();
@@ -56,6 +58,8 @@ public static class GameData
     }
 
     public static int Difficulty { get => difficulty; set => difficulty = value; }
+    
+    public static int TimeLeft { get => timeLeft; set => timeLeft = value; }
     
     public static AgentData PlayerData { get => playerData; set => playerData = value; }
     

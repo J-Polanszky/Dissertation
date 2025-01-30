@@ -4,5 +4,4 @@ Dynamic Difficulty adjustment aided by Reinforcement Learning in Strategy games.
 
 # TODO List
 
-- Fix collision issues and add end of match logic: - 1-2 hours
-- Make proper end game scenes: - 30 mins
+- Finish other tasks and set out training plan for RL-Agent.

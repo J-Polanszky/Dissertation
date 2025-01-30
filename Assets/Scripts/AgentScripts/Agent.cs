@@ -38,7 +38,7 @@ public class Agent : MonoBehaviour
         oreLayer = LayerMask.GetMask("Ore");
 
         navMeshAgent.isStopped = true;
-        navMeshAgent.speed += GameData.Difficulty;
+        navMeshAgent.speed += (float) GameData.Difficulty / 2;
 
         agentMining.onMine += SetAgentToIdle;
 
@@ -52,10 +52,33 @@ public class Agent : MonoBehaviour
         // Add checker for time left and distance so agent deposits before time runs out.
         // Fix collision avoidance issues.
         
-        if (!startAgent)
+        if (!startAgent || agentState == AgentState.Mining)
             return;
 
         UpdateAnimator();
+
+        if (GameData.TimeLeft <= 20)
+        {
+            if (agentState == AgentState.Idle && GameData.MachineData.totalInventory > 0)
+            {
+                Vector3 depoPos = FindBestDeposit();
+                agentState = AgentState.TravellingToDeposit;
+                navMeshAgent.destination = depoPos;
+                return;
+            }
+
+            if (agentState == AgentState.TravellingToMine)
+            {
+                Vector3 depoPos = FindBestDeposit(oreToMine.transform.position);
+                float timeNeededToMine = (Vector3.Distance(transform.position, oreToMine.transform.position) / navMeshAgent.speed) + agentMining.OreMiningTime[oreToMine.tag];
+                float timeNeededToDeposit = Vector3.Distance(oreToMine.transform.position, depoPos) / navMeshAgent.speed;
+                if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
+                    return;
+                agentState = AgentState.TravellingToDeposit;
+                navMeshAgent.destination = FindBestDeposit();
+                return;
+            }
+        }
 
         // Check if the agent is idle.
         if (agentState == AgentState.Idle)
@@ -112,6 +135,18 @@ public class Agent : MonoBehaviour
             }
         }
     }
+    
+    // TODO: Should something like this be implemented, as it can increase complexity and decrease performance.
+    // private void AvoidObstacles()
+    // {
+    //     RaycastHit hit;
+    //     if (Physics.Raycast(transform.position, transform.forward, out hit, obstacleDetectionDistance, obstacleLayer))
+    //     {
+    //         Vector3 avoidDirection = Vector3.Reflect(transform.forward, hit.normal);
+    //         Vector3 newDestination = transform.position + avoidDirection * obstacleDetectionDistance;
+    //         navMeshAgent.SetDestination(newDestination);
+    //     }
+    // }
 
     private void SetAgentToIdle()
     {
@@ -119,8 +154,11 @@ public class Agent : MonoBehaviour
         navMeshAgent.isStopped = true;
     }
 
-    private Vector3 FindBestDeposit()
+    private Vector3 FindBestDeposit(Vector3 pos = new())
     {
+        if (pos == Vector3.zero)
+            pos = transform.position;
+        
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         Transform bestDeposit = null;
 
@@ -132,8 +170,8 @@ public class Agent : MonoBehaviour
                 continue;
             }
 
-            if (Vector3.Distance(transform.position, deposit.transform.position) <
-                Vector3.Distance(transform.position, bestDeposit.position))
+            if (Vector3.Distance(pos, deposit.transform.position) <
+                Vector3.Distance(pos, bestDeposit.position))
                 bestDeposit = deposit.transform;
         }
 
@@ -142,8 +180,9 @@ public class Agent : MonoBehaviour
 
     private GameObject FindBestOre(float oreSearchRadius, int recursiveDepth = 0)
     {
-        if (recursiveDepth > 10)
-            throw new Exception("No Ores Found After 10 Recursive Calls");
+        // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.
+        if (recursiveDepth > 30)
+            throw new Exception("No Ores Found After 30 Recursive Calls");
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, oreSearchRadius, oreLayer);
         Dictionary<string, int> oreValue = new()

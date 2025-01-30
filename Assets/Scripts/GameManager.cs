@@ -19,10 +19,10 @@ public class GameManager : MonoBehaviour
         machineText.text = score.ToString();
     }
 
-    void UpdateTime(int timeInSeconds)
+    void UpdateTime()
     {
-        int minutes = timeInSeconds / 60;
-        int seconds = timeInSeconds % 60;
+        int minutes = GameData.TimeLeft / 60;
+        int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
     }
 
@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
     void RunGameStartFunctions()
     {
         Debug.Log("Game started");
-        Transform canvas = GameObject.Find("Canvas").transform;
+        Transform canvas = GameObject.FindWithTag("Canvas").transform;
         timeText = canvas.Find("Time").GetComponent<TextMeshProUGUI>();
         machineText = canvas.Find("EnemyScore").GetComponent<TextMeshProUGUI>();
         playerText = canvas.Find("Score").GetComponent<TextMeshProUGUI>();
@@ -101,18 +101,27 @@ public class GameManager : MonoBehaviour
 
     void GameOver()
     {
+        string WinorLose()
+        {
+            if (GameData.PlayerData.Score > GameData.MachineData.Score)
+                return "You Win!";
+            if (GameData.PlayerData.Score < GameData.MachineData.Score)
+                return "You Lose!";
+            return "It's a Draw!";
+        }
         Debug.Log("Game over");
+        GameObject.FindWithTag("Canvas").transform.Find("EndText").GetComponent<TextMeshProUGUI>().text = WinorLose();
     }
 
     IEnumerator CountDown()
     {
-        int durationInSeconds = 120;
-        UpdateTime(durationInSeconds);
+        UpdateTime();
 
-        while (durationInSeconds > 0)
+        while (GameData.TimeLeft > 0)
         {
             yield return new WaitForSeconds(1);
-            UpdateTime(--durationInSeconds);
+            GameData.TimeLeft--;
+            UpdateTime();
         }
 
         StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
