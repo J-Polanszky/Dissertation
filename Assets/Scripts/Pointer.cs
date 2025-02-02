@@ -35,6 +35,6 @@ public class Pointer : MonoBehaviour
 
         pointerUI.rotation = Quaternion.Euler(0, 0, angle);
 
-        Debug.Log(isPlayerBaseOffScreen ? "playerBase is off-screen" : "playerBase is on-screen");
+        // Debug.Log(isPlayerBaseOffScreen ? "playerBase is off-screen" : "playerBase is on-screen");
     }
 }

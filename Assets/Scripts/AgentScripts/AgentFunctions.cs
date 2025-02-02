@@ -22,6 +22,7 @@ public class AgentFunctions : MonoBehaviour
     public GameObject FindBestOre(float oreSearchRadius = -1, int recursiveDepth = 0)
     {
         // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.
+        // FIXME: Sometimes this doesnt find ores, even if they are right next to the agent, and it only happens after depositing.
         if (recursiveDepth > 30)
             throw new Exception("No Ores Found After 30 Recursive Calls");
 

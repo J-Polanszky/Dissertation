@@ -74,7 +74,7 @@ public static class GameData
 
     private static void AddToInventory(AgentData agentData, OreType oreType, int oreScore)
     {
-        if (agentData.totalInventory + invStorageQty[oreType] >= 20)
+        if (agentData.totalInventory + invStorageQty[oreType] > 20)
             throw new System.Exception("Inventory will be too full");
         
         agentData.inventory[oreType].Quantity++;
