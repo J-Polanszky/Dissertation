@@ -27,10 +27,36 @@ public class Pointer : MonoBehaviour
                            screenPos.y >= Screen.height;
         bool isPlayerBaseOffScreen = !isInFrontOfCamera || isOffScreen;
 
+        // Calculate the inner radius based on the canvas size
+        float innerRadius = Mathf.Min(Screen.width, Screen.height) / 4f; // Adjust as needed
+
         if (!isInFrontOfCamera)
         {
             // Flip the pointer direction if the base is behind the camera
             angle += 180;
+        }
+        
+        //TODO: When the base is on the edge of the screen, but the transform barely is not, the pointer freaks out. 
+        //More polish is necessary, if time allows.
+
+        if (isPlayerBaseOffScreen)
+        {
+            // Place the pointer at the edge of the canvas based on the angle
+            float canvasHalfWidth = Screen.width / 2f;
+            float canvasHalfHeight = Screen.height / 2f;
+            float radians = angle * Mathf.Deg2Rad;
+            float x = canvasHalfWidth * Mathf.Cos(radians);
+            float y = canvasHalfHeight * Mathf.Sin(radians);
+            pointerUI.position = new Vector3(canvasHalfWidth + x, canvasHalfHeight + y, 0);
+        }
+        else
+        {
+            // Move the pointer towards the edge of the screen if outside the inner radius
+            if (direction.magnitude > innerRadius)
+            {
+                direction = direction.normalized * innerRadius;
+            }
+            pointerUI.position = screenPos - direction;
         }
 
         pointerUI.rotation = Quaternion.Euler(0, 0, angle);
