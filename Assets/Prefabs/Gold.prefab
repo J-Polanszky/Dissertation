@@ -112,6 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd5231638eb69614c8f6ea06590168fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oreType: 0
   playerMined: 0
   isBeingMined: 0
 --- !u!208 &299675105409599749

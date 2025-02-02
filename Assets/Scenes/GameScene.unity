@@ -3100,6 +3100,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ground
       objectReference: {fileID: 0}
+    - target: {fileID: 3832248865067382640, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
+      propertyPath: m_NavMeshData
+      value: 
+      objectReference: {fileID: 23800000, guid: 969ee42ccd1cca14883244ae0baf0ae3, type: 2}
     - target: {fileID: 8766691602725864969, guid: 8711e6df33aa0ca479b207d40b830f59, type: 3}
       propertyPath: TerrainPopulatorPrefab
       value: 
