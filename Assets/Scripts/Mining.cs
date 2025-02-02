@@ -25,14 +25,14 @@ public class Mining : MonoBehaviour
     
     static float animSpeed = 1.3f;
 
-    private Dictionary<string, float> oreMiningTime = new()
+    private Dictionary<OreType, float> oreMiningTime = new()
     {
-        { "Gold", 12.8f / animSpeed },
-        { "Silver", 8f / animSpeed },
-        { "Copper", 4.8f / animSpeed }
+        { OreType.Gold, 12.8f / animSpeed },
+        { OreType.Silver, 8f / animSpeed },
+        { OreType.Copper, 4.8f / animSpeed }
     };
     
-    public Dictionary<string, float> OreMiningTime
+    public Dictionary<OreType, float> OreMiningTime
     {
         get => oreMiningTime;
     }
@@ -60,10 +60,10 @@ public class Mining : MonoBehaviour
     protected IEnumerator MiningCoroutine(GameObject currentOre)
     {
         OreScript oreScript = currentOre.GetComponent<OreScript>();
-        if (oreScript.isBeingMined || !oreMiningTime.ContainsKey(currentOre.tag))
+        if (oreScript.isBeingMined)
             yield break;
         print("Mining");
-        float timeToMine = (float) oreMiningTime[currentOre.tag];
+        float timeToMine = (float) oreMiningTime[oreScript.oreType];
         oreScript.isBeingMined = true;
         pickaxeHandle.SetActive(true);
         PreMine(currentOre);

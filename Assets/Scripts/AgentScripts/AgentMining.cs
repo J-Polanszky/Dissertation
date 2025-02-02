@@ -14,7 +14,7 @@ public class AgentMining : Mining
 
     public void Mine(GameObject ore)
     {
-        if (ore.GetComponent<OreScript>().isBeingMined || !OreMiningTime.ContainsKey(ore.tag))
+        if (ore.GetComponent<OreScript>().isBeingMined)
             return;
         
         StartCoroutine(MiningCoroutine(ore));

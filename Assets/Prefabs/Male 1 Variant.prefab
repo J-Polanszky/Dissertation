@@ -370,6 +370,9 @@ PrefabInstance:
       addedObject: {fileID: 5824811328091162713}
     - targetCorrespondingSourceObject: {fileID: 7019088425620113033, guid: 5da73550c90a266498e0fcd9c6437148, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -3197936913486639640}
+    - targetCorrespondingSourceObject: {fileID: 7019088425620113033, guid: 5da73550c90a266498e0fcd9c6437148, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8203089046866611983}
   m_SourcePrefab: {fileID: 100100000, guid: 5da73550c90a266498e0fcd9c6437148, type: 3}
 --- !u!1 &6880270024213799282 stripped
@@ -455,6 +458,20 @@ MonoBehaviour:
   oreLayer:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &-3197936913486639640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6880270024213799282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5826504b7d2d3fc4fa252d41cbb1c3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oreLayer: 0
+  oreSearchRadius: 10
 --- !u!195 &8203089046866611983
 NavMeshAgent:
   m_ObjectHideFlags: 0

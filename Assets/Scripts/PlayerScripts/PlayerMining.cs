@@ -93,7 +93,7 @@ public class PlayerMining : Mining
 
         GameObject currentOre = RaycastCheck(oreLayer);
         
-        if (currentOre == null || !OreMiningTime.ContainsKey(currentOre.tag))
+        if (currentOre == null)
             return;
         
         StartCoroutine(MiningCoroutine(currentOre));

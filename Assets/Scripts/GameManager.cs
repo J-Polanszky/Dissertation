@@ -89,9 +89,9 @@ public class GameManager : MonoBehaviour
         GameData.MachineData.onScoreUpdated += UpdateMachineScore;
         
         // TODO: Comment out if the old inventory ui is not in use.
-        GameData.PlayerData.inventory["Gold"].onQuantityUpdated += UpdateGold;
-        GameData.PlayerData.inventory["Silver"].onQuantityUpdated += UpdateSilver;
-        GameData.PlayerData.inventory["Copper"].onQuantityUpdated += UpdateCopper;
+        GameData.PlayerData.inventory[OreType.Gold].onQuantityUpdated += UpdateGold;
+        GameData.PlayerData.inventory[OreType.Silver].onQuantityUpdated += UpdateSilver;
+        GameData.PlayerData.inventory[OreType.Copper].onQuantityUpdated += UpdateCopper;
         
         SpawnOres();
         UpdatePlayerScore(0);
