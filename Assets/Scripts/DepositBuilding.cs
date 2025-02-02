@@ -7,13 +7,9 @@ public class DepositBuilding : MonoBehaviour
 {
     public float depositCooldown = 5f;
     
-    // Changed idea and made them universal for both player and agent, as it reduces the amount of code needed.
-    // If time allows, I will split it to use a base system for both player and agent.
     public string agentTag;
+    public AgentData agentData;
     bool agentCooldown = false;
-
-    public string playerTag;
-    bool playerCooldown = false;
     
     void Deposit(AgentData data)
     {
@@ -31,12 +27,11 @@ public class DepositBuilding : MonoBehaviour
         data.totalInventory = 0;
     }
 
-    IEnumerator CountDown(bool isPlayer)
+    IEnumerator CountDown()
     {
         float countDown = depositCooldown;
         yield return new WaitForSeconds(countDown);
-        if (isPlayer)
-            playerCooldown = false;
+        agentCooldown = false;
     }
     
     private void Update()
@@ -49,16 +44,9 @@ public class DepositBuilding : MonoBehaviour
             // Check if the collided object is a player or State machine
             if (col.gameObject.CompareTag(agentTag) && agentCooldown == false)
             {
-                Deposit(GameData.MachineData);
+                Deposit(agentData);
                 agentCooldown = true;
-                StartCoroutine(CountDown(false));
-            }
-
-            if (col.gameObject.CompareTag(playerTag) && playerCooldown == false)
-            {
-                Deposit(GameData.PlayerData);
-                playerCooldown = true;
-                StartCoroutine(CountDown(true));
+                StartCoroutine(CountDown());
             }
         }
         

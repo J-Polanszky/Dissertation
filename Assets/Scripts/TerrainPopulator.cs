@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainPopulator : MonoBehaviour
@@ -21,9 +22,15 @@ public class TerrainPopulator : MonoBehaviour
     int copperCount = 0;
 
     private float edgeBuffer = 12;
+    private List<Vector3> depositPositions = new();
+    
     void Start()
     {
         terrainMesh = GetComponent<MeshRenderer>();
+        foreach (GameObject depo in GameObject.FindGameObjectsWithTag("Deposit"))
+        {
+            depositPositions.Add(depo.transform.position);
+        }
         PopulateTerrain();
     }
 
@@ -50,12 +57,10 @@ public class TerrainPopulator : MonoBehaviour
         }
     }
     
-    bool IsInCorner(Vector3 position, Bounds bounds)
+    bool IsInCorner(Vector3 position)
     {
-        bool inXCorner = (position.x < bounds.min.x + edgeBuffer) || (position.x > bounds.max.x - edgeBuffer);
-        bool inZCorner = (position.z < bounds.min.z + edgeBuffer) || (position.z > bounds.max.z - edgeBuffer);
-
-        return inXCorner && inZCorner;
+        float cornerRadius = 7f; // Adjust as needed
+        return Vector3.Distance(position, depositPositions[0]) < cornerRadius || Vector3.Distance(position, depositPositions[1]) < cornerRadius;
     }
 
     GameObject PlacePrefabRandomly(GameObject prefab, Bounds bounds, float buffer)
@@ -68,7 +73,7 @@ public class TerrainPopulator : MonoBehaviour
             Random.Range(bounds.min.z + buffer, bounds.max.z - buffer)
         );
             
-        } while (IsInCorner(randomPosition, bounds));
+        } while (IsInCorner(randomPosition));
         
         Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
 

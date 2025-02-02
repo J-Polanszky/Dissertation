@@ -93,6 +93,15 @@ public class GameManager : MonoBehaviour
         GameData.PlayerData.inventory[OreType.Silver].onQuantityUpdated += UpdateSilver;
         GameData.PlayerData.inventory[OreType.Copper].onQuantityUpdated += UpdateCopper;
         
+        GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
+        foreach (GameObject deposit in deposits)
+        {
+            if (deposit.name == "PlayerDeposit")
+                deposit.GetComponent<DepositBuilding>().agentData = GameData.PlayerData;
+            else
+                deposit.GetComponent<DepositBuilding>().agentData = GameData.MachineData;
+        }
+        
         SpawnOres();
         UpdatePlayerScore(0);
         UpdateMachineScore(0);

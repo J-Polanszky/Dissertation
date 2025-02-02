@@ -19,31 +19,6 @@ public class AgentFunctions : MonoBehaviour
 
         oreSearchRadius += GameData.Difficulty * 3;
     }
-
-    public Vector3 FindBestDeposit(Vector3 pos = new())
-    {
-        if (pos == Vector3.zero)
-            pos = transform.position;
-        
-        GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
-        Transform bestDeposit = null;
-
-        foreach (GameObject deposit in deposits)
-        {
-            if (bestDeposit == null)
-            {
-                bestDeposit = deposit.transform;
-                continue;
-            }
-
-            if (Vector3.Distance(pos, deposit.transform.position) <
-                Vector3.Distance(pos, bestDeposit.position))
-                bestDeposit = deposit.transform;
-        }
-
-        return bestDeposit.position;
-    }
-
     public GameObject FindBestOre(float oreSearchRadius = -1, int recursiveDepth = 0)
     {
         // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.

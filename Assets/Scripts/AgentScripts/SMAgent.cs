@@ -25,6 +25,7 @@ public class SMAgent : MonoBehaviour
     public bool startAgent = true;
     private AgentState agentState = AgentState.Idle;
     private GameObject oreToMine;
+    private Vector3 depoPos;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,6 +38,8 @@ public class SMAgent : MonoBehaviour
         navMeshAgent.speed += (float)GameData.Difficulty / 2;
 
         agentMining.onMine += SetAgentToIdle;
+
+        depoPos = GameObject.Find("AgentDeposit").transform.position;
     }
 
 
@@ -55,7 +58,6 @@ public class SMAgent : MonoBehaviour
         {
             if (agentState == AgentState.Idle && GameData.MachineData.totalInventory > 0)
             {
-                Vector3 depoPos = agentFunctions.FindBestDeposit();
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = depoPos;
                 return;
@@ -63,7 +65,6 @@ public class SMAgent : MonoBehaviour
 
             if (agentState == AgentState.TravellingToMine)
             {
-                Vector3 depoPos = agentFunctions.FindBestDeposit(oreToMine.transform.position);
                 float timeNeededToMine =
                     (Vector3.Distance(transform.position, oreToMine.transform.position) / navMeshAgent.speed) +
                     agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
@@ -72,7 +73,7 @@ public class SMAgent : MonoBehaviour
                 if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
                     return;
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = agentFunctions.FindBestDeposit();
+                navMeshAgent.destination = depoPos;
                 return;
             }
         }
@@ -82,8 +83,6 @@ public class SMAgent : MonoBehaviour
         {
             Debug.Log("@M total inv" + GameData.MachineData.totalInventory);
             oreToMine = agentFunctions.FindBestOre();
-
-            Vector3 depoPos = agentFunctions.FindBestDeposit();
 
             Debug.Log("Agent inv after mining: " +
                       (GameData.MachineData.totalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
