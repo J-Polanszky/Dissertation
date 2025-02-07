@@ -28,17 +28,17 @@ public class GameManager : MonoBehaviour
 
     void UpdateGold(int gold)
     {
-        goldText.text = "x" + gold;
+        goldText.text = "x" + gold + "(" + (GameData.InvStorageQty[OreType.Gold] * GameData.PlayerData.inventory[OreType.Gold].Quantity) + ")";
     }
 
     void UpdateSilver(int silver)
     {
-        silverText.text = "x" + silver;
+        silverText.text = "x" + silver + "(" + (GameData.InvStorageQty[OreType.Silver] * GameData.PlayerData.inventory[OreType.Silver].Quantity) + ")";
     }
 
     void UpdateCopper(int copper)
     {
-        copperText.text = "x" + copper;
+        copperText.text = "x" + copper + "(" + (GameData.InvStorageQty[OreType.Copper] * GameData.PlayerData.inventory[OreType.Copper].Quantity) + ")";
     }
     
     private void Awake()
@@ -80,18 +80,28 @@ public class GameManager : MonoBehaviour
         machineText = canvas.Find("EnemyScore").GetComponent<TextMeshProUGUI>();
         playerText = canvas.Find("Score").GetComponent<TextMeshProUGUI>();
         Transform inventory = canvas.Find("Inventory");
-        goldText = inventory.Find("Gold").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
-        silverText = inventory.Find("Silver").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
-        copperText = inventory.Find("Copper").GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
+        Transform goldImage = inventory.Find("Gold").GetChild(0);
+        Transform silverImage = inventory.Find("Silver").GetChild(0);
+        Transform copperImage = inventory.Find("Copper").GetChild(0);
+        goldText = goldImage.Find("qty").GetComponent<TextMeshProUGUI>();
+        silverText = silverImage.Find("qty").GetComponent<TextMeshProUGUI>();
+        copperText = copperImage.Find("qty").GetComponent<TextMeshProUGUI>();
+        
+        goldImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Gold].ToString();
+        silverImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Silver].ToString();
+        copperImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Copper].ToString();
         
         // Set callbacks
         GameData.PlayerData.onScoreUpdated += UpdatePlayerScore;
         GameData.MachineData.onScoreUpdated += UpdateMachineScore;
         
-        // TODO: Comment out if the old inventory ui is not in use.
         GameData.PlayerData.inventory[OreType.Gold].onQuantityUpdated += UpdateGold;
         GameData.PlayerData.inventory[OreType.Silver].onQuantityUpdated += UpdateSilver;
         GameData.PlayerData.inventory[OreType.Copper].onQuantityUpdated += UpdateCopper;
+        
+        UpdateGold(0);
+        UpdateSilver(0);
+        UpdateCopper(0);
         
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         foreach (GameObject deposit in deposits)
