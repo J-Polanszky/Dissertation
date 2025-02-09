@@ -29,7 +29,7 @@ public class PlayerMining : Mining
         agentRigidbody.linearVelocity = Vector3.zero;
         ore.GetComponent<OreScript>().playerMined = true;
     }
-
+    
     protected override void PostMine()
     {
         input.enabled = true;
@@ -42,7 +42,7 @@ public class PlayerMining : Mining
 
         if (Physics.Raycast(ray, out hit, 1.2f, layerMask))
         {
-            Debug.Log("Raycast found: " + hit.collider.gameObject.name);
+            // Debug.Log("Raycast found: " + hit.collider.gameObject.name);
             return hit.collider.gameObject;
         }
 
@@ -53,12 +53,12 @@ public class PlayerMining : Mining
             
             if (Physics.Raycast(newRay, out newHit, 0.75f, layerMask))
             {
-                Debug.Log("Raycast found: " + newHit.collider.gameObject.name);
+                // Debug.Log("Raycast found: " + newHit.collider.gameObject.name);
                 return newHit.collider.gameObject;
             }
         }
         
-        Debug.Log("Raycast found nothing");
+        // Debug.Log("Raycast found nothing");
         return null;
     }
     

@@ -33,9 +33,8 @@ public class SMAgent : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
-
+        
         navMeshAgent.isStopped = true;
-        navMeshAgent.speed += (float)GameData.Difficulty / 2;
 
         agentMining.onMine += SetAgentToIdle;
 
@@ -56,7 +55,7 @@ public class SMAgent : MonoBehaviour
 
         if (GameData.TimeLeft <= 20)
         {
-            if (agentState == AgentState.Idle && GameData.MachineData.totalInventory > 0)
+            if (agentState == AgentState.Idle && GameData.MachineData.TotalInventory > 0)
             {
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = depoPos;
@@ -81,14 +80,14 @@ public class SMAgent : MonoBehaviour
         // Check if the agent is idle.
         if (agentState == AgentState.Idle)
         {
-            Debug.Log("@M total inv" + GameData.MachineData.totalInventory);
+            // Debug.Log("@M total inv" + GameData.MachineData.TotalInventory);
             oreToMine = agentFunctions.FindBestOre();
 
-            Debug.Log("Agent inv after mining: " +
-                      (GameData.MachineData.totalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
+            // Debug.Log("Agent inv after mining: " +
+            //           (GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
             // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
-            if ((GameData.MachineData.totalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) > 20 ||
-                (GameData.MachineData.totalInventory > 10 && Vector3.Distance(transform.position, depoPos) <
+            if ((GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) > GameData.MaximumInvQty ||
+                (GameData.MachineData.TotalInventory > ((float) GameData.MaximumInvQty / 2) && Vector3.Distance(transform.position, depoPos) <
                     Vector3.Distance(transform.position, oreToMine.transform.position)))
             {
                 agentState = AgentState.TravellingToDeposit;

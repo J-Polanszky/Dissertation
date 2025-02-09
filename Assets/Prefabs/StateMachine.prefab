@@ -472,6 +472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   oreLayer: 0
   oreSearchRadius: 10
+  isStateMachine: 1
 --- !u!195 &8203089046866611983
 NavMeshAgent:
   m_ObjectHideFlags: 0

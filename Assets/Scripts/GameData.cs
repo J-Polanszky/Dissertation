@@ -29,9 +29,12 @@ public class AgentData
         { OreType.Copper, new InventoryClass() }
     };
 
-    public int totalInventory = 0;
+    public System.Action onInventoryUpdated;
     public System.Action<int> onScoreUpdated;
+    private int totalInventory = 0;
     private int score = 0;
+    
+    public int TotalInventory { get { return totalInventory; } set { totalInventory = value; onInventoryUpdated?.Invoke(); } }
     
     public int Score { get { return score; } set { score = value; onScoreUpdated?.Invoke(value); } }
 }
@@ -58,6 +61,8 @@ public static class GameData
         { OreType.Silver, 3 },
         { OreType.Copper, 1 }
     };
+    
+    public static readonly int MaximumInvQty = 30;
 
     public static Dictionary<OreType, int> InvStorageQty
     {
@@ -74,12 +79,12 @@ public static class GameData
 
     private static void AddToInventory(AgentData agentData, OreType oreType, int oreScore)
     {
-        if (agentData.totalInventory + invStorageQty[oreType] > 20)
+        if (agentData.TotalInventory + invStorageQty[oreType] > MaximumInvQty)
             throw new System.Exception("Inventory will be too full");
         
         agentData.inventory[oreType].Quantity++;
         agentData.inventory[oreType].Score += oreScore;
-        agentData.totalInventory += invStorageQty[oreType];
+        agentData.TotalInventory += invStorageQty[oreType];
     }
     
     public static void AddToPlayerInventory(OreType oreType, int oreScore)

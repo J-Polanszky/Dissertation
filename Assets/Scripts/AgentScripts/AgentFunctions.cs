@@ -10,7 +10,12 @@ public class AgentFunctions : MonoBehaviour
     NavMeshAgent navMeshAgent;
     public int oreLayer;
     public float oreSearchRadius = 10f;
-
+    
+    readonly float defaultStateSpeed = 1f;
+    readonly float defaultRlSpeed = 2f;
+    readonly float defaultAcceleration = 5f;
+    public bool isStateMachine = false;
+    
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -18,7 +23,50 @@ public class AgentFunctions : MonoBehaviour
         oreLayer = LayerMask.GetMask("Ore");
 
         oreSearchRadius += GameData.Difficulty * 3;
+        
+        if (isStateMachine)
+        {
+            navMeshAgent.speed = defaultStateSpeed + (float)GameData.Difficulty / 2;
+            navMeshAgent.acceleration = defaultAcceleration;
+            return;
+        }
+        
+        navMeshAgent.speed = defaultRlSpeed;
+        navMeshAgent.acceleration = defaultAcceleration;
+        
+        GameData.MachineData.onInventoryUpdated += ChangeSpeed;
     }
+    
+    void ChangeSpeed()
+    {
+        // State machine speed varies, RlAgent speed is always the same.
+
+        if (GameData.MachineData.TotalInventory == 0)
+        {
+            if (isStateMachine)
+            {
+                navMeshAgent.speed = defaultStateSpeed + (float)GameData.Difficulty / 2;
+                navMeshAgent.acceleration = defaultAcceleration;
+                return;
+            }
+            navMeshAgent.speed = defaultRlSpeed;
+            navMeshAgent.acceleration = defaultAcceleration;
+        }
+        
+        // Divide by 60 so that the minimum multiplier is 0.5
+        float multiplier = 1 - (float) GameData.MachineData.TotalInventory / (GameData.MaximumInvQty * 2);
+            
+        if (isStateMachine)
+        {
+            navMeshAgent.speed = (defaultStateSpeed + (float)GameData.Difficulty / 2) * multiplier;
+            navMeshAgent.acceleration = defaultAcceleration * multiplier;
+            return;
+        }
+        navMeshAgent.speed = defaultRlSpeed * multiplier;
+        navMeshAgent.acceleration = defaultAcceleration * multiplier;
+        
+    }
+    
     public GameObject FindBestOre(float oreSearchRadius = -1, int recursiveDepth = 0)
     {
         // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.

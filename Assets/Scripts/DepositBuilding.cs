@@ -18,13 +18,13 @@ public class DepositBuilding : MonoBehaviour
             if (value.Quantity == 0)
                 continue;
             
-            Debug.Log("Depositing: " + key + "with value: " + value.Score);
+            // Debug.Log("Depositing: " + key + "with value: " + value.Score);
             data.Score += value.Score;
             value.Quantity = 0;
             value.Score = 0;
         }
         
-        data.totalInventory = 0;
+        data.TotalInventory = 0;
     }
 
     IEnumerator CountDown()
