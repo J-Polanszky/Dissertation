@@ -65,10 +65,10 @@ public class SMAgent : MonoBehaviour
             if (agentState == AgentState.TravellingToMine)
             {
                 float timeNeededToMine =
-                    (Vector3.Distance(transform.position, oreToMine.transform.position) / navMeshAgent.speed) +
+                    (agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position) / navMeshAgent.speed) +
                     agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
                 float timeNeededToDeposit =
-                    Vector3.Distance(oreToMine.transform.position, depoPos) / navMeshAgent.speed;
+                    agentFunctions.CalculatePathRemainingDistance(depoPos, oreToMine.transform.position) / navMeshAgent.speed;
                 if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
                     return;
                 agentState = AgentState.TravellingToDeposit;
@@ -81,14 +81,14 @@ public class SMAgent : MonoBehaviour
         if (agentState == AgentState.Idle)
         {
             // Debug.Log("@M total inv" + GameData.MachineData.TotalInventory);
-            oreToMine = agentFunctions.FindBestOre();
+            oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
 
             // Debug.Log("Agent inv after mining: " +
             //           (GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
             // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
             if ((GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) > GameData.MaximumInvQty ||
-                (GameData.MachineData.TotalInventory > ((float) GameData.MaximumInvQty / 2) && Vector3.Distance(transform.position, depoPos) <
-                    Vector3.Distance(transform.position, oreToMine.transform.position)))
+                (GameData.MachineData.TotalInventory > ((float) GameData.MaximumInvQty / 2) && agentFunctions.CalculatePathRemainingDistance(depoPos) <
+                    agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
             {
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = depoPos;
@@ -109,7 +109,7 @@ public class SMAgent : MonoBehaviour
                 // Check if ore is being mined, or has been mined and destroyed:
                 if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
                 {
-                    oreToMine = agentFunctions.FindBestOre();
+                    oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
                     navMeshAgent.destination = oreToMine.transform.position;
                     return;
                 }
