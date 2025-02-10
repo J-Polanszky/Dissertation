@@ -25,7 +25,7 @@ public class SMAgent : MonoBehaviour
     public bool startAgent = true;
     private AgentState agentState = AgentState.Idle;
     private GameObject oreToMine;
-    private Vector3 depoPos;
+    // private Vector3 depoPos;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -33,12 +33,12 @@ public class SMAgent : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
-        
+
         navMeshAgent.isStopped = true;
 
         agentMining.onMine += SetAgentToIdle;
 
-        depoPos = GameObject.Find("AgentDeposit").transform.position;
+        // depoPos = GameObject.Find("AgentDeposit").transform.position;
     }
 
 
@@ -58,7 +58,7 @@ public class SMAgent : MonoBehaviour
             if (agentState == AgentState.Idle && GameData.MachineData.TotalInventory > 0)
             {
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = depoPos;
+                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
                 return;
             }
 
@@ -68,11 +68,13 @@ public class SMAgent : MonoBehaviour
                     (agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position) / navMeshAgent.speed) +
                     agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
                 float timeNeededToDeposit =
-                    agentFunctions.CalculatePathRemainingDistance(depoPos, oreToMine.transform.position) / navMeshAgent.speed;
+                    agentFunctions.CalculatePathRemainingDistance(
+                        agentFunctions.FindClosestDepositWaypoint(oreToMine.transform.position),
+                        oreToMine.transform.position) / navMeshAgent.speed;
                 if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
                     return;
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = depoPos;
+                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
                 return;
             }
         }
@@ -86,12 +88,14 @@ public class SMAgent : MonoBehaviour
             // Debug.Log("Agent inv after mining: " +
             //           (GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
             // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
-            if ((GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) > GameData.MaximumInvQty ||
-                (GameData.MachineData.TotalInventory > ((float) GameData.MaximumInvQty / 2) && agentFunctions.CalculatePathRemainingDistance(depoPos) <
-                    agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
+            if ((GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) >
+                GameData.MaximumInvQty ||
+                (GameData.MachineData.TotalInventory > ((float)GameData.MaximumInvQty / 2) &&
+                 agentFunctions.CalculatePathRemainingDistance(transform.position) <
+                 agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
             {
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = depoPos;
+                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
                 navMeshAgent.isStopped = false;
                 return;
             }
@@ -124,7 +128,7 @@ public class SMAgent : MonoBehaviour
 
         if (agentState == AgentState.TravellingToDeposit)
         {
-            if (navMeshAgent.remainingDistance < 8f)
+            if (navMeshAgent.remainingDistance < 1f)
             {
                 agentState = AgentState.Idle;
                 navMeshAgent.isStopped = true;
@@ -149,5 +153,4 @@ public class SMAgent : MonoBehaviour
         agentState = AgentState.Idle;
         navMeshAgent.isStopped = true;
     }
-
 }

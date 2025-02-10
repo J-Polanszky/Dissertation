@@ -23,7 +23,7 @@ public class AgentFunctions : MonoBehaviour
     
     // RL Agent variables
     private GameObject player;
-    Vector3 depositPos;
+    Transform depositBuilding;
     
     readonly float defaultRlSpeed = 2f;
     public readonly float RlOreSearchRadius = 10f;
@@ -36,7 +36,7 @@ public class AgentFunctions : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         oreLayer = LayerMask.GetMask("Ore");
         player = GameObject.FindWithTag("Player");
-        depositPos = GameObject.Find("AgentDeposit").transform.position;
+        depositBuilding = GameObject.Find("AgentDeposit").transform;
 
         stateMachineSearchRadius += GameData.Difficulty * 3;
         
@@ -102,6 +102,28 @@ public class AgentFunctions : MonoBehaviour
             return distance;
         }
         return -1f; // Return -1 if the path is invalidE
+    }
+
+    public Vector3 FindClosestDepositWaypoint(Vector3 originPosition)
+    {
+        Vector3 closestWaypoint = Vector3.zero;
+        float closestDistance = Mathf.Infinity;
+        
+        foreach (Transform child in depositBuilding)
+        {
+            //NOTE: if more children are added, a guard statement will be needed.
+            float distance = CalculatePathRemainingDistance(child.position, originPosition);
+            
+            if (closestDistance < distance) continue;
+            
+            closestDistance = distance;
+            closestWaypoint = child.position;
+        }
+        
+        if (closestWaypoint == Vector3.zero)
+            throw new Exception("No Deposit Waypoints Found");
+        
+        return closestWaypoint;
     }
     
     public GameObject[] FindOres(float oreSearchRadius, int recursiveDepth = 0)
@@ -216,7 +238,7 @@ public class AgentFunctions : MonoBehaviour
             //TODO: Make a invalid path checker
             float distanceFromAgent = CalculatePathRemainingDistance(ore.transform.position);
             float distanceFromPlayer = CalculatePathRemainingDistance(ore.transform.position, player.transform.position);
-            float distanceFromBase = CalculatePathRemainingDistance(depositPos, ore.transform.position);
+            float distanceFromBase = CalculatePathRemainingDistance(FindClosestDepositWaypoint(ore.transform.position), ore.transform.position);
             
             if (distanceFromAgent < 0 || distanceFromPlayer < 0 || distanceFromBase < 0)
                 continue;
