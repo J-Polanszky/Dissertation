@@ -108,7 +108,22 @@ public class RLAgent : Agent
     
     public override void CollectObservations(VectorSensor sensor)
     {
-        
+        // Collect ore type observation
+        sensor.AddOneHotObservation((int)oreType, numOfTypes);
+
+        // Collect normalised inventory space taken observation
+        sensor.AddObservation((float) GameData.InvStorageQty[oreType] / GameData.MaximumInvQty);
+
+        // Collect normalised distances
+        sensor.AddObservation(playerDistanceNormalised);
+        sensor.AddObservation(depositDistanceNormalised);
+        sensor.AddObservation(agentDistanceNormalised); // normalised distance from agent to ore
+
+        // Collect inventory space observation
+        sensor.AddObservation((float)GameData.MachineData.TotalInventory / GameData.MaximumInvQty);
+
+        // Collect time left observation
+        sensor.AddObservation((float)GameData.TimeLeft / GameData.InitialTime);
     }
 
     public override void OnActionReceived(ActionBuffers actions)

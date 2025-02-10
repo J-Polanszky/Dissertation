@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     
     public void ChangeDifficulty(int difficulty)
     {
-        Debug.Log("Difficulty changed to " + difficulty);
+        // Debug.Log("Difficulty changed to " + difficulty);
         GameData.Difficulty = difficulty;
     }
 
@@ -134,6 +134,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountDown()
     {
+        GameData.TimeLeft = GameData.InitialTime;
+        
         UpdateTime();
 
         while (GameData.TimeLeft > 0)
