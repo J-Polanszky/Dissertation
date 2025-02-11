@@ -22,7 +22,7 @@ public class SMAgent : MonoBehaviour
     AgentMining agentMining;
     AgentFunctions agentFunctions;
 
-    public bool startAgent = true;
+    public bool startAgent = false;
     private AgentState agentState = AgentState.Idle;
     private GameObject oreToMine;
     // private Vector3 depoPos;
@@ -38,12 +38,17 @@ public class SMAgent : MonoBehaviour
 
         agentMining.onMine += SetAgentToIdle;
 
-        // depoPos = GameObject.Find("AgentDeposit").transform.position;
+        StartCoroutine(DelayedStart());
     }
 
+    IEnumerator DelayedStart()
+    {
+        yield return new WaitForSeconds(0.5f);
+        startAgent = true;
+    }
 
-    // Update is called once per frame
-    void Update()
+    // Updated it to use Fixed Update, as it is more efficient for physics calculations.
+    void FixedUpdate()
     {
         // Add checker for time left and distance so agent deposits before time runs out.
         // Fix collision avoidance issues.

@@ -22,7 +22,8 @@ public class AgentFunctions : MonoBehaviour
     public float stateMachineSearchRadius = 10f;
     
     // RL Agent variables
-    private GameObject player;
+    AgentMining agentMining;
+    GameObject player;
     Transform depositBuilding;
     
     readonly float defaultRlSpeed = 2f;
@@ -34,6 +35,7 @@ public class AgentFunctions : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        agentMining = GetComponent<AgentMining>();
         oreLayer = LayerMask.GetMask("Ore");
         player = GameObject.FindWithTag("Player");
         depositBuilding = GameObject.Find("AgentDeposit").transform;
@@ -215,7 +217,7 @@ public class AgentFunctions : MonoBehaviour
     #region RlAgentFunctions
     // RL Agent functions
 
-    public IEnumerator GatherDataForAgent()
+    public IEnumerator GatherDataForAgent(Action<List<OreData>> callback)
     {
         GameObject[] ores;
         try
@@ -270,8 +272,53 @@ public class AgentFunctions : MonoBehaviour
             });
             
         }
-
+        callback(oreDataList);
         return null;
+    }
+    
+    IEnumerator ReCheckOres(Action<List<OreData>> callback)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            Debug.Log("Rechecking Ores");
+            StartCoroutine(GatherDataForAgent(callback));
+            // No need to update current ore data since it would have been caught in the GatherDataForAgent function.
+        }
+    }
+        
+    // GoToOre&MineCoroutine
+    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback)
+    {
+        navMeshAgent.SetDestination(oreData.orePos);
+        Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
+        while (true)
+        {
+            if (navMeshAgent.remainingDistance < 1f)
+                break;
+            // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
+            yield return new WaitForFixedUpdate();
+        }
+        
+        StopCoroutine(recheckCoroutine);
+        //This ensures that the coroutine stays running until the agent has finished mining the ore.
+        //NOTE: This is where a setting should be made to ensure that the RL agents doesnt make any decisions at this time.
+        agentMining.Mine(oreData.oreToMine.gameObject);
+    }
+    
+    // GoToDepositCoroutine
+    public IEnumerator GoToDepositCoroutine()
+    {
+        Vector3 depositWaypoint = FindClosestDepositWaypoint(transform.position);
+        navMeshAgent.SetDestination(depositWaypoint);
+        
+        while (true)
+        {
+            if (navMeshAgent.remainingDistance < 1f)
+                break;
+            // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
+            yield return new WaitForFixedUpdate();
+        }
     }
     #endregion
 }

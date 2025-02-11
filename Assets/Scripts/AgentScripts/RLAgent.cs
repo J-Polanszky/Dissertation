@@ -6,6 +6,7 @@ using UnityEngine.AI;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
+using UnityEditor;
 
 //TODO: When the RL Agent is doing nothing, find all ores within a set distance, and fill in the resource data for each one.
 // It is important that when the RL agent makes a decision, he knows everything about the ore, the time left, his inventory space and speed, as well as the distance the ore is from the player and his base.
@@ -63,10 +64,12 @@ public class RLAgent : Agent
     // Agent Observation Data
     
     // Ore
+    private Transform oreToMine;
     private OreType oreType;
     private int numOfTypes = Enum.GetNames(typeof(OreType)).Length;
     
     // Distances
+    private float agentDistanceNormalised;
     private float playerDistanceNormalised;
     private float depositDistanceNormalised;
     
@@ -77,9 +80,13 @@ public class RLAgent : Agent
     private NormalisationDataClass normalisationData;
     
     int oreResourceIndex = 0;
-    
-    
+    OreData currentOreData;
+    List<OreData> oreResources = new();
 
+    private bool startTraining = false;
+
+    private int maxEpisodes = 500;
+    
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -94,14 +101,86 @@ public class RLAgent : Agent
         // navMeshAgent.isStopped = true;
         
         agentMining.onMine += SetAgentToIdle;
+
+        StartCoroutine(DelayedStart());
     }
 
+    void GatherDataCallback(List<OreData> oreData)
+    {
+        oreResources = oreData;
+    }
+    
+    IEnumerator DelayedStart()
+    {
+        yield return new WaitForSeconds(0.5f);
+        startTraining = true;
+        StartCoroutine(agentFunctions.GatherDataForAgent(GatherDataCallback));
+    }
+
+    void DecideOnOre(bool recheck = false)
+    {
+        void CalculateNormalisedDistances()
+        {
+            agentDistanceNormalised = (currentOreData.distanceFromAgent - normalisationData.MinDistanceFromAgent) / (normalisationData.MaxDistanceFromAgent - normalisationData.MinDistanceFromAgent);
+            playerDistanceNormalised = (currentOreData.distanceFromPlayer - normalisationData.MinDistanceFromPlayer) / (normalisationData.MaxDistanceFromPlayer - normalisationData.MinDistanceFromPlayer);
+            depositDistanceNormalised = (currentOreData.distanceFromDeposit - normalisationData.MinDistanceFromBase) / (normalisationData.MaxDistanceFromBase - normalisationData.MinDistanceFromBase);
+        }
+        
+        if (recheck)
+        {
+            // Current Ore Data will only ever be null due to coding mistake, so no if statement is needed, as it will just reduce performance for no reason.
+            // if (currentOreData == null)
+            // {
+            //     Debug.LogError("Recheck is true, but no ore data was passed");
+            //     return;
+            // }
+            CalculateNormalisedDistances();
+            // Ensures that the current ore remains the best option
+            RequestDecision();
+            return;
+        }
+        
+        // Should this loop to the start?
+        if(oreResourceIndex >= oreResources.Count)
+            oreResourceIndex = 0;
+        
+        currentOreData = oreResources[oreResourceIndex];
+        
+        oreToMine = currentOreData.oreToMine;
+        oreType = currentOreData.oreType;
+        
+        CalculateNormalisedDistances();
+        
+        RequestDecision();
+    }
+    
+    void ReCheckOreCallback(List<OreData> oreData)
+    {
+        oreResources = oreData;
+        DecideOnOre(true);
+    }
+    
     public override void OnEpisodeBegin()
     {
+        Debug.Log("Episode " + (CompletedEpisodes + 1) + " has begun");
         // Reset the agent and environment for a new episode
-        // agentState = AgentState.Idle;
-        navMeshAgent.isStopped = true;
-        // Add any additional reset logic here
+        
+        if(!startTraining)
+            return;
+        
+        // Reset the agent
+        // Reset the level
+        
+        #if UNITY_EDITOR
+            if(maxEpisodes == 0)
+                return;
+            
+            if (CompletedEpisodes < maxEpisodes)
+                return;
+
+            Debug.Log("Max episodes reached, stopping training");
+            EditorApplication.EnterPlaymode();
+        #endif
     }
 
     // TODO: Should i have the same code as the state machine agent here, or just give it access to the functions?
@@ -115,9 +194,9 @@ public class RLAgent : Agent
         sensor.AddObservation((float) GameData.InvStorageQty[oreType] / GameData.MaximumInvQty);
 
         // Collect normalised distances
+        sensor.AddObservation(agentDistanceNormalised);
         sensor.AddObservation(playerDistanceNormalised);
         sensor.AddObservation(depositDistanceNormalised);
-        sensor.AddObservation(agentDistanceNormalised); // normalised distance from agent to ore
 
         // Collect inventory space observation
         sensor.AddObservation((float)GameData.MachineData.TotalInventory / GameData.MaximumInvQty);
@@ -137,23 +216,19 @@ public class RLAgent : Agent
         switch(action){
             case 0:
             // Move to the nearest deposit
-            // MoveToDeposit();
+            StartCoroutine(agentFunctions.GoToDepositCoroutine());
             break;
         case 1:
             // Move to the nearest ore
-            // MoveToOre();
+            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback));
+            break;
+        case 2:
+            // Look for the best ore
+            oreResourceIndex++;
+            DecideOnOre();
             break;
         }
     }
-
-    // public override void Heuristic(in ActionBuffers actionsOut)
-    // {
-    //     // Provide heuristic actions for testing and debugging
-    //     var continuousActionsOut = actionsOut.ContinuousActions;
-    //     var discreteActionsOut = actionsOut.DiscreteActions;
-    //
-    //     // Implement heuristic actions
-    // }
 
     private void SetAgentToIdle()
     {
