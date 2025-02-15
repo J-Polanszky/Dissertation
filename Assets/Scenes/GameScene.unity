@@ -3868,7 +3868,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6880270024213799282, guid: 0518d295fdc83d547b6c6154f3772bae, type: 3}
       propertyPath: m_Name
-      value: Male 1
+      value: StateMachine
       objectReference: {fileID: 0}
     - target: {fileID: 6880270024214297746, guid: 0518d295fdc83d547b6c6154f3772bae, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4030,7 +4030,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2254997891934790590, guid: fd1eed3262ac90642a4bc675e58c4de5, type: 3}
       propertyPath: m_Name
-      value: Male 2
+      value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

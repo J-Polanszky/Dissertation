@@ -113,8 +113,10 @@ public class GameManager : MonoBehaviour
         }
         
         SpawnOres();
-        UpdatePlayerScore(0);
-        UpdateMachineScore(0);
+        // UpdatePlayerScore(0);
+        // UpdateMachineScore(0);
+        GameData.PlayerData.Reset();
+        GameData.MachineData.Reset();
         StartCoroutine(CountDown());
     }
 

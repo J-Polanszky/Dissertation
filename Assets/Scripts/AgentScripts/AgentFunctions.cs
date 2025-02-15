@@ -11,6 +11,8 @@ public class AgentFunctions : MonoBehaviour
     Animator animator;
     NavMeshAgent navMeshAgent;
     
+    public AgentData agentData;
+    
     public int oreLayer;
     
     readonly float defaultAcceleration = 5f;
@@ -52,7 +54,8 @@ public class AgentFunctions : MonoBehaviour
         navMeshAgent.speed = defaultRlSpeed;
         navMeshAgent.acceleration = defaultAcceleration;
         
-        GameData.MachineData.onInventoryUpdated += ChangeSpeed;
+        // GameData.MachineData.onInventoryUpdated += ChangeSpeed;
+        agentData.onInventoryUpdated += ChangeSpeed;
     }
     
     #region CommonFunctions
@@ -62,7 +65,7 @@ public class AgentFunctions : MonoBehaviour
     {
         // State machine speed varies, RlAgent speed is always the same.
 
-        if (GameData.MachineData.TotalInventory == 0)
+        if (agentData.TotalInventory == 0)
         {
             if (isStateMachine)
             {
@@ -75,7 +78,7 @@ public class AgentFunctions : MonoBehaviour
         }
         
         // Divide by 60 so that the minimum multiplier is 0.5
-        float multiplier = 1 - (float) GameData.MachineData.TotalInventory / (GameData.MaximumInvQty * 2);
+        float multiplier = 1 - (float)agentData.TotalInventory / (GameData.MaximumInvQty * 2);
             
         if (isStateMachine)
         {

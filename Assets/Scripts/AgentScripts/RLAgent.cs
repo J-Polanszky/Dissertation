@@ -58,8 +58,10 @@ public class RLAgent : Agent
     AgentMining agentMining;
     AgentFunctions agentFunctions;
 
-    // BufferSensorComponent m_BufferSensor;
-    // StatsRecorder statsRecorder;
+    BufferSensorComponent m_BufferSensor;
+    StatsRecorder statsRecorder;
+    
+    // [SerializeField] NNModel[] brains;
     
     // Agent Observation Data
     
@@ -90,9 +92,14 @@ public class RLAgent : Agent
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        m_BufferSensor = GetComponent<BufferSensorComponent>();
+        
+        statsRecorder = Academy.Instance.StatsRecorder;
+        
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
 
+        agentFunctions.agentData = GameData.MachineData;
         normalisationData = agentFunctions.NormalisationData;
         
         // m_BufferSensor = GetComponent<BufferSensorComponent>();

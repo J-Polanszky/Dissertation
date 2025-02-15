@@ -21,11 +21,18 @@ public class SMAgent : MonoBehaviour
 
     AgentMining agentMining;
     AgentFunctions agentFunctions;
+    
+    protected AgentData agentData;
 
     public bool startAgent = false;
     private AgentState agentState = AgentState.Idle;
     private GameObject oreToMine;
     // private Vector3 depoPos;
+
+    protected void Awake()
+    {
+        agentData = GameData.MachineData;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,6 +44,7 @@ public class SMAgent : MonoBehaviour
         navMeshAgent.isStopped = true;
 
         agentMining.onMine += SetAgentToIdle;
+        agentFunctions.agentData = agentData;
 
         StartCoroutine(DelayedStart());
     }
@@ -60,7 +68,7 @@ public class SMAgent : MonoBehaviour
 
         if (GameData.TimeLeft <= 20)
         {
-            if (agentState == AgentState.Idle && GameData.MachineData.TotalInventory > 0)
+            if (agentState == AgentState.Idle && agentData.TotalInventory > 0)
             {
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
@@ -87,15 +95,15 @@ public class SMAgent : MonoBehaviour
         // Check if the agent is idle.
         if (agentState == AgentState.Idle)
         {
-            // Debug.Log("@M total inv" + GameData.MachineData.TotalInventory);
+            // Debug.Log("@M total inv" + agentData.TotalInventory);
             oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
 
             // Debug.Log("Agent inv after mining: " +
-            //           (GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
+            //           (agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
             // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
-            if ((GameData.MachineData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) >
+            if ((agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) >
                 GameData.MaximumInvQty ||
-                (GameData.MachineData.TotalInventory > ((float)GameData.MaximumInvQty / 2) &&
+                (agentData.TotalInventory > ((float)GameData.MaximumInvQty / 2) &&
                  agentFunctions.CalculatePathRemainingDistance(transform.position) <
                  agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
             {

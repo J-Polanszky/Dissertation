@@ -37,6 +37,17 @@ public class AgentData
     public int TotalInventory { get { return totalInventory; } set { totalInventory = value; onInventoryUpdated?.Invoke(); } }
     
     public int Score { get { return score; } set { score = value; onScoreUpdated?.Invoke(value); } }
+
+    public void Reset()
+    {
+        TotalInventory = 0;
+        Score = 0;
+        foreach (var (key, value) in inventory)
+        {
+            value.Quantity = 0;
+            value.Score = 0;
+        }
+    }
 }
 
 public static class GameData
