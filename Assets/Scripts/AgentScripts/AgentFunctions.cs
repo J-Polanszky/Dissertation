@@ -222,6 +222,7 @@ public class AgentFunctions : MonoBehaviour
 
     public IEnumerator GatherDataForAgent(Action<List<OreData>> callback)
     {
+        Debug.LogWarning("STARTING GATHER DATA");
         GameObject[] ores;
         try
         {
@@ -231,8 +232,10 @@ public class AgentFunctions : MonoBehaviour
         {
             // Likely no ores found, and need to wait till they spawn
             Debug.LogError(e);
-            return null;
+            yield break;
         }
+        
+        Debug.LogWarning("ORES FOUND");
         
         List<OreData> oreDataList = new();
         
@@ -274,9 +277,10 @@ public class AgentFunctions : MonoBehaviour
                 distanceFromDeposit = distanceFromBase
             });
             
+            Debug.LogWarning("ORE ADDED");
+            
         }
         callback(oreDataList);
-        return null;
     }
     
     IEnumerator ReCheckOres(Action<List<OreData>> callback)

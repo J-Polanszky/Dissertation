@@ -53,7 +53,6 @@ public class NormalisationDataClass
 
 public class RLAgent : Agent
 {
-    
     NavMeshAgent navMeshAgent;
     AgentMining agentMining;
     AgentFunctions agentFunctions;
@@ -108,6 +107,8 @@ public class RLAgent : Agent
         // navMeshAgent.isStopped = true;
         
         agentMining.onMine += SetAgentToIdle;
+        
+        startTraining = true;
 
         StartCoroutine(DelayedStart());
     }
@@ -115,12 +116,13 @@ public class RLAgent : Agent
     void GatherDataCallback(List<OreData> oreData)
     {
         oreResources = oreData;
+        oreResourceIndex = 0;
+        DecideOnOre();
     }
     
     IEnumerator DelayedStart()
     {
         yield return new WaitForSeconds(0.5f);
-        startTraining = true;
         StartCoroutine(agentFunctions.GatherDataForAgent(GatherDataCallback));
     }
 
@@ -175,8 +177,8 @@ public class RLAgent : Agent
         if(!startTraining)
             return;
         
-        // Reset the agent
-        // Reset the level
+        // This will reset everything if it is not the first time running.
+        TrainingManager.instance.StartGame();
         
         #if UNITY_EDITOR
             if(maxEpisodes == 0)

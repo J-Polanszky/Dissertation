@@ -34,6 +34,15 @@ public class TerrainPopulator : MonoBehaviour
         PopulateTerrain();
     }
 
+    public void ResetTerrain()
+    {
+        Debug.Log("Resetting");
+        foreach (Transform child in TerrainPopulatorPrefab)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
     void PopulateTerrain()
     {
         Bounds bounds = terrainMesh.bounds;
@@ -92,6 +101,7 @@ public class TerrainPopulator : MonoBehaviour
     
     public void SetOreSpawns(int oreCluster, int gold, int silver, int copper)
     {
+        Debug.Log("Spawning");
         oreClusterCount = oreCluster;
         goldCount = gold;
         silverCount = silver;
