@@ -4,8 +4,8 @@ Dynamic Difficulty adjustment aided by Reinforcement Learning in Strategy games.
 
 # TODO List
 
-- Set up .yaml config file for Agent - 0.5 : Done by the 23rd Feb
-- Set up rewards and punishments for score - 0.5-1 : Done by the 23rd Feb
+<!-- - Set up .yaml config file for Agent - 0.5 : Done by the 23rd Feb - Decided to check if it is worth setting up the training with yaml and python or not. -->
+<!-- - Set up rewards and punishments for score - 0.5-1 : Done by the 23rd Feb -->
 - Set up tensor board and such for agent monitoring - 1 : Done by the 23rd Feb
 - Decide on what RL agent/SM agent data during training would be best for the DDA system - 2-4 : Done by the 2nd March
 - Implement logging and data gathering for DDA system in training scene - 1-2 : Done by the 2nd March

@@ -7,7 +7,6 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using UnityEditor;
-
 //TODO: When the RL Agent is doing nothing, find all ores within a set distance, and fill in the resource data for each one.
 // It is important that when the RL agent makes a decision, he knows everything about the ore, the time left, his inventory space and speed, as well as the distance the ore is from the player and his base.
 // When the agent is travelling to mine an ore, it should redo this check after a certain amount of time, such as a second to make sure it is still the best option in the long run.
@@ -88,6 +87,9 @@ public class RLAgent : Agent
 
     private int maxEpisodes = 500;
     
+    private int prevScore = 0;
+    private int episodeLength = 0; // Track episode length
+    
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -100,11 +102,6 @@ public class RLAgent : Agent
 
         agentFunctions.agentData = GameData.MachineData;
         normalisationData = agentFunctions.NormalisationData;
-        
-        // m_BufferSensor = GetComponent<BufferSensorComponent>();
-        // statsRecorder = Academy.Instance.StatsRecorder;
-        
-        // navMeshAgent.isStopped = true;
         
         agentMining.onMine += SetAgentToIdle;
         
@@ -124,6 +121,20 @@ public class RLAgent : Agent
     {
         yield return new WaitForSeconds(0.5f);
         StartCoroutine(agentFunctions.GatherDataForAgent(GatherDataCallback));
+    }
+    
+    IEnumerator PunishIdle()
+    {
+        yield return new WaitForSeconds(1);
+        AddReward(-0.05f);
+    }
+    
+    void RewardAgent(int score)
+    {
+        int reward = score - prevScore;
+        prevScore = score;
+        
+        AddReward((float) reward / 10);
     }
 
     void DecideOnOre(bool recheck = false)
@@ -148,7 +159,7 @@ public class RLAgent : Agent
             RequestDecision();
             return;
         }
-        
+
         // Should this loop to the start?
         if(oreResourceIndex >= oreResources.Count)
             oreResourceIndex = 0;
@@ -168,6 +179,11 @@ public class RLAgent : Agent
         oreResources = oreData;
         DecideOnOre(true);
     }
+
+    void PunishOreDestinationChange()
+    {
+        AddReward(-0.1f);
+    }
     
     public override void OnEpisodeBegin()
     {
@@ -179,6 +195,9 @@ public class RLAgent : Agent
         
         // This will reset everything if it is not the first time running.
         TrainingManager.instance.StartGame();
+        prevScore = 0;
+        episodeLength = 0; // Reset episode length
+        GameData.MachineData.onScoreUpdated += RewardAgent;
         
         #if UNITY_EDITOR
             if(maxEpisodes == 0)
@@ -192,8 +211,6 @@ public class RLAgent : Agent
         #endif
     }
 
-    // TODO: Should i have the same code as the state machine agent here, or just give it access to the functions?
-    
     public override void CollectObservations(VectorSensor sensor)
     {
         // Collect ore type observation
@@ -221,15 +238,26 @@ public class RLAgent : Agent
         int action =  actions.DiscreteActions[0];
 
         // Implement the logic to control the agent based on the actions
-        
+        Coroutine punishTravelling;
         switch(action){
             case 0:
             // Move to the nearest deposit
-            StartCoroutine(agentFunctions.GoToDepositCoroutine());
+            if (GameData.MachineData.TotalInventory == 0)
+            {
+                Debug.Log("Punishing for moving to deposit with no inventory");
+                AddReward(-1f);
+                DecideOnOre();
+                break;
+            }
+
+            // Using agentFunctions.StartCoroutine instead of StartCoroutine to avoid the error.
+            punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
+            StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
             break;
         case 1:
             // Move to the nearest ore
-            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback));
+            punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
+            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback, PunishOreDestinationChange, punishTravelling));
             break;
         case 2:
             // Look for the best ore
@@ -237,11 +265,20 @@ public class RLAgent : Agent
             DecideOnOre();
             break;
         }
+
+        episodeLength++; // Increment episode length
     }
 
     private void SetAgentToIdle()
     {
-        // agentState = AgentState.Idle;
         navMeshAgent.isStopped = true;
+    }
+
+    public override void EndEpisode()
+    {
+        base.EndEpisode();
+        statsRecorder.Add("CumulativeReward", GetCumulativeReward());
+        statsRecorder.Add("EpisodeLength", episodeLength);
+        statsRecorder.Add("FinalScore", prevScore);
     }
 }

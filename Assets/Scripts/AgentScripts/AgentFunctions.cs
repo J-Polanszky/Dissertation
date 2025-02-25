@@ -222,7 +222,7 @@ public class AgentFunctions : MonoBehaviour
 
     public IEnumerator GatherDataForAgent(Action<List<OreData>> callback)
     {
-        Debug.LogWarning("STARTING GATHER DATA");
+        // Debug.LogWarning("STARTING GATHER DATA");
         GameObject[] ores;
         try
         {
@@ -235,7 +235,7 @@ public class AgentFunctions : MonoBehaviour
             yield break;
         }
         
-        Debug.LogWarning("ORES FOUND");
+        // Debug.LogWarning("ORES FOUND");
         
         List<OreData> oreDataList = new();
         
@@ -277,7 +277,7 @@ public class AgentFunctions : MonoBehaviour
                 distanceFromDeposit = distanceFromBase
             });
             
-            Debug.LogWarning("ORE ADDED");
+            // Debug.LogWarning("ORE ADDED");
             
         }
         callback(oreDataList);
@@ -295,26 +295,48 @@ public class AgentFunctions : MonoBehaviour
     }
         
     // GoToOre&MineCoroutine
-    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback)
+    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback, Action punishCallback, Coroutine travellingPunish)
     {
-        navMeshAgent.SetDestination(oreData.orePos);
+        Vector3 orePos = oreData.orePos;
+        navMeshAgent.SetDestination(orePos);
         Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
+        Debug.Log("Started GoToOreAndMineCoroutine");
+
         while (true)
         {
+            if (orePos != navMeshAgent.destination)
+            {
+                Debug.Log("Destination changed, punishing agent");
+                punishCallback();
+                yield break;
+            }
+
             if (navMeshAgent.remainingDistance < 1f)
+            {
+                Debug.Log("Reached destination");
                 break;
-            // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
+            }
+
             yield return new WaitForFixedUpdate();
         }
-        
+
         StopCoroutine(recheckCoroutine);
-        //This ensures that the coroutine stays running until the agent has finished mining the ore.
-        //NOTE: This is where a setting should be made to ensure that the RL agents doesnt make any decisions at this time.
+
+        if (oreData.oreScript.isBeingMined)
+        {
+            Debug.Log("Ore is being mined by another agent, punishing agent");
+            punishCallback();
+            StartCoroutine(GatherDataForAgent(recheckCallback));
+            yield break;
+        }
+
+        StopCoroutine(travellingPunish);
+        Debug.Log("Starting mining process");
         agentMining.Mine(oreData.oreToMine.gameObject);
     }
     
     // GoToDepositCoroutine
-    public IEnumerator GoToDepositCoroutine()
+    public IEnumerator GoToDepositCoroutine(Action<List<OreData>> oreListCallback, Coroutine travellingPunish)
     {
         Vector3 depositWaypoint = FindClosestDepositWaypoint(transform.position);
         navMeshAgent.SetDestination(depositWaypoint);
@@ -326,6 +348,8 @@ public class AgentFunctions : MonoBehaviour
             // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
             yield return new WaitForFixedUpdate();
         }
+        StopCoroutine(travellingPunish);
+        StartCoroutine(GatherDataForAgent(oreListCallback));
     }
     #endregion
 }
