@@ -1,0 +1,3 @@
+torch
+mlagents==1.1.0
+mlagents-envs==1.1.0

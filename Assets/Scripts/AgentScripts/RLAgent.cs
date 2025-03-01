@@ -274,11 +274,11 @@ public class RLAgent : Agent
         navMeshAgent.isStopped = true;
     }
 
-    public override void EndEpisode()
-    {
-        base.EndEpisode();
-        statsRecorder.Add("CumulativeReward", GetCumulativeReward());
-        statsRecorder.Add("EpisodeLength", episodeLength);
-        statsRecorder.Add("FinalScore", prevScore);
-    }
+    // public void EndEpisode()
+    // {
+    //     base.EndEpisode();
+    //     statsRecorder.Add("CumulativeReward", GetCumulativeReward());
+    //     statsRecorder.Add("EpisodeLength", episodeLength);
+    //     statsRecorder.Add("FinalScore", prevScore);
+    // }
 }

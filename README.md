@@ -4,10 +4,10 @@ Dynamic Difficulty adjustment aided by Reinforcement Learning in Strategy games.
 
 # TODO List
 
-<!-- - Set up .yaml config file for Agent - 0.5 : Done by the 23rd Feb - Decided to check if it is worth setting up the training with yaml and python or not. -->
+<!-- - Set up .yaml config file for Agent - 0.5 : Done by the 23rd Feb - Transfered everything on main pc to ubuntu to solve python issues -->
 <!-- - Set up rewards and punishments for score - 0.5-1 : Done by the 23rd Feb -->
-- Set up tensor board and such for agent monitoring - 1 : Done by the 23rd Feb
-- Decide on what RL agent/SM agent data during training would be best for the DDA system - 2-4 : Done by the 2nd March
+- Set up tensor board and such for agent monitoring - 1 : Done by the 23rd Feb - Tensorboard is setup as part of the training, but stats recorder is to be fine tuned.
+<!-- - Decide on what RL agent/SM agent data during training would be best for the DDA system - 2-4 : Done by the 2nd March - Likely will be player score, inventory, and the total number of score stored in inventory, and only from the RL Agent. this will be used to set a comparison for the decision tree to realise which RL Agent the player is performing most similarly to --> 
 - Implement logging and data gathering for DDA system in training scene - 1-2 : Done by the 2nd March
 - Ensure that everything is ready for training, monitoring, extraction. Then make evaluation scene. - 1-2 : Done by the 2nd March
 - Everything is ready to train the RL Agent. Expected training duration needed (maximum) - 30 hours, split across 3 weeks. : Start by the 3rd March. End by 23rd March latest
