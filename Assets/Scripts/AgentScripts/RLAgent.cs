@@ -88,7 +88,6 @@ public class RLAgent : Agent
     private int maxEpisodes = 500;
     
     private int prevScore = 0;
-    private int episodeLength = 0; // Track episode length
     
     void Start()
     {
@@ -196,7 +195,6 @@ public class RLAgent : Agent
         // This will reset everything if it is not the first time running.
         TrainingManager.instance.StartGame();
         prevScore = 0;
-        episodeLength = 0; // Reset episode length
         GameData.MachineData.onScoreUpdated += RewardAgent;
         
         #if UNITY_EDITOR
@@ -257,7 +255,7 @@ public class RLAgent : Agent
         case 1:
             // Move to the nearest ore
             punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback, PunishOreDestinationChange, punishTravelling));
+            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback, PunishOreDestinationChange, punishTravelling, GatherDataCallback));
             break;
         case 2:
             // Look for the best ore
@@ -265,20 +263,10 @@ public class RLAgent : Agent
             DecideOnOre();
             break;
         }
-
-        episodeLength++; // Increment episode length
     }
 
     private void SetAgentToIdle()
     {
         navMeshAgent.isStopped = true;
     }
-
-    // public void EndEpisode()
-    // {
-    //     base.EndEpisode();
-    //     statsRecorder.Add("CumulativeReward", GetCumulativeReward());
-    //     statsRecorder.Add("EpisodeLength", episodeLength);
-    //     statsRecorder.Add("FinalScore", prevScore);
-    // }
 }

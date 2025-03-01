@@ -295,44 +295,47 @@ public class AgentFunctions : MonoBehaviour
     }
         
     // GoToOre&MineCoroutine
-    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback, Action punishCallback, Coroutine travellingPunish)
+    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback, Action punishCallback, Coroutine travellingPunish, Action<List<OreData>> callback)
     {
         Vector3 orePos = oreData.orePos;
         navMeshAgent.SetDestination(orePos);
+        yield return new WaitForFixedUpdate();
         Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
         Debug.Log("Started GoToOreAndMineCoroutine");
-
+        
         while (true)
         {
-            if (orePos != navMeshAgent.destination)
+            // using 0.1f accounts for float rounding and the y level being different.
+            if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
             {
                 Debug.Log("Destination changed, punishing agent");
                 punishCallback();
-                yield break;
+                StopCoroutine(recheckCoroutine);
+                break;
             }
 
             if (navMeshAgent.remainingDistance < 1f)
             {
                 Debug.Log("Reached destination");
+                StopCoroutine(recheckCoroutine);
+
+                if (oreData.oreScript.isBeingMined)
+                {
+                    Debug.Log("Ore is being mined by another agent, punishing agent");
+                    punishCallback();
+                    StartCoroutine(GatherDataForAgent(recheckCallback));
+                    yield break;
+                }
+
+                StopCoroutine(travellingPunish);
+                Debug.Log("Starting mining process");
+                agentMining.Mine(oreData.oreToMine.gameObject);
                 break;
             }
 
             yield return new WaitForFixedUpdate();
         }
-
-        StopCoroutine(recheckCoroutine);
-
-        if (oreData.oreScript.isBeingMined)
-        {
-            Debug.Log("Ore is being mined by another agent, punishing agent");
-            punishCallback();
-            StartCoroutine(GatherDataForAgent(recheckCallback));
-            yield break;
-        }
-
-        StopCoroutine(travellingPunish);
-        Debug.Log("Starting mining process");
-        agentMining.Mine(oreData.oreToMine.gameObject);
+        StartCoroutine(GatherDataForAgent(callback));
     }
     
     // GoToDepositCoroutine
