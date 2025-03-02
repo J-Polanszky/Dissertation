@@ -7,10 +7,6 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using UnityEditor;
-//TODO: When the RL Agent is doing nothing, find all ores within a set distance, and fill in the resource data for each one.
-// It is important that when the RL agent makes a decision, he knows everything about the ore, the time left, his inventory space and speed, as well as the distance the ore is from the player and his base.
-// When the agent is travelling to mine an ore, it should redo this check after a certain amount of time, such as a second to make sure it is still the best option in the long run.
-// The agents actions will end up being similar to the State-Machines, with the agent having more control on which ores to mine, and when to deposit.
 
 public class OreData
 {

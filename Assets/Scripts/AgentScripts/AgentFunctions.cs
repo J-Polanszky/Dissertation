@@ -243,7 +243,7 @@ public class AgentFunctions : MonoBehaviour
 
         foreach (GameObject ore in ores)
         {
-            //TODO: Make a invalid path checker
+            //TODO: Make a invalid path checker (is this needed, as the agent seems quite proficient at navigating)
             float distanceFromAgent = CalculatePathRemainingDistance(ore.transform.position);
             float distanceFromPlayer = CalculatePathRemainingDistance(ore.transform.position, player.transform.position);
             float distanceFromBase = CalculatePathRemainingDistance(FindClosestDepositWaypoint(ore.transform.position), ore.transform.position);

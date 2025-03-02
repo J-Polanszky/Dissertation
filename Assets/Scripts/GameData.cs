@@ -63,9 +63,6 @@ public static class GameData
     
     private static AgentData machineData = new();
 
-    // TODO: Make inventory limits a total weight and assign weight to each one instead. Figure out how to display it to the user.
-    // Save current UI for inventory, and instead use a combined image with the ores, with the number of inv used / total inv.
-    // Ask others if this is fine, or if they prefer having the old one and then have the new one next to it to show total.
     private static Dictionary<OreType, int> invStorageQty = new()
     {
         { OreType.Gold, 5 },

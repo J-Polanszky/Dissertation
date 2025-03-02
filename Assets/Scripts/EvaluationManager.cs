@@ -3,9 +3,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class TrainingManager : MonoBehaviour
+public class EvaluationManager : MonoBehaviour
 {
-    public static TrainingManager instance;
+    public static EvaluationManager instance;
     TerrainPopulator terrainPopulator;
 
     GameObject stateMachine, RLAgent;
@@ -37,7 +37,7 @@ public class TrainingManager : MonoBehaviour
         // The default State Machine should be normal difficulty
         GameData.Difficulty = 1;
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
-        // StartGame();
+        StartGame();
     }
     
     public void StartGame()
@@ -89,7 +89,7 @@ public class TrainingManager : MonoBehaviour
             GameData.TimeLeft--;
         }
 
-        RLAgent.GetComponent<RLAgent>().EndEpisode();
+        QuitGame();
     }
     
     void SpawnOres()
