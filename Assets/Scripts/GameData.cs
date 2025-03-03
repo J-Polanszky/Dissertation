@@ -87,7 +87,7 @@ public static class GameData
     
     public static AgentData MachineData { get => machineData; set => machineData = value; }
 
-    private static void AddToInventory(AgentData agentData, OreType oreType, int oreScore)
+    public static void AddToInventory(AgentData agentData, OreType oreType, int oreScore)
     {
         if (agentData.TotalInventory + invStorageQty[oreType] > MaximumInvQty)
             throw new System.Exception("Inventory will be too full");
@@ -96,15 +96,4 @@ public static class GameData
         agentData.inventory[oreType].Score += oreScore;
         agentData.TotalInventory += invStorageQty[oreType];
     }
-    
-    public static void AddToPlayerInventory(OreType oreType, int oreScore)
-    {
-        AddToInventory(playerData, oreType, oreScore);
-    }
-
-    public static void AddToMachineInventory(OreType oreType, int oreScore)
-    {
-        AddToInventory(machineData, oreType, oreScore);
-    }
-    
 }

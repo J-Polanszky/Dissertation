@@ -95,14 +95,20 @@ public class RLAgent : Agent
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
 
-        agentFunctions.agentData = GameData.MachineData;
-        normalisationData = agentFunctions.NormalisationData;
-        
         agentMining.onMine += SetAgentToIdle;
+        agentMining.agentData = GameData.MachineData;
+        
+        agentFunctions.agentData = GameData.MachineData;
+        agentFunctions.depositBuilding = GameObject.Find("AgentDeposit").transform;   
+        normalisationData = agentFunctions.NormalisationData;
         
         startTraining = true;
 
         StartCoroutine(DelayedStart());
+    }
+
+    void FixedUpdate(){
+        agentFunctions.UpdateAnimator();
     }
 
     void GatherDataCallback(List<OreData> oreData)
@@ -169,11 +175,11 @@ public class RLAgent : Agent
         RequestDecision();
     }
     
-    void ReCheckOreCallback(List<OreData> oreData)
-    {
-        oreResources = oreData;
-        DecideOnOre(true);
-    }
+    // void ReCheckOreCallback(List<OreData> oreData)
+    // {
+    //     oreResources = oreData;
+    //     DecideOnOre(true);
+    // }
 
     void PunishOreDestinationChange()
     {
@@ -251,7 +257,7 @@ public class RLAgent : Agent
         case 1:
             // Move to the nearest ore
             punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, ReCheckOreCallback, PunishOreDestinationChange, punishTravelling, GatherDataCallback));
+            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange, punishTravelling, GatherDataCallback));
             break;
         case 2:
             // Look for the best ore

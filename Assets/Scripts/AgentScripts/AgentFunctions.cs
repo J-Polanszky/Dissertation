@@ -10,29 +10,30 @@ public class AgentFunctions : MonoBehaviour
     // Common variables for both state machine and RL agent
     Animator animator;
     NavMeshAgent navMeshAgent;
-    
+
     public AgentData agentData;
-    
+
     public int oreLayer;
-    
+
+    public Transform depositBuilding;
+
     readonly float defaultAcceleration = 5f;
 
     // State machine variables
     public bool isStateMachine = false;
-    
+
     readonly float defaultStateSpeed = 1f;
     public float stateMachineSearchRadius = 10f;
-    
+
     // RL Agent variables
     AgentMining agentMining;
     GameObject player;
-    Transform depositBuilding;
-    
+
     readonly float defaultRlSpeed = 2f;
     public readonly float RlOreSearchRadius = 10f;
-    
+
     public NormalisationDataClass NormalisationData = new();
-    
+
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -40,27 +41,27 @@ public class AgentFunctions : MonoBehaviour
         agentMining = GetComponent<AgentMining>();
         oreLayer = LayerMask.GetMask("Ore");
         player = GameObject.FindWithTag("Player");
-        depositBuilding = GameObject.Find("AgentDeposit").transform;
+        // depositBuilding = GameObject.Find("AgentDeposit").transform;
 
         stateMachineSearchRadius += GameData.Difficulty * 3;
         
+        agentData.onInventoryUpdated += ChangeSpeed;
+        
         if (isStateMachine)
         {
-            navMeshAgent.speed = defaultStateSpeed + (float)GameData.Difficulty / 2;
+            navMeshAgent.speed = defaultStateSpeed + GameData.Difficulty;
             navMeshAgent.acceleration = defaultAcceleration;
             return;
         }
-        
+
         navMeshAgent.speed = defaultRlSpeed;
         navMeshAgent.acceleration = defaultAcceleration;
-        
-        // GameData.MachineData.onInventoryUpdated += ChangeSpeed;
-        agentData.onInventoryUpdated += ChangeSpeed;
     }
-    
+
     #region CommonFunctions
+
     // Common functions for both state machine and RL agent
-    
+
     void ChangeSpeed()
     {
         // State machine speed varies, RlAgent speed is always the same.
@@ -73,29 +74,30 @@ public class AgentFunctions : MonoBehaviour
                 navMeshAgent.acceleration = defaultAcceleration;
                 return;
             }
+
             navMeshAgent.speed = defaultRlSpeed;
             navMeshAgent.acceleration = defaultAcceleration;
         }
-        
+
         // Divide by 60 so that the minimum multiplier is 0.5
         float multiplier = 1 - (float)agentData.TotalInventory / (GameData.MaximumInvQty * 2);
-            
+
         if (isStateMachine)
         {
             navMeshAgent.speed = (defaultStateSpeed + (float)GameData.Difficulty / 2) * multiplier;
             navMeshAgent.acceleration = defaultAcceleration * multiplier;
             return;
         }
+
         navMeshAgent.speed = defaultRlSpeed * multiplier;
         navMeshAgent.acceleration = defaultAcceleration * multiplier;
-        
     }
-    
-    public float CalculatePathRemainingDistance(Vector3 targetPosition, Vector3 originPosition = new ())
+
+    public float CalculatePathRemainingDistance(Vector3 targetPosition, Vector3 originPosition = new())
     {
         if (originPosition == Vector3.zero)
             originPosition = navMeshAgent.transform.position;
-        
+
         NavMeshPath path = new NavMeshPath();
         if (NavMesh.CalculatePath(originPosition, targetPosition, NavMesh.AllAreas, path))
         {
@@ -104,8 +106,10 @@ public class AgentFunctions : MonoBehaviour
             {
                 distance += Vector3.Distance(path.corners[i], path.corners[i + 1]);
             }
+
             return distance;
         }
+
         return -1f; // Return -1 if the path is invalidE
     }
 
@@ -113,39 +117,39 @@ public class AgentFunctions : MonoBehaviour
     {
         Vector3 closestWaypoint = Vector3.zero;
         float closestDistance = Mathf.Infinity;
-        
+
         foreach (Transform child in depositBuilding)
         {
             //NOTE: if more children are added, a guard statement will be needed.
             float distance = CalculatePathRemainingDistance(child.position, originPosition);
-            
+
             if (closestDistance < distance) continue;
-            
+
             closestDistance = distance;
             closestWaypoint = child.position;
         }
-        
+
         if (closestWaypoint == Vector3.zero)
             throw new Exception("No Deposit Waypoints Found");
-        
+
         return closestWaypoint;
     }
-    
+
     public GameObject[] FindOres(float oreSearchRadius, int recursiveDepth = 0)
     {
         // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.
         // FIXME: Sometimes this doesnt find ores, even if they are right next to the agent, and it only happens after depositing.
         if (recursiveDepth > 30)
             throw new Exception("No Ores Found After 30 Recursive Calls");
-        
+
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, oreSearchRadius, oreLayer);
-        
+
         if (hitColliders.Length > 0)
             return Array.ConvertAll(hitColliders, x => x.gameObject);
-        
+
         return FindOres(oreSearchRadius + 5f, recursiveDepth + 1);
     }
-    
+
     public void UpdateAnimator()
     {
         if (animator == null || !animator.enabled) return;
@@ -158,9 +162,11 @@ public class AgentFunctions : MonoBehaviour
         animator.SetFloat(vAgentAnimatorParameters.InputMagnitude, speed);
         animator.SetBool(vAgentAnimatorParameters.IsGrounded, true); // Assuming the agent is always grounded
     }
+
     #endregion
 
     #region StateMachineFunctions
+
     // State machine functions
 
     public GameObject FindBestOre(float oreSearchRadius)
@@ -168,9 +174,9 @@ public class AgentFunctions : MonoBehaviour
         Vector3 playerPos = GameObject.FindWithTag("Player").transform.position;
         GameObject bestOre = null;
         int bestOreType = -1;
-        
+
         GameObject[] ores = FindOres(oreSearchRadius);
-        
+
         if (ores.Length == 1 && ores[0].GetComponent<OreScript>().isBeingMined)
             return FindBestOre(oreSearchRadius + 5f);
 
@@ -182,11 +188,11 @@ public class AgentFunctions : MonoBehaviour
             if (bestOreType == -1)
             {
                 bestOre = ore;
-                bestOreType = (int) Enum.Parse<OreType>(ore.tag);
+                bestOreType = (int)Enum.Parse<OreType>(ore.tag);
                 continue;
             }
-            
-            int curOreType = (int) Enum.Parse<OreType>(ore.tag);
+
+            int curOreType = (int)Enum.Parse<OreType>(ore.tag);
 
             if (curOreType < bestOreType)
                 continue;
@@ -215,9 +221,11 @@ public class AgentFunctions : MonoBehaviour
 
         return bestOre;
     }
+
     #endregion
-    
+
     #region RlAgentFunctions
+
     // RL Agent functions
 
     public IEnumerator GatherDataForAgent(Action<List<OreData>> callback)
@@ -226,7 +234,7 @@ public class AgentFunctions : MonoBehaviour
         GameObject[] ores;
         try
         {
-           ores = FindOres(RlOreSearchRadius);
+            ores = FindOres(RlOreSearchRadius);
         }
         catch (Exception e)
         {
@@ -234,38 +242,43 @@ public class AgentFunctions : MonoBehaviour
             Debug.LogError(e);
             yield break;
         }
-        
+
         // Debug.LogWarning("ORES FOUND");
-        
+
         List<OreData> oreDataList = new();
-        
+
         NormalisationData.Reset();
 
         foreach (GameObject ore in ores)
         {
             //TODO: Make a invalid path checker (is this needed, as the agent seems quite proficient at navigating)
             float distanceFromAgent = CalculatePathRemainingDistance(ore.transform.position);
-            float distanceFromPlayer = CalculatePathRemainingDistance(ore.transform.position, player.transform.position);
-            float distanceFromBase = CalculatePathRemainingDistance(FindClosestDepositWaypoint(ore.transform.position), ore.transform.position);
-            
+            float distanceFromPlayer =
+                CalculatePathRemainingDistance(ore.transform.position, player.transform.position);
+            float distanceFromBase = CalculatePathRemainingDistance(FindClosestDepositWaypoint(ore.transform.position),
+                ore.transform.position);
+
             if (distanceFromAgent < 0 || distanceFromPlayer < 0 || distanceFromBase < 0)
                 continue;
-            
-            if(distanceFromAgent > NormalisationData.MaxDistanceFromAgent)
+
+            if (distanceFromAgent > NormalisationData.MaxDistanceFromAgent)
                 NormalisationData.MaxDistanceFromAgent = distanceFromAgent;
-            else if (NormalisationData.MinDistanceFromAgent == 0 || distanceFromAgent < NormalisationData.MinDistanceFromAgent)
+            else if (NormalisationData.MinDistanceFromAgent == 0 ||
+                     distanceFromAgent < NormalisationData.MinDistanceFromAgent)
                 NormalisationData.MinDistanceFromAgent = distanceFromAgent;
-            
-            if(distanceFromPlayer > NormalisationData.MaxDistanceFromPlayer)
+
+            if (distanceFromPlayer > NormalisationData.MaxDistanceFromPlayer)
                 NormalisationData.MaxDistanceFromPlayer = distanceFromPlayer;
-            else if(NormalisationData.MinDistanceFromPlayer == 0 || distanceFromPlayer < NormalisationData.MinDistanceFromPlayer)
+            else if (NormalisationData.MinDistanceFromPlayer == 0 ||
+                     distanceFromPlayer < NormalisationData.MinDistanceFromPlayer)
                 NormalisationData.MinDistanceFromPlayer = distanceFromPlayer;
 
-            if(distanceFromBase > NormalisationData.MaxDistanceFromBase)
+            if (distanceFromBase > NormalisationData.MaxDistanceFromBase)
                 NormalisationData.MaxDistanceFromBase = distanceFromBase;
-            else if(NormalisationData.MinDistanceFromBase == 0 || distanceFromBase < NormalisationData.MinDistanceFromBase)
+            else if (NormalisationData.MinDistanceFromBase == 0 ||
+                     distanceFromBase < NormalisationData.MinDistanceFromBase)
                 NormalisationData.MinDistanceFromBase = distanceFromBase;
-            
+
             oreDataList.Add(new OreData()
             {
                 oreToMine = ore.transform,
@@ -276,74 +289,81 @@ public class AgentFunctions : MonoBehaviour
                 distanceFromPlayer = distanceFromPlayer,
                 distanceFromDeposit = distanceFromBase
             });
-            
+
             // Debug.LogWarning("ORE ADDED");
-            
         }
+
         callback(oreDataList);
     }
-    
-    IEnumerator ReCheckOres(Action<List<OreData>> callback)
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-            Debug.Log("Rechecking Ores");
-            StartCoroutine(GatherDataForAgent(callback));
-            // No need to update current ore data since it would have been caught in the GatherDataForAgent function.
-        }
-    }
-        
+
+    // IEnumerator ReCheckOres(Action<List<OreData>> callback)
+    // {
+    //     while (true)
+    //     {
+    //         yield return new WaitForSeconds(1f);
+    //         Debug.Log("Rechecking Ores");
+    //         StartCoroutine(GatherDataForAgent(callback));
+    //         // No need to update current ore data since it would have been caught in the GatherDataForAgent function.
+    //     }
+    // }
+
     // GoToOre&MineCoroutine
-    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action<List<OreData>> recheckCallback, Action punishCallback, Coroutine travellingPunish, Action<List<OreData>> callback)
+    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action punishCallback, Coroutine travellingPunish,
+        Action<List<OreData>> callback)
     {
         Vector3 orePos = oreData.orePos;
         navMeshAgent.SetDestination(orePos);
-        yield return new WaitForFixedUpdate();
-        Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
+        // Not using recheck since gains are small and computational cost is high.
+        // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
         Debug.Log("Started GoToOreAndMineCoroutine");
-        
+
         while (true)
         {
-            // using 0.1f accounts for float rounding and the y level being different.
-            if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
-            {
-                Debug.Log("Destination changed, punishing agent");
-                punishCallback();
-                StopCoroutine(recheckCoroutine);
-                break;
-            }
+            yield return new WaitForFixedUpdate();
 
-            if (navMeshAgent.remainingDistance < 1f)
+            //This ensures that the destination has been set properly
+            if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
+                continue;
+
+            // using 0.1f accounts for float rounding and the y level being different.
+            // if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
+            // {
+            //     Debug.Log("Destination changed, punishing agent");
+            //     punishCallback();
+            //     StopCoroutine(recheckCoroutine);
+            //     break;
+            // }
+
+            if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(orePos, transform.position) < 1f)
             {
                 Debug.Log("Reached destination");
-                StopCoroutine(recheckCoroutine);
+                // StopCoroutine(recheckCoroutine);
 
                 if (oreData.oreScript.isBeingMined)
                 {
                     Debug.Log("Ore is being mined by another agent, punishing agent");
                     punishCallback();
-                    StartCoroutine(GatherDataForAgent(recheckCallback));
-                    yield break;
+                    break;
                 }
 
                 StopCoroutine(travellingPunish);
                 Debug.Log("Starting mining process");
-                agentMining.Mine(oreData.oreToMine.gameObject);
+                Coroutine mining = agentMining.Mine(oreData.oreToMine.gameObject);
+                yield return mining;
                 break;
             }
-
-            yield return new WaitForFixedUpdate();
         }
+
+        Debug.Log("Ending GoToOreAndMineCoroutine");
         StartCoroutine(GatherDataForAgent(callback));
     }
-    
+
     // GoToDepositCoroutine
     public IEnumerator GoToDepositCoroutine(Action<List<OreData>> oreListCallback, Coroutine travellingPunish)
     {
         Vector3 depositWaypoint = FindClosestDepositWaypoint(transform.position);
         navMeshAgent.SetDestination(depositWaypoint);
-        
+
         while (true)
         {
             if (navMeshAgent.remainingDistance < 1f)
@@ -351,9 +371,11 @@ public class AgentFunctions : MonoBehaviour
             // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
             yield return new WaitForFixedUpdate();
         }
+
         StopCoroutine(travellingPunish);
         StartCoroutine(GatherDataForAgent(oreListCallback));
     }
+
     #endregion
 }
 

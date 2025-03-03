@@ -27,11 +27,14 @@ public class SMAgent : MonoBehaviour
     public bool startAgent = false;
     private AgentState agentState = AgentState.Idle;
     private GameObject oreToMine;
+
+    protected string depoName;
     // private Vector3 depoPos;
 
     protected void Awake()
     {
         agentData = GameData.MachineData;
+        depoName = "AgentDeposit";
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -42,9 +45,12 @@ public class SMAgent : MonoBehaviour
         agentFunctions = GetComponent<AgentFunctions>();
 
         navMeshAgent.isStopped = true;
+        
 
         agentMining.onMine += SetAgentToIdle;
+        agentMining.agentData = agentData;
         agentFunctions.agentData = agentData;
+        agentFunctions.depositBuilding = GameObject.Find(depoName).transform;   
 
         StartCoroutine(DelayedStart());
     }

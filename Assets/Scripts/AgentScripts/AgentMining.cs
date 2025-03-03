@@ -4,6 +4,9 @@ using UnityEngine.AI;
 public class AgentMining : Mining
 {
     public System.Action onMine;
+
+    public AgentData agentData;
+
     NavMeshAgent navMeshAgent;
 
     protected override void Start()
@@ -12,12 +15,12 @@ public class AgentMining : Mining
         navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
-    public void Mine(GameObject ore)
+    public Coroutine Mine(GameObject ore)
     {
         if (ore.GetComponent<OreScript>().isBeingMined)
-            return;
+            return null;
         
-        StartCoroutine(MiningCoroutine(ore));
+        return StartCoroutine(MiningCoroutine(ore));
     }
 
     private void FaceOre(GameObject ore)
@@ -34,6 +37,7 @@ public class AgentMining : Mining
     {
         navMeshAgent.isStopped = true;
         FaceOre(ore);
+        ore.GetComponent<OreScript>().agentData = agentData;
     }
 
     protected override void PostMine()

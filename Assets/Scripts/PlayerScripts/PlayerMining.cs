@@ -27,7 +27,7 @@ public class PlayerMining : Mining
         input.cc.input.x = 0;
         input.cc.input.z = 0;
         agentRigidbody.linearVelocity = Vector3.zero;
-        ore.GetComponent<OreScript>().playerMined = true;
+        ore.GetComponent<OreScript>().agentData = GameData.PlayerData;
     }
     
     protected override void PostMine()
