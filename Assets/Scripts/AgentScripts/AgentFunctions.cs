@@ -44,8 +44,8 @@ public class AgentFunctions : MonoBehaviour
         // depositBuilding = GameObject.Find("AgentDeposit").transform;
 
         stateMachineSearchRadius += GameData.Difficulty * 3;
-        
-        agentData.onInventoryUpdated += ChangeSpeed;
+
+        StartCoroutine(DelayedStart());
         
         if (isStateMachine)
         {
@@ -58,6 +58,12 @@ public class AgentFunctions : MonoBehaviour
         navMeshAgent.acceleration = defaultAcceleration;
     }
 
+    IEnumerator DelayedStart()
+    {
+        yield return new WaitForSeconds(0.5f);
+        agentData.onInventoryUpdated += ChangeSpeed;
+    }
+    
     #region CommonFunctions
 
     // Common functions for both state machine and RL agent
