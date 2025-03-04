@@ -35,17 +35,20 @@ public class TrainingManager : MonoBehaviour
         playerStartPos = stateMachine.transform.position;
         machineStartPos = RLAgent.transform.position;
         
-        Time.timeScale = 20f;
+        Time.timeScale = 20;
         // The default State Machine should be normal difficulty
         GameData.Difficulty = 1;
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
         // StartGame();
     }
     
-    public void ResetGame()
+    public void StartGame()
     {
         Debug.Log("Starting Game");
-        RunGameStartFunctions();
+        if (!gameStarted)
+            RunGameStartFunctions();
+        else
+            RunGameRestartFunctions();
     }
     
     public void QuitGame()
@@ -59,17 +62,7 @@ public class TrainingManager : MonoBehaviour
 
     void RunGameStartFunctions()
     {
-        if (gameStarted)
-        {
-            terrainPopulator.ResetTerrain();
-            stateMachine.transform.position = playerStartPos;
-            stateMachine.GetComponent<SMAgent>().Reset();
-            RLAgent.transform.position = machineStartPos;
-            RLAgent.GetComponent<RLAgent>().Reset();
-            if (timer != null)
-                StopCoroutine(timer);
-        }
-            
+       gameStarted = true;
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         foreach (GameObject deposit in deposits)
         {
@@ -82,6 +75,23 @@ public class TrainingManager : MonoBehaviour
         SpawnOres();
         GameData.PlayerData.Reset();
         GameData.MachineData.Reset();
+        timer = StartCoroutine(CountDown());
+    }
+    
+    void RunGameRestartFunctions()
+    {
+        terrainPopulator.ResetTerrain();
+        if (timer != null)
+            StopCoroutine(timer);
+        
+        stateMachine.transform.position = playerStartPos;
+        RLAgent.transform.position = machineStartPos;
+        
+        SpawnOres();
+        GameData.PlayerData.Reset();
+        GameData.MachineData.Reset();
+        stateMachine.GetComponent<SMAgent>().Reset();
+        RLAgent.GetComponent<RLAgent>().Reset();
         timer = StartCoroutine(CountDown());
     }
     

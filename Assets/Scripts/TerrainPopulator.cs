@@ -41,6 +41,8 @@ public class TerrainPopulator : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        // Terrain doesnt matter since its a training scene.
+        // PopulateTerrain();
     }
 
     void PopulateTerrain()

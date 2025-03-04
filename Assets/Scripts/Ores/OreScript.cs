@@ -22,7 +22,7 @@ public class OreScript : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError(ex.Message);
+            Debug.LogWarning(ex.Message);
         }
     }
 }

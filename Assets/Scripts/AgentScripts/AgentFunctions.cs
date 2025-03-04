@@ -322,7 +322,7 @@ public class AgentFunctions : MonoBehaviour
         // Not using recheck since gains are small and computational cost is high.
         // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
         Debug.Log("Started GoToOreAndMineCoroutine");
-
+        
         while (true)
         {
             yield return new WaitForFixedUpdate();

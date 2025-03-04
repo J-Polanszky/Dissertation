@@ -21,7 +21,7 @@ public class SMAgent : MonoBehaviour
 
     AgentMining agentMining;
     AgentFunctions agentFunctions;
-    
+
     protected AgentData agentData;
 
     public bool startAgent = false;
@@ -45,26 +45,30 @@ public class SMAgent : MonoBehaviour
         agentFunctions = GetComponent<AgentFunctions>();
 
         navMeshAgent.isStopped = true;
-        
+
 
         agentMining.onMine += SetAgentToIdle;
         agentMining.agentData = agentData;
         agentFunctions.agentData = agentData;
-        agentFunctions.depositBuilding = GameObject.Find(depoName).transform;   
+        agentFunctions.depositBuilding = GameObject.Find(depoName).transform;
 
         StartCoroutine(DelayedStart());
     }
 
     public void Reset()
     {
+        agentMining.Stop();
+        agentFunctions.StopAllCoroutines();
         agentFunctions.NormalisationData.Reset();
-        agentMining.StopAllCoroutines();
         navMeshAgent.isStopped = true;
         agentState = AgentState.Idle;
         oreToMine = null;
+        navMeshAgent.ResetPath();
+        startAgent = false;
+        StartCoroutine(DelayedStart());
     }
 
-    
+
     IEnumerator DelayedStart()
     {
         yield return new WaitForSeconds(0.5f);
@@ -84,13 +88,12 @@ public class SMAgent : MonoBehaviour
 
         if (GameData.TimeLeft <= 20)
         {
-            if (agentState == AgentState.Idle && agentData.TotalInventory > 0)
+            if (agentState == AgentState.TravellingToDeposit)
             {
-                agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
+                //This normally means there is not enough time to mine and depo in time, so to save resources, the agent will be disabled.
+                startAgent = false;
                 return;
             }
-
             if (agentState == AgentState.TravellingToMine)
             {
                 float timeNeededToMine =

@@ -81,7 +81,7 @@ public class RLAgent : Agent
 
     private bool startTraining = false;
 
-    private int maxEpisodes = 500;
+    private int maxEpisodes = 250;
     
     private int prevScore = 0;
     
@@ -113,9 +113,15 @@ public class RLAgent : Agent
     
     public void Reset()
     {
+        agentMining.Stop();
+        agentFunctions.StopAllCoroutines();
         agentFunctions.NormalisationData.Reset();
-        agentMining.StopAllCoroutines();
         navMeshAgent.isStopped = true;
+        oreToMine = null;
+        oreResourceIndex = 0;
+        oreResources.Clear();
+        navMeshAgent.ResetPath();
+        StartCoroutine(DelayedStart());
     }
 
     void GatherDataCallback(List<OreData> oreData)
@@ -202,7 +208,7 @@ public class RLAgent : Agent
             return;
         
         // This will reset everything if it is not the first time running.
-        TrainingManager.instance.ResetGame();
+        TrainingManager.instance.StartGame();
         navMeshAgent.isStopped = false;
         prevScore = 0;
         GameData.MachineData.onScoreUpdated += RewardAgent;

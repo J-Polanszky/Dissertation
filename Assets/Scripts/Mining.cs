@@ -47,6 +47,15 @@ public class Mining : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    public void Stop()
+    {
+        StopAllCoroutines();
+        PostMine();
+        animator.SetBool("Mining", false);
+        isMining = false;
+        pickaxeHandle.SetActive(false);
+    }
+    
     protected virtual void PreMine(GameObject ore)
     {
         
