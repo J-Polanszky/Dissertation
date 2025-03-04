@@ -110,6 +110,13 @@ public class RLAgent : Agent
     void FixedUpdate(){
         agentFunctions.UpdateAnimator();
     }
+    
+    public void Reset()
+    {
+        agentFunctions.NormalisationData.Reset();
+        agentMining.StopAllCoroutines();
+        navMeshAgent.isStopped = true;
+    }
 
     void GatherDataCallback(List<OreData> oreData)
     {
@@ -195,7 +202,8 @@ public class RLAgent : Agent
             return;
         
         // This will reset everything if it is not the first time running.
-        TrainingManager.instance.StartGame();
+        TrainingManager.instance.ResetGame();
+        navMeshAgent.isStopped = false;
         prevScore = 0;
         GameData.MachineData.onScoreUpdated += RewardAgent;
         

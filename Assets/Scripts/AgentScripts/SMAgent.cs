@@ -55,6 +55,16 @@ public class SMAgent : MonoBehaviour
         StartCoroutine(DelayedStart());
     }
 
+    public void Reset()
+    {
+        agentFunctions.NormalisationData.Reset();
+        agentMining.StopAllCoroutines();
+        navMeshAgent.isStopped = true;
+        agentState = AgentState.Idle;
+        oreToMine = null;
+    }
+
+    
     IEnumerator DelayedStart()
     {
         yield return new WaitForSeconds(0.5f);

@@ -13,6 +13,8 @@ public class TrainingManager : MonoBehaviour
     Vector3 playerStartPos, machineStartPos;
     
     bool gameStarted = false;
+
+    private Coroutine timer;
     
     private void Awake()
     {
@@ -40,7 +42,7 @@ public class TrainingManager : MonoBehaviour
         // StartGame();
     }
     
-    public void StartGame()
+    public void ResetGame()
     {
         Debug.Log("Starting Game");
         RunGameStartFunctions();
@@ -61,7 +63,11 @@ public class TrainingManager : MonoBehaviour
         {
             terrainPopulator.ResetTerrain();
             stateMachine.transform.position = playerStartPos;
+            stateMachine.GetComponent<SMAgent>().Reset();
             RLAgent.transform.position = machineStartPos;
+            RLAgent.GetComponent<RLAgent>().Reset();
+            if (timer != null)
+                StopCoroutine(timer);
         }
             
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
@@ -76,7 +82,7 @@ public class TrainingManager : MonoBehaviour
         SpawnOres();
         GameData.PlayerData.Reset();
         GameData.MachineData.Reset();
-        StartCoroutine(CountDown());
+        timer = StartCoroutine(CountDown());
     }
     
     IEnumerator CountDown()
