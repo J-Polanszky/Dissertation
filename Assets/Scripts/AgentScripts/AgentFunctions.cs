@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -141,7 +142,7 @@ public class AgentFunctions : MonoBehaviour
         return closestWaypoint;
     }
 
-    public GameObject[] FindOres(float oreSearchRadius, int recursiveDepth = 0)
+    public List<GameObject> FindOres(float oreSearchRadius, int recursiveDepth = 0,  List<GameObject> oresblacklist = null)
     {
         // It is impossible for no ores to be found within this limit, so while it is higher than i would like, it is the safest option.
         // FIXME: Sometimes this doesnt find ores, even if they are right next to the agent, and it only happens after depositing.
@@ -151,8 +152,17 @@ public class AgentFunctions : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, oreSearchRadius, oreLayer);
 
         if (hitColliders.Length > 0)
-            return Array.ConvertAll(hitColliders, x => x.gameObject);
+        {
+            List<GameObject> ores = hitColliders.Select(x => x.gameObject).ToList();
+            foreach (GameObject ore in oresblacklist ?? new List<GameObject>())
+            {
+                ores.Remove(ore);
+            }
 
+            if (ores.Count > 0)
+                return ores;
+        }
+        
         return FindOres(oreSearchRadius + 5f, recursiveDepth + 1);
     }
 
@@ -181,9 +191,9 @@ public class AgentFunctions : MonoBehaviour
         GameObject bestOre = null;
         int bestOreType = -1;
 
-        GameObject[] ores = FindOres(oreSearchRadius);
+        List<GameObject> ores = FindOres(oreSearchRadius);
 
-        if (ores.Length == 1 && ores[0].GetComponent<OreScript>().isBeingMined)
+        if (ores.Count == 1 && ores[0].GetComponent<OreScript>().isBeingMined)
             return FindBestOre(oreSearchRadius + 5f);
 
         foreach (GameObject ore in ores)
@@ -234,13 +244,13 @@ public class AgentFunctions : MonoBehaviour
 
     // RL Agent functions
 
-    public IEnumerator GatherDataForAgent(Action<List<OreData>> callback)
+    public IEnumerator GatherDataForAgent(Action<List<OreData>> callback, List<GameObject> oresblacklist = null)
     {
         // Debug.LogWarning("STARTING GATHER DATA");
-        GameObject[] ores;
+        List<GameObject> ores;
         try
         {
-            ores = FindOres(RlOreSearchRadius);
+            ores = FindOres(RlOreSearchRadius, 0, oresblacklist);
         }
         catch (Exception e)
         {
@@ -353,25 +363,7 @@ public class AgentFunctions : MonoBehaviour
                     Debug.LogWarning("Agent is stuck, changing ore");
                     StopCoroutine(travellingPunish);
                     // punishCallback();
-                    void RemoveCurrentOreFromList(List<OreData> oreList)
-                    {
-                        int oreIndex = -1;
-                        for (int i = 0; i < oreList.Count; i++)
-                        {
-                            if (oreList[i].oreToMine == oreData.oreToMine)
-                            {
-                                oreIndex = i;
-                                break;
-                            }
-                        }
-                        
-                        if (oreIndex != -1)
-                            oreList.RemoveAt(oreIndex);
-
-                        callback(oreList);
-                    }
-
-                    StartCoroutine(GatherDataForAgent(RemoveCurrentOreFromList));
+                    StartCoroutine(GatherDataForAgent(callback, new List<GameObject>(){oreData.oreToMine.gameObject}));
                     yield break;
                 }
             }
