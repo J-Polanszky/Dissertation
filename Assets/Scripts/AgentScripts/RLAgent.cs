@@ -160,17 +160,25 @@ public class RLAgent : Agent
             depositDistanceNormalised = (currentOreData.distanceFromDeposit - normalisationData.MinDistanceFromBase) / (normalisationData.MaxDistanceFromBase - normalisationData.MinDistanceFromBase);
         }
         
-        if (recheck)
+        // if (recheck)
+        // {
+        //     // Current Ore Data will only ever be null due to coding mistake, so no if statement is needed, as it will just reduce performance for no reason.
+        //     // if (currentOreData == null)
+        //     // {
+        //     //     Debug.LogError("Recheck is true, but no ore data was passed");
+        //     //     return;
+        //     // }
+        //     CalculateNormalisedDistances();
+        //     // Ensures that the current ore remains the best option
+        //     RequestDecision();
+        //     return;
+        // }
+
+        // On rare occasions, the RL Agent wont find an ore. it is to wait and then decide again.
+        if(oreResources.Count == 0)
         {
-            // Current Ore Data will only ever be null due to coding mistake, so no if statement is needed, as it will just reduce performance for no reason.
-            // if (currentOreData == null)
-            // {
-            //     Debug.LogError("Recheck is true, but no ore data was passed");
-            //     return;
-            // }
-            CalculateNormalisedDistances();
-            // Ensures that the current ore remains the best option
-            RequestDecision();
+            Debug.LogError("No ore resources found");
+            StartCoroutine(DelayedStart());
             return;
         }
 
@@ -269,7 +277,11 @@ public class RLAgent : Agent
             StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
             break;
         case 1:
-            // Move to the nearest ore
+            // Move to the decided ore
+            // Punishing the agent on wasting time travelling to and mining when he wont be able to store the mined ore.
+            if (GameData.MachineData.TotalInventory + GameData.InvStorageQty[currentOreData.oreType] > GameData.MaximumInvQty)
+                AddReward(-1f);
+            
             punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
             StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange, punishTravelling, GatherDataCallback));
             break;

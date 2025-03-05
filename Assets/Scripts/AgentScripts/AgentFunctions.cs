@@ -322,23 +322,59 @@ public class AgentFunctions : MonoBehaviour
         // Not using recheck since gains are small and computational cost is high.
         // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
         Debug.Log("Started GoToOreAndMineCoroutine");
-        
+
+        // On Rare occasions, the pathfinding gets stuck
+
+        float stuckCheckInterval = 2f;
+        float stuckCheckTimer = 0f;
+        Vector3 lastPosition = transform.position;
+        float stuckDistanceThreshold = 1.5f;
+
         while (true)
         {
             yield return new WaitForFixedUpdate();
 
             //This ensures that the destination has been set properly
-            if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
+            if (Vector3.Distance(orePos, navMeshAgent.destination) > 1f)
                 continue;
 
-            // using 0.1f accounts for float rounding and the y level being different.
-            // if (Vector3.Distance(orePos, navMeshAgent.destination) > 0.1f)
-            // {
-            //     Debug.Log("Destination changed, punishing agent");
-            //     punishCallback();
-            //     StopCoroutine(recheckCoroutine);
-            //     break;
-            // }
+            // Check if the agent is stuck
+            stuckCheckTimer += Time.fixedDeltaTime;
+            if (stuckCheckTimer >= stuckCheckInterval)
+            {
+                stuckCheckTimer = 0f;
+                float prevDistanceFromOre = Vector3.Distance(lastPosition, orePos);
+                float currentDistanceFromOre = Vector3.Distance(transform.position, orePos);
+                float distanceMoved = prevDistanceFromOre - currentDistanceFromOre;
+                lastPosition = transform.position;
+
+                if (distanceMoved < stuckDistanceThreshold)
+                {
+                    Debug.LogWarning("Agent is stuck, changing ore");
+                    StopCoroutine(travellingPunish);
+                    // punishCallback();
+                    void RemoveCurrentOreFromList(List<OreData> oreList)
+                    {
+                        int oreIndex = -1;
+                        for (int i = 0; i < oreList.Count; i++)
+                        {
+                            if (oreList[i].oreToMine == oreData.oreToMine)
+                            {
+                                oreIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        if (oreIndex != -1)
+                            oreList.RemoveAt(oreIndex);
+
+                        callback(oreList);
+                    }
+
+                    StartCoroutine(GatherDataForAgent(RemoveCurrentOreFromList));
+                    yield break;
+                }
+            }
 
             if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(orePos, transform.position) < 1f)
             {

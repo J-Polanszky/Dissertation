@@ -106,7 +106,7 @@ public class SMAgent : MonoBehaviour
                 if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
                     return;
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
+                navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
                 return;
             }
         }
@@ -127,13 +127,13 @@ public class SMAgent : MonoBehaviour
                  agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
             {
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
+                navMeshAgent.SetDestination( agentFunctions.FindClosestDepositWaypoint(transform.position));
                 navMeshAgent.isStopped = false;
                 return;
             }
 
             agentState = AgentState.TravellingToMine;
-            navMeshAgent.destination = oreToMine.transform.position;
+            navMeshAgent.SetDestination( oreToMine.transform.position);
             navMeshAgent.isStopped = false;
             return;
         }
@@ -146,7 +146,7 @@ public class SMAgent : MonoBehaviour
                 if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
                 {
                     oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
-                    navMeshAgent.destination = oreToMine.transform.position;
+                    navMeshAgent.SetDestination( oreToMine.transform.position);
                     return;
                 }
 

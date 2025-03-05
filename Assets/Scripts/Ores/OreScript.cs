@@ -13,16 +13,14 @@ public class OreScript : MonoBehaviour
 
     void OnDestroy()
     {
-        try
-        {
+        try{
             GameData.AddToInventory(agentData, oreType,
                     oreScore);
-
-            destroyedCallback?.Invoke();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex){
             Debug.LogWarning(ex.Message);
         }
+
+        destroyedCallback?.Invoke();
     }
 }
