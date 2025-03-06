@@ -11,11 +11,11 @@ public class TerrainPopulator : MonoBehaviour
     public int grassCount = 150;
     public int bushCount = 30;
     public int treeCount = 20;
-    
+
     public GameObject OreClusterPrefab;
-    
+
     int oreClusterCount = 0;
-    
+
     // Percentage out of 100 based on difficulty
     int goldCount = 0;
     int silverCount = 0;
@@ -23,7 +23,9 @@ public class TerrainPopulator : MonoBehaviour
 
     private float edgeBuffer = 12;
     private List<Vector3> depositPositions = new();
-    
+
+    delegate bool VerifyCallbackType(Vector3 t);
+
     void Start()
     {
         terrainMesh = GetComponent<MeshRenderer>();
@@ -31,6 +33,7 @@ public class TerrainPopulator : MonoBehaviour
         {
             depositPositions.Add(depo.transform.position);
         }
+
         PopulateTerrain();
     }
 
@@ -41,6 +44,7 @@ public class TerrainPopulator : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+
         PopulateTerrain();
     }
 
@@ -66,48 +70,50 @@ public class TerrainPopulator : MonoBehaviour
             PlacePrefabRandomly(treePrefab[randomIndex], bounds, edgeBuffer);
         }
     }
-    
+
     bool IsInCorner(Vector3 position)
     {
         float cornerRadius = 7f; // Adjust as needed
-        return Vector3.Distance(position, depositPositions[0]) < cornerRadius || Vector3.Distance(position, depositPositions[1]) < cornerRadius;
+        return Vector3.Distance(position, depositPositions[0]) < cornerRadius ||
+               Vector3.Distance(position, depositPositions[1]) < cornerRadius;
     }
 
-    GameObject PlacePrefabRandomly(GameObject prefab, Bounds bounds, float buffer)
+    GameObject PlacePrefabRandomly(GameObject prefab, Bounds bounds, float buffer,
+        VerifyCallbackType verifyCallback = null)
     {
         Vector3 randomPosition;
-        do {
+        do
+        {
             randomPosition = new Vector3(
-            Random.Range(bounds.min.x + buffer, bounds.max.x - buffer),
-            bounds.min.y,
-            Random.Range(bounds.min.z + buffer, bounds.max.z - buffer)
-        );
-            
-        } while (IsInCorner(randomPosition));
-        
+                Random.Range(bounds.min.x + buffer, bounds.max.x - buffer),
+                bounds.min.y,
+                Random.Range(bounds.min.z + buffer, bounds.max.z - buffer)
+            );
+        } while (IsInCorner(randomPosition) || (verifyCallback != null && !verifyCallback(randomPosition)));
+
         Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
 
         return Instantiate(prefab, randomPosition, randomRotation, TerrainPopulatorPrefab);
     }
 
-   
-    
+
     public void SpawnOreCluster()
     {
         print("Spawning Ore Cluster");
-        GameObject clusterObject = PlacePrefabRandomly(OreClusterPrefab, terrainMesh.bounds, edgeBuffer);
-        
+        GameObject clusterObject = PlacePrefabRandomly(OreClusterPrefab, terrainMesh.bounds, edgeBuffer,
+            ClusterOreScript.CheckIfValidSpawn);
+
         clusterObject.GetComponent<ClusterOreScript>().SpawnOres(goldCount, silverCount, copperCount, SpawnOreCluster);
     }
-    
+
     public void SetOreSpawns(int oreCluster, int gold, int silver, int copper)
     {
-        Debug.Log("Spawning");
+        // Debug.Log("Spawning");
         oreClusterCount = oreCluster;
         goldCount = gold;
         silverCount = silver;
         copperCount = copper;
-        
+
         for (int i = 0; i < oreClusterCount; i++)
             SpawnOreCluster();
     }

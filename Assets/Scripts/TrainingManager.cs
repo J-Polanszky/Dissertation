@@ -105,7 +105,7 @@ public class TrainingManager : MonoBehaviour
             GameData.TimeLeft--;
         }
 
-        RLAgent.GetComponent<RLAgent>().EndEpisode();
+        RLAgent.GetComponent<RLAgent>().CustomEndEpisode();
     }
     
     void SpawnOres()

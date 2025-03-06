@@ -40,6 +40,19 @@ public class ClusterOreScript : MonoBehaviour
         }
     }
 
+    public static bool CheckIfValidSpawn(Vector3 position)
+    {
+        // Physics overlay is large since the collider is smaller than the non-navigatable area to the navmesh-agents. It being this large makes sure that a corner is
+        // always a valid path.
+        Vector3 center = new Vector3(position.x -0.375f, position.y + 0.324f, position.z);
+        float radius = 1.4f;
+        int obstacleLayer = LayerMask.GetMask("Obstacle");
+        
+        Collider[] colliders = Physics.OverlapSphere(center, radius, obstacleLayer);
+        
+        return !(colliders.Length > 0);
+    }
+
     void OnDestroy()
     {
         // Stops the game from freezing when exiting

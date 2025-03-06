@@ -292,7 +292,13 @@ public class RLAgent : Agent
             break;
         }
     }
-
+    
+    public void CustomEndEpisode()
+    {
+        statsRecorder.Add("Score", GameData.MachineData.Score);
+        EndEpisode();
+    }
+    
     private void SetAgentToIdle()
     {
         navMeshAgent.isStopped = true;
