@@ -29,6 +29,9 @@ public class TrainingManager : MonoBehaviour
 
     private void Start()
     {
+        // The Training all seems to work without ever breaking, thus the dev console will be disabled to save on resources.
+        Debug.developerConsoleEnabled = false;
+        
         stateMachine = GameObject.FindGameObjectWithTag("Player");
         RLAgent = GameObject.FindGameObjectWithTag("Agent");
         
@@ -62,7 +65,7 @@ public class TrainingManager : MonoBehaviour
 
     void RunGameStartFunctions()
     {
-       gameStarted = true;
+        gameStarted = true;
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         foreach (GameObject deposit in deposits)
         {
@@ -80,6 +83,8 @@ public class TrainingManager : MonoBehaviour
     
     void RunGameRestartFunctions()
     {
+        // Clear console if it is open
+        Debug.ClearDeveloperConsole();
         terrainPopulator.ResetTerrain();
         if (timer != null)
             StopCoroutine(timer);
