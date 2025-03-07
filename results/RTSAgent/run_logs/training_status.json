@@ -2,58 +2,58 @@
     "RTSAgent": {
         "checkpoints": [
             {
-                "steps": 11987,
-                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-11987.onnx",
-                "reward": -12.233333031336466,
-                "creation_time": 1741354065.8428454,
+                "steps": 95953,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-95953.onnx",
+                "reward": 7.474999904632568,
+                "creation_time": 1741360193.0601387,
                 "auxillary_file_paths": [
-                    "results/RTSAgent/RTSAgent/RTSAgent-11987.pt"
+                    "results/RTSAgent/RTSAgent/RTSAgent-95953.pt"
                 ]
             },
             {
-                "steps": 23884,
-                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-23884.onnx",
-                "reward": 8.833333969116211,
-                "creation_time": 1741354530.9210587,
+                "steps": 107761,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-107761.onnx",
+                "reward": 6.725000083446503,
+                "creation_time": 1741360680.660341,
                 "auxillary_file_paths": [
-                    "results/RTSAgent/RTSAgent/RTSAgent-23884.pt"
+                    "results/RTSAgent/RTSAgent/RTSAgent-107761.pt"
                 ]
             },
             {
-                "steps": 35937,
-                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-35937.onnx",
-                "reward": 11.750000794728598,
-                "creation_time": 1741355001.5747,
+                "steps": 119788,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-119788.onnx",
+                "reward": 8.420000314712524,
+                "creation_time": 1741361202.8411543,
                 "auxillary_file_paths": [
-                    "results/RTSAgent/RTSAgent/RTSAgent-35937.pt"
+                    "results/RTSAgent/RTSAgent/RTSAgent-119788.pt"
                 ]
             },
             {
-                "steps": 47958,
-                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-47958.onnx",
+                "steps": 131914,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-131914.onnx",
+                "reward": 12.450000762939453,
+                "creation_time": 1741361731.469353,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-131914.pt"
+                ]
+            },
+            {
+                "steps": 133600,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-133600.onnx",
                 "reward": null,
-                "creation_time": 1741355435.2892237,
+                "creation_time": 1741361800.6061304,
                 "auxillary_file_paths": [
-                    "results/RTSAgent/RTSAgent/RTSAgent-47958.pt"
-                ]
-            },
-            {
-                "steps": 50092,
-                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-50092.onnx",
-                "reward": null,
-                "creation_time": 1741355527.6654594,
-                "auxillary_file_paths": [
-                    "results/RTSAgent/RTSAgent/RTSAgent-50092.pt"
+                    "results/RTSAgent/RTSAgent/RTSAgent-133600.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 50092,
+            "steps": 133600,
             "file_path": "results/RTSAgent/RTSAgent.onnx",
             "reward": null,
-            "creation_time": 1741355527.6654594,
+            "creation_time": 1741361800.6061304,
             "auxillary_file_paths": [
-                "results/RTSAgent/RTSAgent/RTSAgent-50092.pt"
+                "results/RTSAgent/RTSAgent/RTSAgent-133600.pt"
             ]
         }
     },
