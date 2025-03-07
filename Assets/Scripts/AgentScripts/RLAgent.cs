@@ -303,6 +303,7 @@ public class RLAgent : Agent
     
     public void CustomEndEpisode()
     {
+        // TODO: Reward agent for empty inventory, and increase punishment based on wasted ores in inventory.
         statsRecorder.Add("Score", GameData.MachineData.Score);
         EndEpisode();
     }
