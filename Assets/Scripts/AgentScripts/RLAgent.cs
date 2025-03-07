@@ -6,6 +6,7 @@ using UnityEngine.AI;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using UnityEditor;
 
 public class OreData
@@ -85,6 +86,8 @@ public class RLAgent : Agent
     
     private int prevScore = 0;
     
+    bool isInference = false;
+
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -103,6 +106,8 @@ public class RLAgent : Agent
         normalisationData = agentFunctions.NormalisationData;
         
         startTraining = true;
+
+        isInference = GetComponent<BehaviorParameters>().Model != null;
 
         StartCoroutine(DelayedStart());
     }
@@ -216,7 +221,10 @@ public class RLAgent : Agent
             return;
         
         // This will reset everything if it is not the first time running.
-        TrainingManager.instance.StartGame();
+        if (isInference)
+            EvaluationManager.instance.StartGame();
+        else
+            TrainingManager.instance.StartGame();
         navMeshAgent.isStopped = false;
         prevScore = 0;
         GameData.MachineData.onScoreUpdated += RewardAgent;

@@ -35,7 +35,7 @@ public class EvaluationManager : MonoBehaviour
         
         Time.timeScale = 20f;
         // The default State Machine should be normal difficulty
-        GameData.Difficulty = 1;
+        GameData.Difficulty = 2;
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
         StartGame();
     }
@@ -48,6 +48,8 @@ public class EvaluationManager : MonoBehaviour
     
     public void QuitGame()
     {
+        Debug.Log("Agent Score: " + GameData.MachineData.Score);
+        Debug.Log("Player Score: " + GameData.PlayerData.Score);
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

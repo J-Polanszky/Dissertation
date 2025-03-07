@@ -895,6 +895,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 625252377550732369, guid: dd4ac6287ab323244adfd41edf5cd1a9, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 255d240996dfcbe408601deddab7b9f2, type: 3}
     - target: {fileID: 7159209809905596223, guid: dd4ac6287ab323244adfd41edf5cd1a9, type: 3}
       propertyPath: m_Name
       value: RLAgent
@@ -952,6 +956,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4972421364005104118, guid: 49777b9ae7cd87e438f7eb1f1c2248b5, type: 3}
+      propertyPath: avoidancePriority
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7758872878299748971, guid: 49777b9ae7cd87e438f7eb1f1c2248b5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -20.04
@@ -1131,6 +1139,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2266801166903107347, guid: a49ae8bf2cb5f1643a744a192973366d, type: 3}
+      propertyPath: agentTag
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 4867369543719290798, guid: a49ae8bf2cb5f1643a744a192973366d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -36.01
@@ -1174,10 +1186,6 @@ PrefabInstance:
     - target: {fileID: 5244316848446627092, guid: a49ae8bf2cb5f1643a744a192973366d, type: 3}
       propertyPath: m_Name
       value: PlayerDeposit
-      objectReference: {fileID: 0}
-    - target: {fileID: 2266801166903107347, guid: a49ae8bf2cb5f1643a744a192973366d, type: 3}
-      propertyPath: agentTag
-      value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
