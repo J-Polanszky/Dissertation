@@ -116,17 +116,8 @@ public class TrainingManager : MonoBehaviour
     
     void SpawnOres()
     {
-        // Easy
-        if (GameData.Difficulty == 3)
-            terrainPopulator.SetOreSpawns(40, 10,30,60);
-        
-        // Normal
-        else if (GameData.Difficulty == 2)
-            terrainPopulator.SetOreSpawns(30, 5, 25, 70);
-        
-        // Hard
-        else
-            terrainPopulator.SetOreSpawns(20, 5, 20, 75);
+        // Making the agent always play with hard ore spawns
+        terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
     
 }
