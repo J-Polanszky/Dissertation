@@ -31,6 +31,7 @@ public class TrainingManager : MonoBehaviour
     {
         // The Training all seems to work without ever breaking, thus the dev console will be disabled to save on resources.
         Debug.developerConsoleEnabled = false;
+        Debug.unityLogger.logEnabled = false;
         
         stateMachine = GameObject.FindGameObjectWithTag("Player");
         RLAgent = GameObject.FindGameObjectWithTag("Agent");

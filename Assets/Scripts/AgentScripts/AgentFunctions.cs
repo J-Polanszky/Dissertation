@@ -164,7 +164,7 @@ public class AgentFunctions : MonoBehaviour
                 return ores;
         }
 
-        return FindOres(oreSearchRadius + 5f, recursiveDepth + 1);
+        return FindOres(oreSearchRadius + 5f, recursiveDepth + 1, oresblacklist);
     }
 
     public void UpdateAnimator()
