@@ -109,7 +109,12 @@ public class RLAgent : Agent
 
         startTraining = true;
 
-        isInference = GetComponent<BehaviorParameters>().Model != null;
+        BehaviorParameters behaviorParameters = GetComponent<BehaviorParameters>();
+        isInference = behaviorParameters.Model != null;
+        // behaviorParameters.InferenceDevice = InferenceDevice.ComputeShader;
+        
+        if(isInference)
+            behaviorParameters.BehaviorType = BehaviorType.InferenceOnly;
 
         StartCoroutine(DelayedStart());
     }
@@ -147,8 +152,9 @@ public class RLAgent : Agent
 
     IEnumerator PunishIdle()
     {
+        // Since rewards have beem increased, the punishment for travelling has also been increased. This will punish going for further away ores unless they are of higher value.
         yield return new WaitForSeconds(1);
-        AddReward(-0.05f);
+        AddReward(-0.1f);
     }
 
     void RewardAgent(int score)
@@ -229,10 +235,16 @@ public class RLAgent : Agent
             return;
 
         // This will reset everything if it is not the first time running.
-        if (isInference)
-            EvaluationManager.instance.StartGame();
-        else
+        if (!isInference)
             TrainingManager.instance.StartGame();
+        else
+        {
+            if (GameSceneManager.instance != null)
+                GameSceneManager.instance.StartGame();
+            else
+                EvaluationManager.instance.StartGame();
+        }
+        
         navMeshAgent.isStopped = false;
         prevScore = 0;
         GameData.MachineData.onScoreUpdated += RewardAgent;
@@ -296,7 +308,7 @@ public class RLAgent : Agent
 
                 // Using agentFunctions.StartCoroutine instead of StartCoroutine to avoid the error.
                 punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-                StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
+                this.action = StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
                 break;
             case 1:
                 // Move to the decided ore
@@ -306,7 +318,7 @@ public class RLAgent : Agent
                     AddReward(-1f);
 
                 punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-                StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange,
+                this.action = StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange,
                     punishTravelling, GatherDataCallback, RewardOnMine));
                 break;
             case 2:
@@ -334,7 +346,8 @@ public class RLAgent : Agent
         
         AddReward(reward - punishment);
 
-        statsRecorder.Add("Score", GameData.MachineData.Score);
+        if (!isInference)
+            statsRecorder.Add("Score", GameData.MachineData.Score);
         EndEpisode();
     }
 

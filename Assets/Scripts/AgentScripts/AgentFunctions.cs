@@ -50,7 +50,8 @@ public class AgentFunctions : MonoBehaviour
 
         if (isStateMachine)
         {
-            navMeshAgent.speed = defaultStateSpeed + GameData.Difficulty;
+            // This makes it too fast and is quite unfair to the player, so the speed boost is halved.
+            navMeshAgent.speed = defaultStateSpeed + ((float)GameData.Difficulty / 2);
             navMeshAgent.acceleration = defaultAcceleration;
             return;
         }
@@ -157,6 +158,7 @@ public class AgentFunctions : MonoBehaviour
             List<GameObject> ores = hitColliders.Select(x => x.gameObject).ToList();
             foreach (GameObject ore in oresblacklist ?? new List<GameObject>())
             {
+                if (ore == null) continue;
                 ores.Remove(ore);
             }
 
@@ -250,7 +252,7 @@ public class AgentFunctions : MonoBehaviour
         List<GameObject> ores;
         byte blacklisted;
         List<OreData> oreDataList;
-        
+
         do
         {
             blacklisted = 0;
@@ -355,10 +357,20 @@ public class AgentFunctions : MonoBehaviour
         float stuckCheckTimer = 0f;
         Vector3 lastPosition = transform.position;
         float stuckDistanceThreshold = 1f;
+        int totalStrikes = 0;
+
+        GameObject ore = oreData.oreToMine.gameObject;
 
         while (true)
         {
             yield return new WaitForFixedUpdate();
+
+            if (ore == null)
+            {
+                Debug.LogWarning("Ore is null, punishing agent");
+                punishCallback();
+                break;
+            }
 
             //This ensures that the destination has been set properly
             if (Vector3.Distance(orePos, navMeshAgent.destination) > 1f)
@@ -376,7 +388,12 @@ public class AgentFunctions : MonoBehaviour
 
                 if (distanceMoved < stuckDistanceThreshold)
                 {
-                    Debug.LogWarning("Agent is stuck, changing ore");
+                    totalStrikes++;
+                    if (totalStrikes < 3 && CalculatePathRemainingDistance(orePos, transform.position) != -1)
+                        continue;
+
+                    Debug.LogWarning("Agent is stuck, changing ore\nValid Path Value: " +
+                                     CalculatePathRemainingDistance(orePos, navMeshAgent.transform.position));
                     StopCoroutine(travellingPunish);
                     // punishCallback();
                     // Rare error when this is called when the ore does not exist.
@@ -433,7 +450,12 @@ public class AgentFunctions : MonoBehaviour
             }
         }
 
+        // There is a chance that this will be called before the ore has been destroyed. Wait for the ore to be destroyed before calling the callback.
         // Debug.Log("Ending GoToOreAndMineCoroutine");
+
+        while (oreData.oreToMine != null)
+            yield return new WaitForFixedUpdate();
+
         StartCoroutine(GatherDataForAgent(callback));
     }
 

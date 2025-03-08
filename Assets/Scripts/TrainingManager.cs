@@ -40,7 +40,7 @@ public class TrainingManager : MonoBehaviour
         machineStartPos = RLAgent.transform.position;
         
         Time.timeScale = 20;
-        // The default State Machine should be normal difficulty
+        // The default State Machine should be hard difficulty
         GameData.Difficulty = 2;
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
         // StartGame();

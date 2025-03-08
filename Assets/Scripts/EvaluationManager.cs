@@ -15,6 +15,8 @@ public class EvaluationManager : MonoBehaviour
     Vector3 playerStartPos, machineStartPos;
     
     bool gameStarted = false;
+    
+    Coroutine timer;
 
     List<float> machineScore = new();
     List<float> playerScore = new();
@@ -41,16 +43,18 @@ public class EvaluationManager : MonoBehaviour
         machineStartPos = RLAgent.transform.position;
         
         Time.timeScale = 20f;
-        // The default State Machine should be normal difficulty
+        // The default State Machine should be hard difficulty
         GameData.Difficulty = 2;
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
-        StartGame();
     }
     
     public void StartGame()
     {
         Debug.Log("Starting Game");
-        RunGameStartFunctions();
+        if (!gameStarted)
+            RunGameStartFunctions();
+        else
+            RunGameRestartFunctions();
     }
     
     public void QuitGame()
@@ -69,19 +73,7 @@ public class EvaluationManager : MonoBehaviour
 
     void RunGameStartFunctions()
     {
-        if (runTimes == 10)
-        {
-            QuitGame();
-            return;
-        }
-            
-        if (gameStarted)
-        {
-            terrainPopulator.ResetTerrain();
-            stateMachine.transform.position = playerStartPos;
-            RLAgent.transform.position = machineStartPos;
-        }
-            
+        gameStarted = true;
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         foreach (GameObject deposit in deposits)
         {
@@ -90,6 +82,28 @@ public class EvaluationManager : MonoBehaviour
             else
                 deposit.GetComponent<DepositBuilding>().agentData = GameData.MachineData;
         }
+        
+        runTimes++;
+        SpawnOres();
+        GameData.PlayerData.Reset();
+        GameData.MachineData.Reset();
+        timer = StartCoroutine(CountDown());
+    }
+    
+    void RunGameRestartFunctions()
+    {
+        if (runTimes == 10)
+        {
+            QuitGame();
+            return;
+        }
+            
+        terrainPopulator.ResetTerrain();
+        if (timer != null)
+            StopCoroutine(timer);
+        
+        stateMachine.transform.position = playerStartPos;
+        RLAgent.transform.position = machineStartPos;
         
         runTimes++; 
         SpawnOres();
@@ -110,7 +124,9 @@ public class EvaluationManager : MonoBehaviour
 
         playerScore.Add(GameData.PlayerData.Score);
         machineScore.Add(GameData.MachineData.Score);
-        StartGame();
+        // RLAgent.GetComponent<RLAgent>().OnEpisodeBegin();
+        // Issue with state machine not resetting properly, even though scene is identical to training scene.   
+        QuitGame();
     }
     
     void SpawnOres()
