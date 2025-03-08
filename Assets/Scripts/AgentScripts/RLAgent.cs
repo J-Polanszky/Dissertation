@@ -15,7 +15,7 @@ public class OreData
     public Vector3 orePos;
     public OreType oreType;
     public OreScript oreScript;
-    
+
     public float distanceFromPlayer;
     public float distanceFromAgent;
     public float distanceFromDeposit;
@@ -30,7 +30,7 @@ public class NormalisationDataClass
     public float MaxDistanceFromPlayer;
     public float MinDistanceFromBase;
     public float MaxDistanceFromBase;
-    
+
     public void Reset()
     {
         MinDistanceFromAgent = 0;
@@ -40,7 +40,7 @@ public class NormalisationDataClass
         MinDistanceFromBase = 0;
         MaxDistanceFromBase = 0;
     }
-    
+
     public NormalisationDataClass()
     {
         Reset();
@@ -55,27 +55,27 @@ public class RLAgent : Agent
 
     BufferSensorComponent m_BufferSensor;
     StatsRecorder statsRecorder;
-    
+
     // [SerializeField] NNModel[] brains;
-    
+
     // Agent Observation Data
-    
+
     // Ore
     private Transform oreToMine;
     private OreType oreType;
     private int numOfTypes = Enum.GetNames(typeof(OreType)).Length;
-    
+
     // Distances
     private float agentDistanceNormalised;
     private float playerDistanceNormalised;
     private float depositDistanceNormalised;
-    
+
     // Inventory
     private float invAmountNormalised;
 
     //Calculate min and max distance from ores and deposit for normalisation
     private NormalisationDataClass normalisationData;
-    
+
     int oreResourceIndex = 0;
     OreData currentOreData;
     List<OreData> oreResources = new();
@@ -83,28 +83,30 @@ public class RLAgent : Agent
     private bool startTraining = false;
 
     private int maxEpisodes = 250;
-    
+
     private int prevScore = 0;
-    
+
     bool isInference = false;
+
+    private Coroutine action;
 
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         m_BufferSensor = GetComponent<BufferSensorComponent>();
-        
+
         statsRecorder = Academy.Instance.StatsRecorder;
-        
+
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
 
         agentMining.onMine += SetAgentToIdle;
         agentMining.agentData = GameData.MachineData;
-        
+
         agentFunctions.agentData = GameData.MachineData;
-        agentFunctions.depositBuilding = GameObject.Find("AgentDeposit").transform;   
+        agentFunctions.depositBuilding = GameObject.Find("AgentDeposit").transform;
         normalisationData = agentFunctions.NormalisationData;
-        
+
         startTraining = true;
 
         isInference = GetComponent<BehaviorParameters>().Model != null;
@@ -112,10 +114,11 @@ public class RLAgent : Agent
         StartCoroutine(DelayedStart());
     }
 
-    void FixedUpdate(){
+    void FixedUpdate()
+    {
         agentFunctions.UpdateAnimator();
     }
-    
+
     public void Reset()
     {
         agentMining.Stop();
@@ -135,36 +138,41 @@ public class RLAgent : Agent
         oreResourceIndex = 0;
         DecideOnOre();
     }
-    
+
     IEnumerator DelayedStart()
     {
         yield return new WaitForSeconds(0.5f);
         StartCoroutine(agentFunctions.GatherDataForAgent(GatherDataCallback));
     }
-    
+
     IEnumerator PunishIdle()
     {
         yield return new WaitForSeconds(1);
         AddReward(-0.05f);
     }
-    
+
     void RewardAgent(int score)
     {
         int reward = score - prevScore;
         prevScore = score;
-        
-        AddReward((float) reward / 10);
+
+        // Increased the reward amount?
+        AddReward((float)reward / 10);
     }
 
     void DecideOnOre(bool recheck = false)
     {
         void CalculateNormalisedDistances()
         {
-            agentDistanceNormalised = (currentOreData.distanceFromAgent - normalisationData.MinDistanceFromAgent) / (normalisationData.MaxDistanceFromAgent - normalisationData.MinDistanceFromAgent);
-            playerDistanceNormalised = (currentOreData.distanceFromPlayer - normalisationData.MinDistanceFromPlayer) / (normalisationData.MaxDistanceFromPlayer - normalisationData.MinDistanceFromPlayer);
-            depositDistanceNormalised = (currentOreData.distanceFromDeposit - normalisationData.MinDistanceFromBase) / (normalisationData.MaxDistanceFromBase - normalisationData.MinDistanceFromBase);
+            agentDistanceNormalised = (currentOreData.distanceFromAgent - normalisationData.MinDistanceFromAgent) /
+                                      (normalisationData.MaxDistanceFromAgent - normalisationData.MinDistanceFromAgent);
+            playerDistanceNormalised = (currentOreData.distanceFromPlayer - normalisationData.MinDistanceFromPlayer) /
+                                       (normalisationData.MaxDistanceFromPlayer -
+                                        normalisationData.MinDistanceFromPlayer);
+            depositDistanceNormalised = (currentOreData.distanceFromDeposit - normalisationData.MinDistanceFromBase) /
+                                        (normalisationData.MaxDistanceFromBase - normalisationData.MinDistanceFromBase);
         }
-        
+
         // if (recheck)
         // {
         //     // Current Ore Data will only ever be null due to coding mistake, so no if statement is needed, as it will just reduce performance for no reason.
@@ -180,7 +188,7 @@ public class RLAgent : Agent
         // }
 
         // On rare occasions, the RL Agent wont find an ore. it is to wait and then decide again.
-        if(oreResources.Count == 0)
+        if (oreResources.Count == 0)
         {
             Debug.LogError("No ore resources found");
             StartCoroutine(DelayedStart());
@@ -188,19 +196,19 @@ public class RLAgent : Agent
         }
 
         // Should this loop to the start?
-        if(oreResourceIndex >= oreResources.Count)
+        if (oreResourceIndex >= oreResources.Count)
             oreResourceIndex = 0;
-        
+
         currentOreData = oreResources[oreResourceIndex];
-        
+
         oreToMine = currentOreData.oreToMine;
         oreType = currentOreData.oreType;
-        
+
         CalculateNormalisedDistances();
-        
+
         RequestDecision();
     }
-    
+
     // void ReCheckOreCallback(List<OreData> oreData)
     // {
     //     oreResources = oreData;
@@ -211,15 +219,15 @@ public class RLAgent : Agent
     {
         AddReward(-0.1f);
     }
-    
+
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode " + (CompletedEpisodes + 1) + " has begun");
         // Reset the agent and environment for a new episode
-        
-        if(!startTraining)
+
+        if (!startTraining)
             return;
-        
+
         // This will reset everything if it is not the first time running.
         if (isInference)
             EvaluationManager.instance.StartGame();
@@ -228,17 +236,17 @@ public class RLAgent : Agent
         navMeshAgent.isStopped = false;
         prevScore = 0;
         GameData.MachineData.onScoreUpdated += RewardAgent;
-        
-        #if UNITY_EDITOR
-            if(maxEpisodes == 0)
-                return;
-            
-            if (CompletedEpisodes < maxEpisodes)
-                return;
 
-            Debug.Log("Max episodes reached, stopping training");
-            EditorApplication.EnterPlaymode();
-        #endif
+#if UNITY_EDITOR
+        if (maxEpisodes == 0)
+            return;
+
+        if (CompletedEpisodes < maxEpisodes)
+            return;
+
+        Debug.Log("Max episodes reached, stopping training");
+        EditorApplication.EnterPlaymode();
+#endif
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -247,7 +255,7 @@ public class RLAgent : Agent
         sensor.AddOneHotObservation((int)oreType, numOfTypes);
 
         // Collect normalised inventory space taken observation
-        sensor.AddObservation((float) GameData.InvStorageQty[oreType] / GameData.MaximumInvQty);
+        sensor.AddObservation((float)GameData.InvStorageQty[oreType] / GameData.MaximumInvQty);
 
         // Collect normalised distances
         sensor.AddObservation(agentDistanceNormalised);
@@ -261,53 +269,75 @@ public class RLAgent : Agent
         sensor.AddObservation((float)GameData.TimeLeft / GameData.InitialTime);
     }
 
+    void RewardOnMine(float score)
+    {
+        if (score > 0)
+            AddReward(score);
+    }
+
+    IEnumerator ExecuteAction(int action)
+    {
+        if (this.action != null)
+            yield return this.action;
+            
+        // Implement the logic to control the agent based on the actions
+        Coroutine punishTravelling;
+        switch (action)
+        {
+            case 0:
+                // Move to the nearest deposit
+                if (GameData.MachineData.TotalInventory == 0)
+                {
+                    Debug.Log("Punishing for moving to deposit with no inventory");
+                    AddReward(-1f);
+                    DecideOnOre();
+                    break;
+                }
+
+                // Using agentFunctions.StartCoroutine instead of StartCoroutine to avoid the error.
+                punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
+                StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
+                break;
+            case 1:
+                // Move to the decided ore
+                // Punishing the agent on wasting time travelling to and mining when he wont be able to store the mined ore.
+                if (GameData.MachineData.TotalInventory + GameData.InvStorageQty[currentOreData.oreType] >
+                    GameData.MaximumInvQty)
+                    AddReward(-1f);
+
+                punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
+                StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange,
+                    punishTravelling, GatherDataCallback, RewardOnMine));
+                break;
+            case 2:
+                // Look for the best ore
+                oreResourceIndex++;
+                DecideOnOre();
+                break;
+        }
+    }
+    
     public override void OnActionReceived(ActionBuffers actions)
     {
         // Use the actions received from the neural network
         // var continuousActions = actions.ContinuousActions;
-        int action =  actions.DiscreteActions[0];
+        int action = actions.DiscreteActions[0];
 
-        // Implement the logic to control the agent based on the actions
-        Coroutine punishTravelling;
-        switch(action){
-            case 0:
-            // Move to the nearest deposit
-            if (GameData.MachineData.TotalInventory == 0)
-            {
-                Debug.Log("Punishing for moving to deposit with no inventory");
-                AddReward(-1f);
-                DecideOnOre();
-                break;
-            }
-
-            // Using agentFunctions.StartCoroutine instead of StartCoroutine to avoid the error.
-            punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-            StartCoroutine(agentFunctions.GoToDepositCoroutine(GatherDataCallback, punishTravelling));
-            break;
-        case 1:
-            // Move to the decided ore
-            // Punishing the agent on wasting time travelling to and mining when he wont be able to store the mined ore.
-            if (GameData.MachineData.TotalInventory + GameData.InvStorageQty[currentOreData.oreType] > GameData.MaximumInvQty)
-                AddReward(-1f);
-            
-            punishTravelling = agentFunctions.StartCoroutine(PunishIdle());
-            StartCoroutine(agentFunctions.GoToOreAndMineCoroutine(currentOreData, PunishOreDestinationChange, punishTravelling, GatherDataCallback));
-            break;
-        case 2:
-            // Look for the best ore
-            oreResourceIndex++;
-            DecideOnOre();
-            break;
-        }
+        StartCoroutine(ExecuteAction(action));
     }
-    
+
     public void CustomEndEpisode()
     {
         // TODO: Reward agent for empty inventory, and increase punishment based on wasted ores in inventory.
+        float reward = 2;
+        float punishment = 20 * ((float)GameData.MachineData.TotalInventory / GameData.MaximumInvQty);
+        
+        AddReward(reward - punishment);
+
         statsRecorder.Add("Score", GameData.MachineData.Score);
         EndEpisode();
     }
-    
+
     private void SetAgentToIdle()
     {
         navMeshAgent.isStopped = true;

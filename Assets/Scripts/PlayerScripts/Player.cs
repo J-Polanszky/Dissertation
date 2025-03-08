@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
         // Divide by double max so that the minimum multiplier is 0.5
         float multiplier = 1 - (float) GameData.PlayerData.TotalInventory / (GameData.MaximumInvQty * 2);
         
-        Debug.Log("Player inventory: " + GameData.PlayerData.TotalInventory + " Multiplier: " + multiplier);
+        // Debug.Log("Player inventory: " + GameData.PlayerData.TotalInventory + " Multiplier: " + multiplier);
         cc.strafeSpeed.walkSpeed = defaultWalkSpeed * multiplier;
         cc.strafeSpeed.runningSpeed = defaultRunSpeed * multiplier;
         cc.strafeSpeed.sprintSpeed = defaultSprintSpeed * multiplier;

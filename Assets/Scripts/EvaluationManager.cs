@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,6 +15,11 @@ public class EvaluationManager : MonoBehaviour
     Vector3 playerStartPos, machineStartPos;
     
     bool gameStarted = false;
+
+    List<float> machineScore = new();
+    List<float> playerScore = new();
+
+    private int runTimes = 0;
     
     private void Awake()
     {
@@ -48,8 +55,11 @@ public class EvaluationManager : MonoBehaviour
     
     public void QuitGame()
     {
-        Debug.Log("Agent Score: " + GameData.MachineData.Score);
-        Debug.Log("Player Score: " + GameData.PlayerData.Score);
+        Debug.Log("Quitting Game");
+        Debug.Log("Agent Score: " + machineScore);
+        Debug.Log("Agent Score avg: " + machineScore.Average());
+        Debug.Log("Player Score: " + playerScore);
+        Debug.Log("Player Score avg: " + playerScore.Average());
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -59,6 +69,12 @@ public class EvaluationManager : MonoBehaviour
 
     void RunGameStartFunctions()
     {
+        if (runTimes == 10)
+        {
+            QuitGame();
+            return;
+        }
+            
         if (gameStarted)
         {
             terrainPopulator.ResetTerrain();
@@ -75,6 +91,7 @@ public class EvaluationManager : MonoBehaviour
                 deposit.GetComponent<DepositBuilding>().agentData = GameData.MachineData;
         }
         
+        runTimes++; 
         SpawnOres();
         GameData.PlayerData.Reset();
         GameData.MachineData.Reset();
@@ -91,7 +108,9 @@ public class EvaluationManager : MonoBehaviour
             GameData.TimeLeft--;
         }
 
-        QuitGame();
+        playerScore.Add(GameData.PlayerData.Score);
+        machineScore.Add(GameData.MachineData.Score);
+        StartGame();
     }
     
     void SpawnOres()

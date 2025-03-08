@@ -99,7 +99,7 @@ public class TerrainPopulator : MonoBehaviour
 
     public void SpawnOreCluster()
     {
-        print("Spawning Ore Cluster");
+        // print("Spawning Ore Cluster");
         GameObject clusterObject = PlacePrefabRandomly(OreClusterPrefab, terrainMesh.bounds, edgeBuffer,
             ClusterOreScript.CheckIfValidSpawn);
 

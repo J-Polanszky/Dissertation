@@ -71,7 +71,7 @@ public class Mining : MonoBehaviour
         OreScript oreScript = currentOre.GetComponent<OreScript>();
         if (oreScript.isBeingMined)
             yield break;
-        print("Mining");
+        Debug.Log("Mining");
         float timeToMine = (float) oreMiningTime[oreScript.oreType];
         oreScript.isBeingMined = true;
         pickaxeHandle.SetActive(true);

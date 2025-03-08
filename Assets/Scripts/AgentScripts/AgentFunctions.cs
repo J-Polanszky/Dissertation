@@ -341,13 +341,13 @@ public class AgentFunctions : MonoBehaviour
 
     // GoToOre&MineCoroutine
     public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action punishCallback, Coroutine travellingPunish,
-        Action<List<OreData>> callback)
+        Action<List<OreData>> callback, Action<float> rewardCallback)
     {
         Vector3 orePos = oreData.orePos;
         navMeshAgent.SetDestination(orePos);
         // Not using recheck since gains are small and computational cost is high.
         // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
-        Debug.Log("Started GoToOreAndMineCoroutine");
+        // Debug.Log("Started GoToOreAndMineCoroutine");
 
         // On Rare occasions, the pathfinding gets stuck
 
@@ -399,7 +399,7 @@ public class AgentFunctions : MonoBehaviour
 
             if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(orePos, transform.position) < 1f)
             {
-                Debug.Log("Reached destination");
+                // Debug.Log("Reached destination");
                 // StopCoroutine(recheckCoroutine);
 
                 if (oreData.oreScript.isBeingMined)
@@ -410,7 +410,7 @@ public class AgentFunctions : MonoBehaviour
                 }
 
                 StopCoroutine(travellingPunish);
-                Debug.Log("Starting mining process");
+                // Debug.Log("Starting mining process");
                 Coroutine mining;
                 try
                 {
@@ -423,11 +423,17 @@ public class AgentFunctions : MonoBehaviour
                 }
 
                 yield return mining;
+                // Added rewards on mining for higher tier ores to help agent learn that sometimes suffering the travel punishment is worth getting the higher tier ore.
+                // To check if these rewards should be adjusted.
+                if (oreData.oreType == OreType.Silver)
+                    rewardCallback(0.25f);
+                if (oreData.oreType == OreType.Gold)
+                    rewardCallback(0.5f);
                 break;
             }
         }
 
-        Debug.Log("Ending GoToOreAndMineCoroutine");
+        // Debug.Log("Ending GoToOreAndMineCoroutine");
         StartCoroutine(GatherDataForAgent(callback));
     }
 
