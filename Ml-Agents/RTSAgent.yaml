@@ -23,7 +23,7 @@ behaviors:
     keep_checkpoints: 5
   # TODO: adjust the steps and numbers appropriately. Currently they are set very high for testing purposes.
   # Since the training will be redone using the previously trainined model, the numbers can be reduced.
-    max_steps: 960000
+    max_steps: 360000
     time_horizon: 400
     summary_freq: 400
     checkpoint_interval: 12000

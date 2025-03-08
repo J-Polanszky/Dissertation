@@ -443,9 +443,9 @@ public class AgentFunctions : MonoBehaviour
                 // Added rewards on mining for higher tier ores to help agent learn that sometimes suffering the travel punishment is worth getting the higher tier ore.
                 // To check if these rewards should be adjusted.
                 if (oreData.oreType == OreType.Silver)
-                    rewardCallback(0.25f);
+                    rewardCallback(0.4f);
                 if (oreData.oreType == OreType.Gold)
-                    rewardCallback(0.5f);
+                    rewardCallback(0.8f);
                 break;
             }
         }
