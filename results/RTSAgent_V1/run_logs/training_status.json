@@ -1,0 +1,65 @@
+{
+    "RTSAgent": {
+        "checkpoints": [
+            {
+                "steps": 95953,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-95953.onnx",
+                "reward": 7.474999904632568,
+                "creation_time": 1741360193.0601387,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-95953.pt"
+                ]
+            },
+            {
+                "steps": 107761,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-107761.onnx",
+                "reward": 6.725000083446503,
+                "creation_time": 1741360680.660341,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-107761.pt"
+                ]
+            },
+            {
+                "steps": 119788,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-119788.onnx",
+                "reward": 8.420000314712524,
+                "creation_time": 1741361202.8411543,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-119788.pt"
+                ]
+            },
+            {
+                "steps": 131914,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-131914.onnx",
+                "reward": 12.450000762939453,
+                "creation_time": 1741361731.469353,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-131914.pt"
+                ]
+            },
+            {
+                "steps": 133600,
+                "file_path": "results/RTSAgent/RTSAgent/RTSAgent-133600.onnx",
+                "reward": null,
+                "creation_time": 1741361800.6061304,
+                "auxillary_file_paths": [
+                    "results/RTSAgent/RTSAgent/RTSAgent-133600.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 133600,
+            "file_path": "results/RTSAgent/RTSAgent.onnx",
+            "reward": null,
+            "creation_time": 1741361800.6061304,
+            "auxillary_file_paths": [
+                "results/RTSAgent/RTSAgent/RTSAgent-133600.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu124"
+    }
+}
