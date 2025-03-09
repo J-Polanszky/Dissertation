@@ -155,12 +155,12 @@ public class GameManager : MonoBehaviour
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
         
         // Easy
-        if (GameData.Difficulty == 3)
-            terrainPopulator.SetOreSpawns(30, 10,30,60);
+        if (GameData.Difficulty == 0)
+            terrainPopulator.SetOreSpawns(20, 10,30,60);
         
         // Normal
-        else if (GameData.Difficulty == 2)
-            terrainPopulator.SetOreSpawns(20, 5, 25, 70);
+        else if (GameData.Difficulty == 1)
+            terrainPopulator.SetOreSpawns(15, 5, 25, 70);
         
         // Hard
         else

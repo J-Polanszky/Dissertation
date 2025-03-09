@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.MLAgents.Policies;
+using Unity.Sentis;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,6 +23,8 @@ public class EvaluationManager : MonoBehaviour
     List<float> machineScore = new();
     List<float> playerScore = new();
 
+    public int difficulty = 2;
+
     private int runTimes = 0;
     
     private void Awake()
@@ -36,6 +40,9 @@ public class EvaluationManager : MonoBehaviour
 
     private void Start()
     {
+        Debug.developerConsoleEnabled = false;
+        Debug.unityLogger.logEnabled = false;
+        
         stateMachine = GameObject.FindGameObjectWithTag("Player");
         RLAgent = GameObject.FindGameObjectWithTag("Agent");
         
@@ -43,9 +50,10 @@ public class EvaluationManager : MonoBehaviour
         machineStartPos = RLAgent.transform.position;
         
         Time.timeScale = 20f;
-        // The default State Machine should be hard difficulty
-        GameData.Difficulty = 2;
+        GameData.Difficulty = difficulty;
+
         terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
+        
     }
     
     public void StartGame()
@@ -59,6 +67,8 @@ public class EvaluationManager : MonoBehaviour
     
     public void QuitGame()
     {
+        Debug.developerConsoleEnabled = true;
+        Debug.unityLogger.logEnabled = true;
         Debug.Log("Quitting Game");
         Debug.Log("Agent Score: " + machineScore);
         Debug.Log("Agent Score avg: " + machineScore.Average());
@@ -109,6 +119,8 @@ public class EvaluationManager : MonoBehaviour
         SpawnOres();
         GameData.PlayerData.Reset();
         GameData.MachineData.Reset();
+        stateMachine.GetComponent<SMAgent>().Reset();
+        RLAgent.GetComponent<RLAgent>().Reset();
         StartCoroutine(CountDown());
     }
     
@@ -124,15 +136,26 @@ public class EvaluationManager : MonoBehaviour
 
         playerScore.Add(GameData.PlayerData.Score);
         machineScore.Add(GameData.MachineData.Score);
-        // RLAgent.GetComponent<RLAgent>().OnEpisodeBegin();
+
+        RLAgent.GetComponent<RLAgent>().CustomEndEpisode();
+        
         // Issue with state machine not resetting properly, even though scene is identical to training scene.   
-        QuitGame();
+        // QuitGame();
     }
     
     void SpawnOres()
     {
-        // Making the agent always play with hard ore spawns
-        terrainPopulator.SetOreSpawns(10, 5, 20, 75);
+        // Easy
+        if (GameData.Difficulty == 0)
+            terrainPopulator.SetOreSpawns(20, 10,30,60);
+        
+        // Normal
+        else if (GameData.Difficulty == 1)
+            terrainPopulator.SetOreSpawns(15, 5, 25, 70);
+        
+        // Hard
+        else
+            terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
     
 }

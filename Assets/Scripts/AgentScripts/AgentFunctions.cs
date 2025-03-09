@@ -17,47 +17,19 @@ public class AgentFunctions : MonoBehaviour
     public int oreLayer;
 
     public Transform depositBuilding;
-
-    readonly float defaultAcceleration = 5f;
-
-    // State machine variables
-    public bool isStateMachine = false;
-
-    readonly float defaultStateSpeed = 1f;
-    public float stateMachineSearchRadius = 10f;
-
-    // RL Agent variables
-    AgentMining agentMining;
-    GameObject player;
-
-    readonly float defaultRlSpeed = 2f;
-    public readonly float RlOreSearchRadius = 10f;
-
-    public NormalisationDataClass NormalisationData = new();
-
+    
+    public readonly float defaultSpeed = 2f;
+    public readonly float defaultAcceleration = 5f;
+    public float searchRadius = 15f;
+    
     private void Start()
     {
         animator = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
-        agentMining = GetComponent<AgentMining>();
         oreLayer = LayerMask.GetMask("Ore");
-        player = GameObject.FindWithTag("Player");
         // depositBuilding = GameObject.Find("AgentDeposit").transform;
-
-        stateMachineSearchRadius += GameData.Difficulty * 3;
-
+        
         StartCoroutine(DelayedStart());
-
-        if (isStateMachine)
-        {
-            // This makes it too fast and is quite unfair to the player, so the speed boost is halved.
-            navMeshAgent.speed = defaultStateSpeed + ((float)GameData.Difficulty / 2);
-            navMeshAgent.acceleration = defaultAcceleration;
-            return;
-        }
-
-        navMeshAgent.speed = defaultRlSpeed;
-        navMeshAgent.acceleration = defaultAcceleration;
     }
 
     IEnumerator DelayedStart()
@@ -76,28 +48,14 @@ public class AgentFunctions : MonoBehaviour
 
         if (agentData.TotalInventory == 0)
         {
-            if (isStateMachine)
-            {
-                navMeshAgent.speed = defaultStateSpeed + (float)GameData.Difficulty / 2;
-                navMeshAgent.acceleration = defaultAcceleration;
-                return;
-            }
-
-            navMeshAgent.speed = defaultRlSpeed;
+            navMeshAgent.speed = defaultSpeed;
             navMeshAgent.acceleration = defaultAcceleration;
         }
 
         // Divide by 60 so that the minimum multiplier is 0.5
         float multiplier = 1 - (float)agentData.TotalInventory / (GameData.MaximumInvQty * 2);
-
-        if (isStateMachine)
-        {
-            navMeshAgent.speed = (defaultStateSpeed + (float)GameData.Difficulty / 2) * multiplier;
-            navMeshAgent.acceleration = defaultAcceleration * multiplier;
-            return;
-        }
-
-        navMeshAgent.speed = defaultRlSpeed * multiplier;
+        
+        navMeshAgent.speed = defaultSpeed * multiplier;
         navMeshAgent.acceleration = defaultAcceleration * multiplier;
     }
 
@@ -183,301 +141,7 @@ public class AgentFunctions : MonoBehaviour
     }
 
     #endregion
-
-    #region StateMachineFunctions
-
-    // State machine functions
-
-    public GameObject FindBestOre(float oreSearchRadius)
-    {
-        Vector3 playerPos = GameObject.FindWithTag("Player").transform.position;
-        GameObject bestOre = null;
-        int bestOreType = -1;
-
-        List<GameObject> ores = FindOres(oreSearchRadius);
-
-        if (ores.Count == 1 && ores[0].GetComponent<OreScript>().isBeingMined)
-            return FindBestOre(oreSearchRadius + 5f);
-
-        foreach (GameObject ore in ores)
-        {
-            if (ore.GetComponent<OreScript>().isBeingMined)
-                continue;
-
-            if (bestOreType == -1)
-            {
-                bestOre = ore;
-                bestOreType = (int)Enum.Parse<OreType>(ore.tag);
-                continue;
-            }
-
-            int curOreType = (int)Enum.Parse<OreType>(ore.tag);
-
-            if (curOreType < bestOreType)
-                continue;
-
-            if (curOreType > bestOreType)
-            {
-                if (Vector3.Distance(transform.position, ore.transform.position) >
-                    Vector3.Distance(playerPos, ore.transform.position))
-                    continue;
-                bestOre = ore;
-                bestOreType = curOreType;
-                continue;
-            }
-
-            if (Vector3.Distance(transform.position, ore.transform.position) >
-                Vector3.Distance(playerPos, ore.transform.position))
-                continue;
-
-            if (Vector3.Distance(transform.position, ore.transform.position) <
-                Vector3.Distance(transform.position, bestOre.transform.position))
-            {
-                bestOre = ore;
-                bestOreType = curOreType;
-            }
-        }
-
-        return bestOre;
-    }
-
-    #endregion
-
-    #region RlAgentFunctions
-
-    // RL Agent functions
-
-    public IEnumerator GatherDataForAgent(Action<List<OreData>> callback, List<GameObject> oresblacklist = null)
-    {
-        List<GameObject> ores;
-        byte blacklisted;
-        List<OreData> oreDataList;
-
-        do
-        {
-            blacklisted = 0;
-            // Debug.LogWarning("STARTING GATHER DATA");
-            try
-            {
-                ores = FindOres(RlOreSearchRadius, 0, oresblacklist);
-            }
-            catch (Exception e)
-            {
-                // Likely no ores found, and need to wait till they spawn
-                Debug.LogError(e);
-                yield break;
-            }
-
-            // Debug.LogWarning("ORES FOUND");
-
-            oreDataList = new();
-
-            if (oresblacklist == null)
-                oresblacklist = new List<GameObject>();
-
-            NormalisationData.Reset();
-
-            foreach (GameObject ore in ores)
-            {
-                //TODO: Make a invalid path checker (is this needed, as the agent seems quite proficient at navigating)
-                float distanceFromAgent = CalculatePathRemainingDistance(ore.transform.position);
-                float distanceFromPlayer =
-                    CalculatePathRemainingDistance(ore.transform.position, player.transform.position);
-                float distanceFromBase = CalculatePathRemainingDistance(
-                    FindClosestDepositWaypoint(ore.transform.position),
-                    ore.transform.position);
-
-                if (distanceFromAgent < 0 || distanceFromPlayer < 0 || distanceFromBase < 0)
-                {
-                    oresblacklist.Add(ore);
-                    blacklisted++;
-                    continue;
-                }
-
-                if (distanceFromAgent > NormalisationData.MaxDistanceFromAgent)
-                    NormalisationData.MaxDistanceFromAgent = distanceFromAgent;
-                else if (NormalisationData.MinDistanceFromAgent == 0 ||
-                         distanceFromAgent < NormalisationData.MinDistanceFromAgent)
-                    NormalisationData.MinDistanceFromAgent = distanceFromAgent;
-
-                if (distanceFromPlayer > NormalisationData.MaxDistanceFromPlayer)
-                    NormalisationData.MaxDistanceFromPlayer = distanceFromPlayer;
-                else if (NormalisationData.MinDistanceFromPlayer == 0 ||
-                         distanceFromPlayer < NormalisationData.MinDistanceFromPlayer)
-                    NormalisationData.MinDistanceFromPlayer = distanceFromPlayer;
-
-                if (distanceFromBase > NormalisationData.MaxDistanceFromBase)
-                    NormalisationData.MaxDistanceFromBase = distanceFromBase;
-                else if (NormalisationData.MinDistanceFromBase == 0 ||
-                         distanceFromBase < NormalisationData.MinDistanceFromBase)
-                    NormalisationData.MinDistanceFromBase = distanceFromBase;
-
-                oreDataList.Add(new OreData()
-                {
-                    oreToMine = ore.transform,
-                    orePos = ore.transform.position,
-                    oreType = Enum.Parse<OreType>(ore.tag),
-                    oreScript = ore.GetComponent<OreScript>(),
-                    distanceFromAgent = distanceFromAgent,
-                    distanceFromPlayer = distanceFromPlayer,
-                    distanceFromDeposit = distanceFromBase
-                });
-
-                // Debug.LogWarning("ORE ADDED");
-            }
-        } while (blacklisted == ores.Count);
-
-        callback(oreDataList);
-    }
-
-    // IEnumerator ReCheckOres(Action<List<OreData>> callback)
-    // {
-    //     while (true)
-    //     {
-    //         yield return new WaitForSeconds(1f);
-    //         Debug.Log("Rechecking Ores");
-    //         StartCoroutine(GatherDataForAgent(callback));
-    //         // No need to update current ore data since it would have been caught in the GatherDataForAgent function.
-    //     }
-    // }
-
-    // GoToOre&MineCoroutine
-    public IEnumerator GoToOreAndMineCoroutine(OreData oreData, Action punishCallback, Coroutine travellingPunish,
-        Action<List<OreData>> callback, Action<float> rewardCallback)
-    {
-        Vector3 orePos = oreData.orePos;
-        navMeshAgent.SetDestination(orePos);
-        // Not using recheck since gains are small and computational cost is high.
-        // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
-        // Debug.Log("Started GoToOreAndMineCoroutine");
-
-        // On Rare occasions, the pathfinding gets stuck
-
-        float stuckCheckInterval = 2f;
-        float stuckCheckTimer = 0f;
-        Vector3 lastPosition = transform.position;
-        float stuckDistanceThreshold = 1f;
-        int totalStrikes = 0;
-
-        GameObject ore = oreData.oreToMine.gameObject;
-
-        while (true)
-        {
-            yield return new WaitForFixedUpdate();
-
-            if (ore == null)
-            {
-                Debug.LogWarning("Ore is null, punishing agent");
-                punishCallback();
-                break;
-            }
-
-            //This ensures that the destination has been set properly
-            if (Vector3.Distance(orePos, navMeshAgent.destination) > 1f)
-                continue;
-
-            // Check if the agent is stuck
-            stuckCheckTimer += Time.fixedDeltaTime;
-            if (stuckCheckTimer >= stuckCheckInterval)
-            {
-                stuckCheckTimer = 0f;
-                float prevDistanceFromOre = Vector3.Distance(lastPosition, orePos);
-                float currentDistanceFromOre = Vector3.Distance(transform.position, orePos);
-                float distanceMoved = prevDistanceFromOre - currentDistanceFromOre;
-                lastPosition = transform.position;
-
-                if (distanceMoved < stuckDistanceThreshold)
-                {
-                    totalStrikes++;
-                    if (totalStrikes < 3 && CalculatePathRemainingDistance(orePos, transform.position) != -1)
-                        continue;
-
-                    Debug.LogWarning("Agent is stuck, changing ore\nValid Path Value: " +
-                                     CalculatePathRemainingDistance(orePos, navMeshAgent.transform.position));
-                    StopCoroutine(travellingPunish);
-                    // punishCallback();
-                    // Rare error when this is called when the ore does not exist.
-                    // While it will hurt performance, it is necessary to ensure that the agent is not stuck.
-                    try
-                    {
-                        StartCoroutine(GatherDataForAgent(callback,
-                            new List<GameObject>() { oreData.oreToMine.gameObject }));
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e);
-                        punishCallback();
-                        break;
-                    }
-
-                    yield break;
-                }
-            }
-
-            if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(orePos, transform.position) < 1f)
-            {
-                // Debug.Log("Reached destination");
-                // StopCoroutine(recheckCoroutine);
-
-                if (oreData.oreScript.isBeingMined)
-                {
-                    Debug.Log("Ore is being mined by another agent, punishing agent");
-                    punishCallback();
-                    break;
-                }
-
-                StopCoroutine(travellingPunish);
-                // Debug.Log("Starting mining process");
-                Coroutine mining;
-                try
-                {
-                    mining = agentMining.Mine(oreData.oreToMine.gameObject);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                    break;
-                }
-
-                yield return mining;
-                // Added rewards on mining for higher tier ores to help agent learn that sometimes suffering the travel punishment is worth getting the higher tier ore.
-                // To check if these rewards should be adjusted.
-                if (oreData.oreType == OreType.Silver)
-                    rewardCallback(0.4f);
-                if (oreData.oreType == OreType.Gold)
-                    rewardCallback(0.8f);
-                break;
-            }
-        }
-
-        // There is a chance that this will be called before the ore has been destroyed. Wait for the ore to be destroyed before calling the callback.
-        // Debug.Log("Ending GoToOreAndMineCoroutine");
-
-        while (oreData.oreToMine != null)
-            yield return new WaitForFixedUpdate();
-
-        StartCoroutine(GatherDataForAgent(callback));
-    }
-
-    // GoToDepositCoroutine
-    public IEnumerator GoToDepositCoroutine(Action<List<OreData>> oreListCallback, Coroutine travellingPunish)
-    {
-        Vector3 depositWaypoint = FindClosestDepositWaypoint(transform.position);
-        navMeshAgent.SetDestination(depositWaypoint);
-
-        while (true)
-        {
-            if (navMeshAgent.remainingDistance < 1f)
-                break;
-            // FixedUpdate is used to ensure that the agent moves smoothly, and improves performance.
-            yield return new WaitForFixedUpdate();
-        }
-
-        StopCoroutine(travellingPunish);
-        StartCoroutine(GatherDataForAgent(oreListCallback));
-    }
-
-    #endregion
+    
 }
 
 public static partial class vAgentAnimatorParameters

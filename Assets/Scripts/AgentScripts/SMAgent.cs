@@ -29,7 +29,10 @@ public class SMAgent : MonoBehaviour
     private GameObject oreToMine;
 
     protected string depoName;
-    // private Vector3 depoPos;
+
+    delegate GameObject DecideOnOreType(List<GameObject> gameObjects);
+
+    private DecideOnOreType decideOnOreFunction;
 
     protected void Awake()
     {
@@ -46,11 +49,21 @@ public class SMAgent : MonoBehaviour
 
         navMeshAgent.isStopped = true;
 
-
         agentMining.onMine += SetAgentToIdle;
         agentMining.agentData = agentData;
         agentFunctions.agentData = agentData;
         agentFunctions.depositBuilding = GameObject.Find(depoName).transform;
+
+        // navMeshAgent.speed = defaultSpeed + ((float)GameData.Difficulty / 2);
+        navMeshAgent.speed = agentFunctions.defaultSpeed;
+        navMeshAgent.acceleration = agentFunctions.defaultAcceleration;
+
+        if (GameData.Difficulty == 0)
+            decideOnOreFunction = DecideOnOreEasy;
+        else if (GameData.Difficulty == 1)
+            decideOnOreFunction = DecideOnOreMedium;
+        else
+            decideOnOreFunction = DecideOnOreHard;
 
         StartCoroutine(DelayedStart());
     }
@@ -59,7 +72,6 @@ public class SMAgent : MonoBehaviour
     {
         agentMining.Stop();
         agentFunctions.StopAllCoroutines();
-        agentFunctions.NormalisationData.Reset();
         navMeshAgent.isStopped = true;
         agentState = AgentState.Idle;
         oreToMine = null;
@@ -94,6 +106,7 @@ public class SMAgent : MonoBehaviour
                 startAgent = false;
                 return;
             }
+
             if (agentState == AgentState.TravellingToMine)
             {
                 float timeNeededToMine =
@@ -115,7 +128,7 @@ public class SMAgent : MonoBehaviour
         if (agentState == AgentState.Idle)
         {
             // Debug.Log("@M total inv" + agentData.TotalInventory);
-            oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
+            oreToMine = FindBestOre(agentFunctions.searchRadius);
 
             // Debug.Log("Agent inv after mining: " +
             //           (agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
@@ -127,13 +140,13 @@ public class SMAgent : MonoBehaviour
                  agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
             {
                 agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.SetDestination( agentFunctions.FindClosestDepositWaypoint(transform.position));
+                navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
                 navMeshAgent.isStopped = false;
                 return;
             }
 
             agentState = AgentState.TravellingToMine;
-            navMeshAgent.SetDestination( oreToMine.transform.position);
+            navMeshAgent.SetDestination(oreToMine.transform.position);
             navMeshAgent.isStopped = false;
             return;
         }
@@ -145,8 +158,8 @@ public class SMAgent : MonoBehaviour
                 // Check if ore is being mined, or has been mined and destroyed:
                 if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
                 {
-                    oreToMine = agentFunctions.FindBestOre(agentFunctions.stateMachineSearchRadius);
-                    navMeshAgent.SetDestination( oreToMine.transform.position);
+                    oreToMine = FindBestOre(agentFunctions.searchRadius);
+                    navMeshAgent.SetDestination(oreToMine.transform.position);
                     return;
                 }
 
@@ -168,17 +181,136 @@ public class SMAgent : MonoBehaviour
         }
     }
 
-    // TODO: Should something like this be implemented, as it can increase complexity and decrease performance.
-    // private void AvoidObstacles()
-    // {
-    //     RaycastHit hit;
-    //     if (Physics.Raycast(transform.position, transform.forward, out hit, obstacleDetectionDistance, obstacleLayer))
-    //     {
-    //         Vector3 avoidDirection = Vector3.Reflect(transform.forward, hit.normal);
-    //         Vector3 newDestination = transform.position + avoidDirection * obstacleDetectionDistance;
-    //         navMeshAgent.SetDestination(newDestination);
-    //     }
-    // }
+    GameObject DecideOnOreEasy(List<GameObject> ores)
+    {
+        GameObject closestOre = null;
+        Vector3 closestOrePos = Vector3.zero;
+
+        foreach (GameObject ore in ores)
+        {
+            // if (ore.GetComponent<OreScript>().isBeingMined)
+            //     continue;
+
+            if (closestOre == null)
+            {
+                closestOre = ore;
+                closestOrePos = ore.transform.position;
+                continue;
+            }
+
+            if (agentFunctions.CalculatePathRemainingDistance(closestOrePos, transform.position) <=
+                agentFunctions.CalculatePathRemainingDistance(closestOrePos, ore.transform.position))
+                continue;
+
+            closestOre = ore;
+            closestOrePos = closestOre.transform.position;
+        }
+        
+        return closestOre;  
+    }
+
+    GameObject DecideOnOreMedium(List<GameObject> ores)
+    {
+        Vector3 playerPos = GameObject.FindWithTag("Player").transform.position;
+        GameObject bestOre = null;
+        int bestOreType = -1;
+        foreach (GameObject ore in ores)
+        {
+            if (ore.GetComponent<OreScript>().isBeingMined)
+                continue;
+
+            if (bestOreType == -1)
+            {
+                bestOre = ore;
+                bestOreType = (int)Enum.Parse<OreType>(ore.tag);
+                continue;
+            }
+
+            int curOreType = (int)Enum.Parse<OreType>(ore.tag);
+
+            if (curOreType < bestOreType)
+                continue;
+            
+            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) >
+                agentFunctions.CalculatePathRemainingDistance(ore.transform.position, playerPos))
+                continue;
+
+            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) <
+                agentFunctions.CalculatePathRemainingDistance(bestOre.transform.position, transform.position))
+            {
+                bestOre = ore;
+                bestOreType = curOreType;
+                continue;
+            }
+
+            if (curOreType > bestOreType)
+            {
+                // Pick a val from 1-10, if its 1-5, continue. This will help make the state machine make some dumb decisions
+                int randomVal = UnityEngine.Random.Range(0, 10);
+                if (randomVal <= 5)
+                    continue;
+                
+                bestOre = ore;
+                bestOreType = curOreType;
+            }
+        }
+
+        return bestOre;
+    }
+
+    GameObject DecideOnOreHard(List<GameObject> ores)
+    {
+        Vector3 playerPos = GameObject.FindWithTag("Player").transform.position;
+        GameObject bestOre = null;
+        int bestOreType = -1;
+        foreach (GameObject ore in ores)
+        {
+            if (ore.GetComponent<OreScript>().isBeingMined)
+                continue;
+
+            if (bestOreType == -1)
+            {
+                bestOre = ore;
+                bestOreType = (int)Enum.Parse<OreType>(ore.tag);
+                continue;
+            }
+
+            int curOreType = (int)Enum.Parse<OreType>(ore.tag);
+
+            if (curOreType < bestOreType)
+                continue;
+            
+            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) >
+                agentFunctions.CalculatePathRemainingDistance(ore.transform.position, playerPos))
+                continue;
+
+            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) <
+                agentFunctions.CalculatePathRemainingDistance(bestOre.transform.position, transform.position))
+            {
+                bestOre = ore;
+                bestOreType = curOreType;
+                continue;
+            }
+
+            if (curOreType > bestOreType)
+            {
+                bestOre = ore;
+                bestOreType = curOreType;
+            }
+        }
+
+        return bestOre;
+    }
+
+    GameObject FindBestOre(float oreSearchRadius)
+    {
+        List<GameObject> ores = agentFunctions.FindOres(oreSearchRadius);
+
+        if (ores.Count == 1 && ores[0].GetComponent<OreScript>().isBeingMined)
+            return FindBestOre(oreSearchRadius + 5f);
+
+        return decideOnOreFunction(ores);
+    }
 
     private void SetAgentToIdle()
     {

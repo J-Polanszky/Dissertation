@@ -1,0 +1,335 @@
+{
+    "RTSAgent": {
+        "checkpoints": [
+            {
+                "steps": 3974,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-3974.onnx",
+                "reward": -59.629411080304315,
+                "creation_time": 1741536872.1205065,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-3974.pt"
+                ]
+            },
+            {
+                "steps": 7905,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-7905.onnx",
+                "reward": -54.44047600882394,
+                "creation_time": 1741537179.2901983,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-7905.pt"
+                ]
+            },
+            {
+                "steps": 11959,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-11959.onnx",
+                "reward": -56.92727314342152,
+                "creation_time": 1741537446.0900953,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-11959.pt"
+                ]
+            },
+            {
+                "steps": 15733,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-15733.onnx",
+                "reward": -37.525927702585854,
+                "creation_time": 1741537673.1064487,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-15733.pt"
+                ]
+            },
+            {
+                "steps": 19868,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-19868.onnx",
+                "reward": -21.028571946280344,
+                "creation_time": 1741537902.1571443,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-19868.pt"
+                ]
+            },
+            {
+                "steps": 23805,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-23805.onnx",
+                "reward": 16.560000228881837,
+                "creation_time": 1741538075.043996,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-23805.pt"
+                ]
+            },
+            {
+                "steps": 27865,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-27865.onnx",
+                "reward": 16.97499990463257,
+                "creation_time": 1741538303.2409012,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-27865.pt"
+                ]
+            },
+            {
+                "steps": 31769,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-31769.onnx",
+                "reward": 14.894444704055786,
+                "creation_time": 1741538489.4596803,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-31769.pt"
+                ]
+            },
+            {
+                "steps": 35846,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-35846.onnx",
+                "reward": 19.983333110809326,
+                "creation_time": 1741538707.2482417,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-35846.pt"
+                ]
+            },
+            {
+                "steps": 39989,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-39989.onnx",
+                "reward": 17.872222264607746,
+                "creation_time": 1741538916.0110636,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-39989.pt"
+                ]
+            },
+            {
+                "steps": 43716,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-43716.onnx",
+                "reward": 19.858334064483643,
+                "creation_time": 1741539104.7191288,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-43716.pt"
+                ]
+            },
+            {
+                "steps": 47601,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-47601.onnx",
+                "reward": 14.377777417500814,
+                "creation_time": 1741539294.7472286,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-47601.pt"
+                ]
+            },
+            {
+                "steps": 51996,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-51996.onnx",
+                "reward": 17.93333339691162,
+                "creation_time": 1741539526.6089835,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-51996.pt"
+                ]
+            },
+            {
+                "steps": 55972,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-55972.onnx",
+                "reward": 15.233333885669708,
+                "creation_time": 1741539752.2366583,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-55972.pt"
+                ]
+            },
+            {
+                "steps": 59935,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-59935.onnx",
+                "reward": null,
+                "creation_time": 1741539940.9363647,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-59935.pt"
+                ]
+            },
+            {
+                "steps": 63963,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-63963.onnx",
+                "reward": 20.12424260919744,
+                "creation_time": 1741540169.0592747,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-63963.pt"
+                ]
+            },
+            {
+                "steps": 67758,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-67758.onnx",
+                "reward": 23.481481817033554,
+                "creation_time": 1741540377.1288447,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-67758.pt"
+                ]
+            },
+            {
+                "steps": 71867,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-71867.onnx",
+                "reward": 17.340000104904174,
+                "creation_time": 1741540607.0576475,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-71867.pt"
+                ]
+            },
+            {
+                "steps": 73267,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-73267.onnx",
+                "reward": 19.03333282470703,
+                "creation_time": 1741540681.8648407,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-73267.pt"
+                ]
+            },
+            {
+                "steps": 75834,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-75834.onnx",
+                "reward": 20.838889201482136,
+                "creation_time": 1741540993.8378246,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-75834.pt"
+                ]
+            },
+            {
+                "steps": 79926,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-79926.onnx",
+                "reward": 20.193333864212036,
+                "creation_time": 1741541079.0549664,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-79926.pt"
+                ]
+            },
+            {
+                "steps": 83808,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-83808.onnx",
+                "reward": 18.54666700363159,
+                "creation_time": 1741541159.006602,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-83808.pt"
+                ]
+            },
+            {
+                "steps": 87696,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-87696.onnx",
+                "reward": 22.100000381469727,
+                "creation_time": 1741541245.0785413,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-87696.pt"
+                ]
+            },
+            {
+                "steps": 91931,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-91931.onnx",
+                "reward": 17.24444516499837,
+                "creation_time": 1741541337.4873939,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-91931.pt"
+                ]
+            },
+            {
+                "steps": 95756,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-95756.onnx",
+                "reward": 21.59999990463257,
+                "creation_time": 1741541421.3204067,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-95756.pt"
+                ]
+            },
+            {
+                "steps": 99840,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-99840.onnx",
+                "reward": 18.96666717529297,
+                "creation_time": 1741541506.5111856,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-99840.pt"
+                ]
+            },
+            {
+                "steps": 103823,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-103823.onnx",
+                "reward": 19.26666796207428,
+                "creation_time": 1741541593.6522942,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-103823.pt"
+                ]
+            },
+            {
+                "steps": 107900,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-107900.onnx",
+                "reward": 20.389744327618526,
+                "creation_time": 1741541689.618747,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-107900.pt"
+                ]
+            },
+            {
+                "steps": 111814,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-111814.onnx",
+                "reward": 20.086667466163636,
+                "creation_time": 1741541781.602455,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-111814.pt"
+                ]
+            },
+            {
+                "steps": 115948,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-115948.onnx",
+                "reward": 22.633334016799928,
+                "creation_time": 1741541880.2539945,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-115948.pt"
+                ]
+            },
+            {
+                "steps": 119705,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-119705.onnx",
+                "reward": 21.704167053103447,
+                "creation_time": 1741541973.250297,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-119705.pt"
+                ]
+            },
+            {
+                "steps": 123764,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-123764.onnx",
+                "reward": 21.714814848370022,
+                "creation_time": 1741542070.578104,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-123764.pt"
+                ]
+            },
+            {
+                "steps": 127694,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-127694.onnx",
+                "reward": 22.242857660566056,
+                "creation_time": 1741542164.973512,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-127694.pt"
+                ]
+            },
+            {
+                "steps": 131717,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-131717.onnx",
+                "reward": 22.13333402077357,
+                "creation_time": 1741542257.7442174,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-131717.pt"
+                ]
+            },
+            {
+                "steps": 133514,
+                "file_path": "results/RTSAgent_V4/RTSAgent/RTSAgent-133514.onnx",
+                "reward": 20.896969979459588,
+                "creation_time": 1741542291.397967,
+                "auxillary_file_paths": [
+                    "results/RTSAgent_V4/RTSAgent/RTSAgent-133514.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 133514,
+            "file_path": "results/RTSAgent_V4/RTSAgent.onnx",
+            "reward": 20.896969979459588,
+            "creation_time": 1741542291.397967,
+            "auxillary_file_paths": [
+                "results/RTSAgent_V4/RTSAgent/RTSAgent-133514.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cu124"
+    }
+}
