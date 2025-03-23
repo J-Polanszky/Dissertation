@@ -54,6 +54,15 @@ namespace Invector.vCharacterController
         public float groundMaxDistance = 0.5f;
         [Tooltip("Max angle to walk")]
         [Range(30, 80)] public float slopeLimit = 75f;
+        
+        // Movement state events
+        public delegate void MovementStateHandler();
+
+        public event MovementStateHandler OnStartedWalking;
+        public event MovementStateHandler OnStoppedWalking;
+        public event MovementStateHandler OnStartedSprinting;
+        public event MovementStateHandler OnStoppedSprinting;
+        
         #endregion
 
         #region Components
@@ -103,6 +112,9 @@ namespace Invector.vCharacterController
         internal Vector3 inputSmooth;                       // generate smooth input based on the inputSmooth value       
         internal Vector3 moveDirection;                     // used to know the direction you're moving 
 
+        internal bool wasMoving = false;
+        internal bool wasSprinting = false;
+        
         #endregion
 
         public void Init()
@@ -151,6 +163,7 @@ namespace Invector.vCharacterController
             CheckSlopeLimit();
             ControlJumpBehaviour();
             AirControl();
+            CheckMovementStateChanges();
         }
 
         #region Locomotion
@@ -229,6 +242,39 @@ namespace Invector.vCharacterController
             Vector3 desiredForward = Vector3.RotateTowards(transform.forward, direction.normalized, rotationSpeed * Time.deltaTime, .1f);
             Quaternion _newRotation = Quaternion.LookRotation(desiredForward);
             transform.rotation = _newRotation;
+        }
+        
+        protected virtual void CheckMovementStateChanges()
+        {
+            bool isMovingNow = input.magnitude > 0.1f && isGrounded;
+    
+            // Check for walking state changes
+            if (isMovingNow && !wasMoving)
+            {
+                // Started walking
+                OnStartedWalking?.Invoke();
+            }
+            else if (!isMovingNow && wasMoving)
+            {
+                // Stopped walking
+                OnStoppedWalking?.Invoke();
+            }
+    
+            // Check for sprinting state changes
+            if (isSprinting && !wasSprinting)
+            {
+                // Started sprinting
+                OnStartedSprinting?.Invoke();
+            }
+            else if (!isSprinting && wasSprinting)
+            {
+                // Stopped sprinting
+                OnStoppedSprinting?.Invoke();
+            }
+    
+            // Update previous states
+            wasMoving = isMovingNow;
+            wasSprinting = isSprinting;
         }
 
         #endregion

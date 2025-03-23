@@ -5,6 +5,9 @@ using Object = System.Object;
 
 public class DepositBuilding : MonoBehaviour
 {
+    private string depositSfx = "event:/SFX_Events/Deposit";
+    FMOD.Studio.EventInstance depositInstance;
+    
     public float depositCooldown = 5f;
     
     public string agentTag;
@@ -33,7 +36,14 @@ public class DepositBuilding : MonoBehaviour
         yield return new WaitForSeconds(countDown);
         agentCooldown = false;
     }
-    
+
+    private void Start()
+    {
+        depositInstance = FMODUnity.RuntimeManager.CreateInstance(depositSfx);
+        depositInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+        depositInstance.setVolume(1);
+    }
+
     private void Update()
     {
         // Create a physics sphere where if a player walks into it, it checks if it is the player assigned to it
@@ -45,6 +55,7 @@ public class DepositBuilding : MonoBehaviour
             if (col.gameObject.CompareTag(agentTag) && agentCooldown == false)
             {
                 Deposit(agentData);
+                depositInstance.start();
                 agentCooldown = true;
                 StartCoroutine(CountDown());
             }

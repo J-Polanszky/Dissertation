@@ -83,28 +83,24 @@ namespace Invector.vCharacterController
             var sprintConditions = (input.sqrMagnitude > 0.1f && isGrounded &&
                 !(isStrafing && !strafeSpeed.walkByDefault && (horizontalSpeed >= 0.5 || horizontalSpeed <= -0.5 || verticalSpeed <= 0.1f)));
 
+            bool shouldSprint = false;
+            
             if (value && sprintConditions)
             {
                 if (input.sqrMagnitude > 0.1f)
                 {
                     if (isGrounded && useContinuousSprint)
                     {
-                        isSprinting = !isSprinting;
+                        shouldSprint = !isSprinting;
                     }
                     else if (!isSprinting)
                     {
-                        isSprinting = true;
+                        shouldSprint = true;
                     }
                 }
-                else if (!useContinuousSprint && isSprinting)
-                {
-                    isSprinting = false;
-                }
             }
-            else if (isSprinting)
-            {
-                isSprinting = false;
-            }
+            
+            isSprinting = shouldSprint;
         }
 
         public virtual void Strafe()

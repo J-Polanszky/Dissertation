@@ -1,10 +1,21 @@
 using System.Collections;
+using FMODUnity;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    private string backgroundMusic = "event:/Music_Events/BackingTrack";
+    string clockSfx = "event:/SFX_Events/Clock";
+    string buttonSfx = "event:/SFX_Events/UI_Buttons";
+    
+    [SerializeField] private GameObject playerPrefab;
+    
+    FMOD.Studio.EventInstance backgroundMusicInstance;
+    FMOD.Studio.EventInstance clockInstance;
+    FMOD.Studio.EventInstance buttonInstance;
+    
     public static GameManager instance;
 
     private TextMeshProUGUI playerText, machineText, timeText, goldText, silverText, copperText;
@@ -24,6 +35,8 @@ public class GameManager : MonoBehaviour
         int minutes = GameData.TimeLeft / 60;
         int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
+        if (minutes == 0 && seconds <= 30)
+            clockInstance.start();
     }
 
     void UpdateGold(int gold)
@@ -51,20 +64,36 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         
     }
+
+    void Start()
+    {
+        FMODUnity.RuntimeManager.GetBus("bus:/").setVolume(0.7f);
+
+        backgroundMusicInstance = RuntimeManager.CreateInstance(backgroundMusic);
+        clockInstance = RuntimeManager.CreateInstance(clockSfx);
+        buttonInstance = RuntimeManager.CreateInstance(buttonSfx);
+        
+        backgroundMusicInstance.start();
+    }
+    
+    //TODO: Change gamestate variable to change music instance
     
     public void ChangeDifficulty(int difficulty)
     {
         // Debug.Log("Difficulty changed to " + difficulty);
+        buttonInstance.start();
         GameData.Difficulty = difficulty;
     }
 
     public void StartGame()
     {
+        buttonInstance.start();
         StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
     }
     
     public void QuitGame()
     {
+        buttonInstance.start();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -147,6 +176,7 @@ public class GameManager : MonoBehaviour
             UpdateTime();
         }
 
+        clockInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
     }
     

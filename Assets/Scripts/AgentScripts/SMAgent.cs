@@ -17,6 +17,12 @@ public enum AgentState
 
 public class SMAgent : MonoBehaviour
 {
+    private string walkSfx = "event:/SFX_Events/Walk";
+    private string runSfx = "event:/SFX_Events/Run";
+    
+    FMOD.Studio.EventInstance walkInstance;
+    FMOD.Studio.EventInstance runInstance;
+    
     private NavMeshAgent navMeshAgent;
 
     AgentMining agentMining;
@@ -37,6 +43,15 @@ public class SMAgent : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        walkInstance = FMODUnity.RuntimeManager.CreateInstance(walkSfx);
+        runInstance = FMODUnity.RuntimeManager.CreateInstance(runSfx);
+        
+        walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+        runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+
+        walkInstance.setVolume(0.4f);
+        runInstance.setVolume(0.4f);
+        
         navMeshAgent = GetComponent<NavMeshAgent>();
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
@@ -61,6 +76,9 @@ public class SMAgent : MonoBehaviour
         // Add checker for time left and distance so agent deposits before time runs out.
         // Fix collision avoidance issues.
 
+        walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+        runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+
         if (!startAgent || agentState == AgentState.Mining)
             return;
 
@@ -72,6 +90,7 @@ public class SMAgent : MonoBehaviour
             {
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
+                runInstance.start();
                 return;
             }
 
@@ -109,12 +128,14 @@ public class SMAgent : MonoBehaviour
             {
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.destination = agentFunctions.FindClosestDepositWaypoint(transform.position);
+                runInstance.start();
                 navMeshAgent.isStopped = false;
                 return;
             }
 
             agentState = AgentState.TravellingToMine;
             navMeshAgent.destination = oreToMine.transform.position;
+            runInstance.start();
             navMeshAgent.isStopped = false;
             return;
         }
@@ -132,6 +153,7 @@ public class SMAgent : MonoBehaviour
                 }
 
                 agentState = AgentState.Mining;
+                runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
                 agentMining.Mine(oreToMine);
                 oreToMine = null;
             }
@@ -144,6 +166,7 @@ public class SMAgent : MonoBehaviour
             if (navMeshAgent.remainingDistance < 1f)
             {
                 agentState = AgentState.Idle;
+                runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
                 navMeshAgent.isStopped = true;
             }
         }

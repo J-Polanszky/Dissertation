@@ -16,6 +16,9 @@ using UnityEngine.InputSystem;
 
 public class Mining : MonoBehaviour
 {
+    string buttonSfx = "event:/SFX_Events/Mine";
+    FMOD.Studio.EventInstance mineInstance;
+    
     public LayerMask oreLayer;
 
     private GameObject pickaxeHandle;
@@ -40,6 +43,8 @@ public class Mining : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
     {
+        mineInstance = FMODUnity.RuntimeManager.CreateInstance(buttonSfx);
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         pickaxeHandle = GameObject.FindGameObjectWithTag("Pickaxe_Handle");
@@ -69,9 +74,12 @@ public class Mining : MonoBehaviour
         PreMine(currentOre);
         isMining = true;
         animator.SetBool("Mining", true);
+        mineInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform));
+        mineInstance.start();
 
         yield return new WaitForSeconds(timeToMine);
 
+        mineInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         animator.SetBool("Mining", false);
         Destroy(currentOre);    
         isMining = false;
