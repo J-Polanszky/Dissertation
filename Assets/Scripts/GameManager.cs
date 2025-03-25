@@ -11,18 +11,20 @@ public class GameManager : MonoBehaviour
     private string backgroundMusic = "event:/Music_Events/BackingTrack";
     string clockSfx = "event:/SFX_Events/Clock";
     string buttonSfx = "event:/SFX_Events/UI_Buttons";
-    
+
     [SerializeField] private GameObject playerPrefab;
-    
+
     FMOD.Studio.EventInstance backgroundMusicInstance;
     FMOD.Studio.EventInstance clockInstance;
     FMOD.Studio.EventInstance buttonInstance;
-    
+
     public static GameManager instance;
 
     private TextMeshProUGUI playerText, machineText, timeText, goldText, silverText, copperText;
 
     int playTest = 0;
+
+    bool clockStarted = false;
 
     void UpdatePlayerScore(int score)
     {
@@ -39,8 +41,12 @@ public class GameManager : MonoBehaviour
         int minutes = GameData.TimeLeft / 60;
         int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
-        if (minutes == 0 && seconds <= 30)
+        if (!clockStarted && minutes == 0 && seconds <= 30)
+        {
             clockInstance.start();
+            clockStarted = true;
+            SetGameState(2);
+        }
     }
 
     void UpdateGold(int gold)
@@ -82,12 +88,13 @@ public class GameManager : MonoBehaviour
         backgroundMusicInstance = RuntimeManager.CreateInstance(backgroundMusic);
         clockInstance = RuntimeManager.CreateInstance(clockSfx);
         buttonInstance = RuntimeManager.CreateInstance(buttonSfx);
-        
+
+        SetGameState(0);
         backgroundMusicInstance.start();
     }
-    
+
     //TODO: Change gamestate variable to change music instance
-    
+
     public void ChangeDifficulty(int difficulty)
     {
         // Debug.Log("Difficulty changed to " + difficulty);
@@ -105,6 +112,7 @@ public class GameManager : MonoBehaviour
     void StartTest1()
     {
         buttonInstance.start();
+        SetGameState(1);
         StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
     }
 
@@ -191,9 +199,18 @@ public class GameManager : MonoBehaviour
         string WinOrLose()
         {
             if (GameData.PlayerData.Score > GameData.MachineData.Score)
+            {
+                SetGameState(3);
                 return "You Win!";
+            }
+            
             if (GameData.PlayerData.Score < GameData.MachineData.Score)
+            {
+                SetGameState(4);
                 return "You Lose!";
+            }
+
+            SetGameState(3);
             return "It's a Draw!";
         }
 
@@ -231,6 +248,7 @@ public class GameManager : MonoBehaviour
         clockInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         DataCollector.Instance.gameActive = false;
         DataCollector.Instance.StopAllCoroutines();
+        clockStarted = false;
         StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
     }
 
@@ -262,5 +280,10 @@ public class GameManager : MonoBehaviour
 
         if (callback != null)
             callback();
+    }
+
+    void SetGameState(int state)
+    {
+        backgroundMusicInstance.setParameterByName("GameState", state);
     }
 }

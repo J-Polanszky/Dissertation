@@ -13,6 +13,8 @@ public class PlayerMining : Mining
     vThirdPersonInput input;
     Rigidbody agentRigidbody;
 
+    public Action stopSfx;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
@@ -28,6 +30,7 @@ public class PlayerMining : Mining
         input.cc.input.z = 0;
         agentRigidbody.linearVelocity = Vector3.zero;
         ore.GetComponent<OreScript>().agentData = GameData.PlayerData;
+        stopSfx?.Invoke();
     }
     
     protected override void PostMine()

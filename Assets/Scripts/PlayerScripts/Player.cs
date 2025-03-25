@@ -5,26 +5,26 @@ public class Player : MonoBehaviour
 {
     private string walkSfx = "event:/SFX_Events/Walk";
     private string runSfx = "event:/SFX_Events/Run";
-    
+
     FMOD.Studio.EventInstance walkInstance;
     FMOD.Studio.EventInstance runInstance;
-    
+
     vThirdPersonController cc;
     readonly float defaultWalkSpeed = 2;
     readonly float defaultRunSpeed = 4;
     readonly float defaultSprintSpeed = 6;
-    
+
     void Start()
     {
         walkInstance = FMODUnity.RuntimeManager.CreateInstance(walkSfx);
         runInstance = FMODUnity.RuntimeManager.CreateInstance(runSfx);
-        
+
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
 
         walkInstance.setVolume(0.4f);
         runInstance.setVolume(0.4f);
-        
+
         cc = GetComponent<vThirdPersonController>();
         cc.strafeSpeed.walkSpeed = defaultWalkSpeed;
         cc.strafeSpeed.runningSpeed = defaultRunSpeed;
@@ -34,11 +34,18 @@ public class Player : MonoBehaviour
         cc.OnStoppedWalking += HandleStopWalking;
         cc.OnStartedSprinting += HandleStartRun;
         cc.OnStoppedSprinting += HandleStopRun;
-        
+
         GameData.PlayerData.onInventoryUpdated += ChangeSpeed;
+
+        GetComponent<PlayerMining>().stopSfx += () =>
+        {
+            runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+            walkInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        };
     }
 
-    void FixedUpdate(){
+    void FixedUpdate()
+    {
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
     }
@@ -64,7 +71,7 @@ public class Player : MonoBehaviour
         runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         walkInstance.start();
     }
-    
+
     void ChangeSpeed()
     {
         // Change the speed of a player, and slow him down to 50% speed if inventory is full
@@ -76,7 +83,7 @@ public class Player : MonoBehaviour
             cc.strafeSpeed.runningSpeed = defaultRunSpeed;
             cc.strafeSpeed.sprintSpeed = defaultSprintSpeed;
         }
-        
+
         // Divide by double max so that the minimum multiplier is 0.5
         float multiplier = 1 - (float) GameData.PlayerData.TotalInventory / (GameData.MaximumInvQty * 2);
         
@@ -84,9 +91,8 @@ public class Player : MonoBehaviour
         cc.strafeSpeed.walkSpeed = defaultWalkSpeed * multiplier;
         cc.strafeSpeed.runningSpeed = defaultRunSpeed * multiplier;
         cc.strafeSpeed.sprintSpeed = defaultSprintSpeed * multiplier;
-        
     }
-    
+
     void OnDestroy()
     {
         // Unsubscribe from events when destroyed
