@@ -57,7 +57,7 @@ public static class GameData
     // Hard - 2
     private static int difficulty = 0;
 
-    private static int timeLeft = 60;
+    private static int timeLeft = 600;
 
     private static AgentData playerData = new();
     
@@ -75,7 +75,7 @@ public static class GameData
     
     public static readonly int MaximumInvQty = 30;
 
-    public static readonly int InitialTime = 600;
+    public static readonly int InitialTime = 60;
 
     public static Dictionary<OreType, int> InvStorageQty
     {

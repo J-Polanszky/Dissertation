@@ -37,12 +37,17 @@ public class GameManager : MonoBehaviour
         int minutes = GameData.TimeLeft / 60;
         int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
+        
         if (!clockStarted && minutes == 0 && seconds <= 30)
         {
+            clockInstance.setVolume(0);
             clockInstance.start();
             clockStarted = true;
             SetGameState(2);
         }
+
+        if (clockStarted)
+            clockInstance.setVolume((float)(30 - seconds) / 30f);
     }
 
     void UpdateGold(int gold)
@@ -86,6 +91,7 @@ public class GameManager : MonoBehaviour
         buttonInstance = RuntimeManager.CreateInstance(buttonSfx);
 
         SetGameState(0);
+        backgroundMusicInstance.setVolume(0.65f);
         backgroundMusicInstance.start();
     }
 
