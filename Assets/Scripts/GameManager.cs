@@ -9,16 +9,18 @@ public class GameManager : MonoBehaviour
     private string backgroundMusic = "event:/Music_Events/BackingTrack";
     string clockSfx = "event:/SFX_Events/Clock";
     string buttonSfx = "event:/SFX_Events/UI_Buttons";
-    
+
     [SerializeField] private GameObject playerPrefab;
-    
+
     FMOD.Studio.EventInstance backgroundMusicInstance;
     FMOD.Studio.EventInstance clockInstance;
     FMOD.Studio.EventInstance buttonInstance;
-    
+
     public static GameManager instance;
 
     private TextMeshProUGUI playerText, machineText, timeText, goldText, silverText, copperText;
+
+    bool clockStarted = false;
 
     void UpdatePlayerScore(int score)
     {
@@ -35,34 +37,44 @@ public class GameManager : MonoBehaviour
         int minutes = GameData.TimeLeft / 60;
         int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
-        if (minutes == 0 && seconds <= 30)
+        if (!clockStarted && minutes == 0 && seconds <= 30)
+        {
             clockInstance.start();
+            clockStarted = true;
+            SetGameState(2);
+        }
     }
 
     void UpdateGold(int gold)
     {
-        goldText.text = "x" + gold + "(" + (GameData.InvStorageQty[OreType.Gold] * GameData.PlayerData.inventory[OreType.Gold].Quantity) + ")";
+        goldText.text = "x" + gold + "(" +
+                        (GameData.InvStorageQty[OreType.Gold] * GameData.PlayerData.inventory[OreType.Gold].Quantity) +
+                        ")";
     }
 
     void UpdateSilver(int silver)
     {
-        silverText.text = "x" + silver + "(" + (GameData.InvStorageQty[OreType.Silver] * GameData.PlayerData.inventory[OreType.Silver].Quantity) + ")";
+        silverText.text = "x" + silver + "(" +
+                          (GameData.InvStorageQty[OreType.Silver] *
+                           GameData.PlayerData.inventory[OreType.Silver].Quantity) + ")";
     }
 
     void UpdateCopper(int copper)
     {
-        copperText.text = "x" + copper + "(" + (GameData.InvStorageQty[OreType.Copper] * GameData.PlayerData.inventory[OreType.Copper].Quantity) + ")";
+        copperText.text = "x" + copper + "(" +
+                          (GameData.InvStorageQty[OreType.Copper] *
+                           GameData.PlayerData.inventory[OreType.Copper].Quantity) + ")";
     }
-    
+
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-        }else
+        }
+        else
             Destroy(gameObject);
-        
     }
 
     void Start()
@@ -72,12 +84,13 @@ public class GameManager : MonoBehaviour
         backgroundMusicInstance = RuntimeManager.CreateInstance(backgroundMusic);
         clockInstance = RuntimeManager.CreateInstance(clockSfx);
         buttonInstance = RuntimeManager.CreateInstance(buttonSfx);
-        
+
+        SetGameState(0);
         backgroundMusicInstance.start();
     }
-    
+
     //TODO: Change gamestate variable to change music instance
-    
+
     public void ChangeDifficulty(int difficulty)
     {
         // Debug.Log("Difficulty changed to " + difficulty);
@@ -88,9 +101,10 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         buttonInstance.start();
+        SetGameState(1);
         StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
     }
-    
+
     public void QuitGame()
     {
         buttonInstance.start();
@@ -115,23 +129,26 @@ public class GameManager : MonoBehaviour
         goldText = goldImage.Find("qty").GetComponent<TextMeshProUGUI>();
         silverText = silverImage.Find("qty").GetComponent<TextMeshProUGUI>();
         copperText = copperImage.Find("qty").GetComponent<TextMeshProUGUI>();
-        
-        goldImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Gold].ToString();
-        silverImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Silver].ToString();
-        copperImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text = GameData.InvStorageQty[OreType.Copper].ToString();
-        
+
+        goldImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text =
+            GameData.InvStorageQty[OreType.Gold].ToString();
+        silverImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text =
+            GameData.InvStorageQty[OreType.Silver].ToString();
+        copperImage.Find("Panel").Find("inv_taken").GetComponent<TextMeshProUGUI>().text =
+            GameData.InvStorageQty[OreType.Copper].ToString();
+
         // Set callbacks
         GameData.PlayerData.onScoreUpdated += UpdatePlayerScore;
         GameData.MachineData.onScoreUpdated += UpdateMachineScore;
-        
+
         GameData.PlayerData.inventory[OreType.Gold].onQuantityUpdated += UpdateGold;
         GameData.PlayerData.inventory[OreType.Silver].onQuantityUpdated += UpdateSilver;
         GameData.PlayerData.inventory[OreType.Copper].onQuantityUpdated += UpdateCopper;
-        
+
         UpdateGold(0);
         UpdateSilver(0);
         UpdateCopper(0);
-        
+
         GameObject[] deposits = GameObject.FindGameObjectsWithTag("Deposit");
         foreach (GameObject deposit in deposits)
         {
@@ -140,7 +157,7 @@ public class GameManager : MonoBehaviour
             else
                 deposit.GetComponent<DepositBuilding>().agentData = GameData.MachineData;
         }
-        
+
         SpawnOres();
         // UpdatePlayerScore(0);
         // UpdateMachineScore(0);
@@ -151,22 +168,32 @@ public class GameManager : MonoBehaviour
 
     void GameOver()
     {
-        string WinorLose()
+        string WinOrLose()
         {
             if (GameData.PlayerData.Score > GameData.MachineData.Score)
+            {
+                SetGameState(3);
                 return "You Win!";
+            }
+            
             if (GameData.PlayerData.Score < GameData.MachineData.Score)
+            {
+                SetGameState(4);
                 return "You Lose!";
+            }
+
+            SetGameState(3);
             return "It's a Draw!";
         }
+
         Debug.Log("Game over");
-        GameObject.FindWithTag("Canvas").transform.Find("EndText").GetComponent<TextMeshProUGUI>().text = WinorLose();
+        GameObject.FindWithTag("Canvas").transform.Find("EndText").GetComponent<TextMeshProUGUI>().text = WinOrLose();
     }
 
     IEnumerator CountDown()
     {
         GameData.TimeLeft = GameData.InitialTime;
-        
+
         UpdateTime();
 
         while (GameData.TimeLeft > 0)
@@ -177,26 +204,27 @@ public class GameManager : MonoBehaviour
         }
 
         clockInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        clockStarted = false;
         StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
     }
-    
+
     void SpawnOres()
     {
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
-        
+
         // Easy
         if (GameData.Difficulty == 3)
-            terrainPopulator.SetOreSpawns(40, 10,30,60);
-        
+            terrainPopulator.SetOreSpawns(40, 10, 30, 60);
+
         // Normal
         else if (GameData.Difficulty == 2)
             terrainPopulator.SetOreSpawns(30, 5, 25, 70);
-        
+
         // Hard
         else
             terrainPopulator.SetOreSpawns(20, 5, 20, 75);
     }
-    
+
     IEnumerator LoadGameSceneAsync(string sceneName, System.Action callback = null)
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
@@ -219,6 +247,9 @@ public class GameManager : MonoBehaviour
         if (callback != null)
             callback();
     }
-    
-    
+
+    void SetGameState(int state)
+    {
+        backgroundMusicInstance.setParameterByName("GameState", state);
+    }
 }
