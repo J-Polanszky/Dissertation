@@ -41,7 +41,7 @@ public class DepositBuilding : MonoBehaviour
     {
         depositInstance = FMODUnity.RuntimeManager.CreateInstance(depositSfx);
         depositInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
-        depositInstance.setVolume(1);
+        depositInstance.setVolume(2f);
     }
 
     private void Update()

@@ -63,7 +63,7 @@ public static class GameData
     // Hard - 2
     private static int difficulty = 0;
 
-    private static int timeLeft = 60;
+    private static int timeLeft = 600;
 
     private static AgentData playerData = new();
     

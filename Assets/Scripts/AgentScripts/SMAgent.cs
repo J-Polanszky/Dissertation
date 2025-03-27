@@ -57,8 +57,8 @@ public class SMAgent : MonoBehaviour
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
 
-        walkInstance.setVolume(0.4f);
-        runInstance.setVolume(0.4f);
+        walkInstance.setVolume(0.25f);
+        runInstance.setVolume(0.25f);
         
         navMeshAgent = GetComponent<NavMeshAgent>();
         agentMining = GetComponent<AgentMining>();
@@ -390,5 +390,13 @@ public class SMAgent : MonoBehaviour
     {
         agentState = AgentState.Idle;
         navMeshAgent.isStopped = true;
+    }
+    
+    private void OnDestroy()
+    {
+        walkInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        walkInstance.release();
+        runInstance.release();
     }
 }
