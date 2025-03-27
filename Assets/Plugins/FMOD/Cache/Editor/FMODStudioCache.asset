@@ -26,7 +26,7 @@ MonoBehaviour:
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 625
+  Length: 375
 --- !u!114 &-4877427727547813172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,7 +160,7 @@ MonoBehaviour:
   - {fileID: 8774378401937120492}
   StringsBanks:
   - {fileID: 2995650648216428987}
-  cacheTime: 638783435548523130
+  cacheTime: 638786742030000000
   cacheVersion: 131846
 --- !u!114 &2995650648216428987
 MonoBehaviour:
@@ -177,7 +177,7 @@ MonoBehaviour:
   Path: Assets/joshua_polanszky_msd63b fmod project/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 638783435548523130
+  lastModified: 638786742030000000
   FileSizes:
   - Name: Desktop
     Value: 1092
@@ -252,10 +252,10 @@ MonoBehaviour:
   Path: Assets/joshua_polanszky_msd63b fmod project/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 638783435548523130
+  lastModified: 638786742030000000
   FileSizes:
   - Name: Desktop
-    Value: 1847808
+    Value: 1843872
   Exists: 1
 --- !u!114 &9009514785204373265
 MonoBehaviour:
