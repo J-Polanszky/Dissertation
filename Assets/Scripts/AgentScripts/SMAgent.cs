@@ -33,6 +33,8 @@ public class SMAgent : MonoBehaviour
     delegate GameObject DecideOnOreType(List<GameObject> gameObjects);
 
     private DecideOnOreType decideOnOreFunction;
+    
+    int mistakesDone = 0;
 
     protected void Awake()
     {
@@ -130,20 +132,8 @@ public class SMAgent : MonoBehaviour
             // Debug.Log("@M total inv" + agentData.TotalInventory);
             oreToMine = FindBestOre(agentFunctions.searchRadius);
 
-            // Debug.Log("Agent inv after mining: " +
-            //           (agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
-            // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
-            if ((agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]) >
-                GameData.MaximumInvQty ||
-                (agentData.TotalInventory > ((float)GameData.MaximumInvQty / 2) &&
-                 agentFunctions.CalculatePathRemainingDistance(transform.position) <
-                 agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position)))
-            {
-                agentState = AgentState.TravellingToDeposit;
-                navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
-                navMeshAgent.isStopped = false;
+            if (oreToMine == null)
                 return;
-            }
 
             agentState = AgentState.TravellingToMine;
             navMeshAgent.SetDestination(oreToMine.transform.position);
@@ -181,6 +171,25 @@ public class SMAgent : MonoBehaviour
         }
     }
 
+    bool CheckIfInventoryFull(GameObject ore)
+    {
+        // Debug.Log("Agent inv after mining: " +
+        //           (agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(oreToMine.tag)]));
+        // Check if inventory would be full after mining, or is over half full, and if the deposit is closer than the ore, go deposit.
+        return (agentData.TotalInventory + GameData.InvStorageQty[Enum.Parse<OreType>(ore.tag)]) >
+               GameData.MaximumInvQty ||
+               (agentData.TotalInventory > ((float)GameData.MaximumInvQty / 2) &&
+                agentFunctions.CalculatePathRemainingDistance(transform.position) <
+                agentFunctions.CalculatePathRemainingDistance(ore.transform.position));
+    }
+
+    void GoToDeposit()
+    {
+        agentState = AgentState.TravellingToDeposit;
+        navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
+        navMeshAgent.isStopped = false;
+    }
+
     GameObject DecideOnOreEasy(List<GameObject> ores)
     {
         GameObject closestOre = null;
@@ -205,57 +214,65 @@ public class SMAgent : MonoBehaviour
             closestOre = ore;
             closestOrePos = closestOre.transform.position;
         }
+
+        if (!CheckIfInventoryFull(closestOre))
+            return closestOre;
+
         
-        return closestOre;  
+        // 75% chance to over mine, with a maximum of 3 mistakes.
+        int random = UnityEngine.Random.Range(0, 4);
+        random -= mistakesDone;
+        if (random <= 0)
+        {
+            mistakesDone = 0;
+            return closestOre;
+        }
+
+        GoToDeposit();
+        mistakesDone++;
+        return null;
     }
 
     GameObject DecideOnOreMedium(List<GameObject> ores)
     {
-        Vector3 playerPos = GameObject.FindWithTag("Player").transform.position;
-        GameObject bestOre = null;
-        int bestOreType = -1;
+        GameObject closestOre = null;
+        Vector3 closestOrePos = Vector3.zero;
+
         foreach (GameObject ore in ores)
         {
-            if (ore.GetComponent<OreScript>().isBeingMined)
-                continue;
+            // if (ore.GetComponent<OreScript>().isBeingMined)
+            //     continue;
 
-            if (bestOreType == -1)
+            if (closestOre == null)
             {
-                bestOre = ore;
-                bestOreType = (int)Enum.Parse<OreType>(ore.tag);
+                closestOre = ore;
+                closestOrePos = ore.transform.position;
                 continue;
             }
 
-            int curOreType = (int)Enum.Parse<OreType>(ore.tag);
-
-            if (curOreType < bestOreType)
-                continue;
-            
-            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) >
-                agentFunctions.CalculatePathRemainingDistance(ore.transform.position, playerPos))
+            if (agentFunctions.CalculatePathRemainingDistance(closestOrePos, transform.position) <=
+                agentFunctions.CalculatePathRemainingDistance(closestOrePos, ore.transform.position))
                 continue;
 
-            if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) <
-                agentFunctions.CalculatePathRemainingDistance(bestOre.transform.position, transform.position))
-            {
-                bestOre = ore;
-                bestOreType = curOreType;
-                continue;
-            }
-
-            if (curOreType > bestOreType)
-            {
-                // Pick a val from 1-10, if its 1-5, continue. This will help make the state machine make some dumb decisions
-                int randomVal = UnityEngine.Random.Range(0, 10);
-                if (randomVal <= 5)
-                    continue;
-                
-                bestOre = ore;
-                bestOreType = curOreType;
-            }
+            closestOre = ore;
+            closestOrePos = closestOre.transform.position;
+        }
+        
+        if (!CheckIfInventoryFull(closestOre))
+            return closestOre;
+        
+        // 25% chance to over mine, but will only do it once
+        int random = UnityEngine.Random.Range(0, 4);
+        random -= mistakesDone;
+        if (random <= 2)
+        {
+            mistakesDone = 0;
+            return closestOre;
         }
 
-        return bestOre;
+        GoToDeposit();
+        mistakesDone++;
+        return null;
     }
 
     GameObject DecideOnOreHard(List<GameObject> ores)
@@ -279,7 +296,7 @@ public class SMAgent : MonoBehaviour
 
             if (curOreType < bestOreType)
                 continue;
-            
+
             if (agentFunctions.CalculatePathRemainingDistance(ore.transform.position, transform.position) >
                 agentFunctions.CalculatePathRemainingDistance(ore.transform.position, playerPos))
                 continue;
@@ -298,8 +315,12 @@ public class SMAgent : MonoBehaviour
                 bestOreType = curOreType;
             }
         }
-
-        return bestOre;
+        
+        if (!CheckIfInventoryFull(bestOre))
+            return bestOre;
+        
+        GoToDeposit();
+        return null;
     }
 
     GameObject FindBestOre(float oreSearchRadius)
