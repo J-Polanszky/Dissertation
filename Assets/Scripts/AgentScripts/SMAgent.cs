@@ -85,7 +85,7 @@ public class SMAgent : MonoBehaviour
 
     IEnumerator DelayedStart()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
         startAgent = true;
     }
 
