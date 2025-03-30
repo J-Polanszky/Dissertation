@@ -495,8 +495,8 @@ public class RLAgent : Agent
 
         if(TrainingManager.instance != null)
             TrainingManager.instance.StartGame();
-        else if (GameSceneManager.instance != null)
-            GameSceneManager.instance.StartGame();
+        else if (GameManager.instance != null)
+            GameManager.instance.RunGameStartFunctions();
         else
             EvaluationManager.instance.StartGame();
 

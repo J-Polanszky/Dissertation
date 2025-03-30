@@ -40,6 +40,9 @@ public class AgentData
 
     public void Reset()
     {
+        onInventoryUpdated = null;
+        onScoreUpdated = null;
+        
         TotalInventory = 0;
         Score = 0;
         foreach (var (key, value) in inventory)
@@ -72,7 +75,7 @@ public static class GameData
     
     public static readonly int MaximumInvQty = 30;
 
-    public static readonly int InitialTime = 600;
+    public static readonly int InitialTime = 480;
 
     public static Dictionary<OreType, int> InvStorageQty
     {
