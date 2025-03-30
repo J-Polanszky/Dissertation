@@ -20,7 +20,7 @@ public class AgentMining : Mining
         if (ore.GetComponent<OreScript>().isBeingMined)
             return null;
         
-        return StartCoroutine(MiningCoroutine(ore));
+        return StartCoroutine(MiningCoroutine(ore, agentData));
     }
 
     private void FaceOre(GameObject ore)
