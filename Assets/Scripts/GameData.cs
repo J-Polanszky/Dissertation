@@ -33,10 +33,13 @@ public class AgentData
     public System.Action<int> onScoreUpdated;
     private int totalInventory = 0;
     private int score = 0;
+    private float timeSpentMining = 0;
     
     public int TotalInventory { get { return totalInventory; } set { totalInventory = value; onInventoryUpdated?.Invoke(); } }
     
     public int Score { get { return score; } set { score = value; onScoreUpdated?.Invoke(value); } }
+    
+    public float TimeSpentMining { get { return timeSpentMining; } set { timeSpentMining = value; } }
 
     public void Reset()
     {

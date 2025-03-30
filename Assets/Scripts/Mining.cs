@@ -66,7 +66,7 @@ public class Mining : MonoBehaviour
         
     }
 
-    protected IEnumerator MiningCoroutine(GameObject currentOre)
+    protected IEnumerator MiningCoroutine(GameObject currentOre, AgentData agentData)
     {
         OreScript oreScript = currentOre.GetComponent<OreScript>();
         if (oreScript.isBeingMined)
@@ -78,6 +78,7 @@ public class Mining : MonoBehaviour
         PreMine(currentOre);
         isMining = true;
         animator.SetBool("Mining", true);
+        agentData.TimeSpentMining += timeToMine;
 
         yield return new WaitForSeconds(timeToMine);
 

@@ -96,6 +96,6 @@ public class PlayerMining : Mining
         if (currentOre == null)
             return;
         
-        StartCoroutine(MiningCoroutine(currentOre));
+        StartCoroutine(MiningCoroutine(currentOre, GameData.PlayerData));
     }
 }
