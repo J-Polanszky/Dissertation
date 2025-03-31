@@ -52,14 +52,13 @@ public class DataCollector : MonoBehaviour
             playerScore,
             opponentScore
         );
-
-        // TODO: Send using realtime firebase
-        // FirebaseHandler.Instance.SendEndOfGameEvent(PlayerID, PlaytestName, endOfGame);
+        
+        FirebaseHandler.Instance.SendEndOfGameEvent(PlayerID, PlaytestName, endOfGame);
     }
 
     public void RecordTimestampEvent()
     {
-        string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        string timestamp = (GameData.InitialTime - GameData.TimeLeft).ToString();
         string difficulty = GameData.Difficulty switch
         {
             0 => "Easy",
@@ -70,7 +69,7 @@ public class DataCollector : MonoBehaviour
         string timePassed = (GameData.InitialTime - GameData.TimeLeft).ToString();
         
         // Player data
-        //TODO: Implement most of these
+        
         string playerTimeSpentMining = GameData.PlayerData.TimeSpentMining.ToString();
         string playerTimeSpentWTravelling =
             Math.Round((float) (GameData.InitialTime - GameData.TimeLeft) - GameData.PlayerData.TimeSpentMining, 2).ToString();
@@ -119,14 +118,13 @@ public class DataCollector : MonoBehaviour
             opponentScoreOfInventory
         );
         
-        TimeStamp timestampEvent = new TimeStamp(
+        TimeStampEvent timestampEvent = new TimeStampEvent(
             difficulty,
             timePassed,
             playerCollectedData,
             opponentCollectedData
         );
-        
-        // TODO: Send using realtime firebase
-        // FirebaseHandler.Instance.SendTimestampEvent(PlayerID, PlaytestName, timestampEvent);
+
+        FirebaseHandler.Instance.SendTimestampEvent(PlayerID, PlaytestName, timestamp, timestampEvent);
     }
 }
