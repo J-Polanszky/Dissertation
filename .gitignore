@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 .vscode/
 venv/
+
+*FirebaseCppApp-12_7_0.bundle
+*FirebaseCppApp-12_7_0.so
