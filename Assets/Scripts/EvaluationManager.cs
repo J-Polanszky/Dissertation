@@ -145,17 +145,7 @@ public class EvaluationManager : MonoBehaviour
     
     void SpawnOres()
     {
-        // Easy
-        if (GameData.Difficulty == 0)
-            terrainPopulator.SetOreSpawns(20, 10,30,60);
-        
-        // Normal
-        else if (GameData.Difficulty == 1)
-            terrainPopulator.SetOreSpawns(15, 5, 25, 70);
-        
-        // Hard
-        else
-            terrainPopulator.SetOreSpawns(10, 5, 20, 75);
+        terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
     
 }

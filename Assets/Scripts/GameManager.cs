@@ -207,18 +207,8 @@ public class GameManager : MonoBehaviour
     void SpawnOres()
     {
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
-
-        // Easy
-        if (GameData.Difficulty == 0)
-            terrainPopulator.SetOreSpawns(20, 10, 30, 60);
-
-        // Normal
-        else if (GameData.Difficulty == 1)
-            terrainPopulator.SetOreSpawns(15, 5, 25, 70);
-
-        // Hard
-        else
-            terrainPopulator.SetOreSpawns(10, 5, 20, 75);
+        
+        terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
 
     IEnumerator LoadGameSceneAsync(string sceneName, System.Action callback = null)
