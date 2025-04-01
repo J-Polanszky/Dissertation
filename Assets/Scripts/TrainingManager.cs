@@ -116,7 +116,6 @@ public class TrainingManager : MonoBehaviour
     
     void SpawnOres()
     {
-        // Making the agent always play with hard ore spawns
         terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
     

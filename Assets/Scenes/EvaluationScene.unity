@@ -794,7 +794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01e746714079af24c893bc89c9c9efd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficulty: 0
+  difficulty: 1
 --- !u!114 &1580648425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -904,7 +904,7 @@ PrefabInstance:
     - target: {fileID: 625252377550732369, guid: dd4ac6287ab323244adfd41edf5cd1a9, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5022602860645237092, guid: 4c844fa3e757eaa4282012f13f5b0ea8, type: 3}
     - target: {fileID: 7159209809905596223, guid: dd4ac6287ab323244adfd41edf5cd1a9, type: 3}
       propertyPath: m_Name
       value: RLAgent

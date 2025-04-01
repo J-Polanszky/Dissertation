@@ -149,6 +149,8 @@ public class SMAgent : MonoBehaviour
                 if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
                 {
                     oreToMine = FindBestOre(agentFunctions.searchRadius);
+                    if(oreToMine == null)
+                        return;
                     navMeshAgent.SetDestination(oreToMine.transform.position);
                     return;
                 }
@@ -192,6 +194,18 @@ public class SMAgent : MonoBehaviour
 
     GameObject DecideOnOreEasy(List<GameObject> ores)
     {
+        // Add a 10% chance to go to the deposit if inventory is over half full
+        if (agentData.TotalInventory >= GameData.MaximumInvQty / 2)
+        {
+            int depoRand = UnityEngine.Random.Range(0, 10);
+            // Debug.Log("DepoRand: " + depoRand);
+            if (depoRand == 0)  // 1 in 10 chance (10%)
+            {
+                GoToDeposit();
+                return null;
+            }
+        }
+
         GameObject closestOre = null;
         Vector3 closestOrePos = Vector3.zero;
 
@@ -224,17 +238,35 @@ public class SMAgent : MonoBehaviour
         random -= mistakesDone;
         if (random <= 0)
         {
-            mistakesDone = 0;
+            mistakesDone++;
             return closestOre;
         }
 
+        mistakesDone = 0;
         GoToDeposit();
-        mistakesDone++;
         return null;
     }
 
     GameObject DecideOnOreMedium(List<GameObject> ores)
     {
+        if (agentData.TotalInventory >= GameData.MaximumInvQty / 2)
+        {
+            // Start at 10%, and scale up as inventory fills up
+            // 0% chance if inventory is below 50%
+            // 10% chance if inventory is 50% full
+            // 20% chance if inventory is 60% full
+            // 30% chance if inventory is 70% full
+            // 40% chance if inventory is 80% full
+            // 50% chance if inventory is 90% full or higher
+            int depoRand = UnityEngine.Random.Range(0, 10);
+            depoRand -= Math.Min(5, (int)((float)agentData.TotalInventory / GameData.MaximumInvQty * 10) - 4);
+            if (depoRand > 0) 
+            {
+                GoToDeposit();
+                return null;
+            }
+        }
+
         GameObject closestOre = null;
         Vector3 closestOrePos = Vector3.zero;
 
@@ -266,12 +298,12 @@ public class SMAgent : MonoBehaviour
         random -= mistakesDone;
         if (random <= 2)
         {
-            mistakesDone = 0;
+            mistakesDone++;
             return closestOre;
         }
 
         GoToDeposit();
-        mistakesDone++;
+        mistakesDone = 0;
         return null;
     }
 
