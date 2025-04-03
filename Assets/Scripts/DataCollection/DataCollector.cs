@@ -1,11 +1,14 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class DataCollector : MonoBehaviour
 {
-    public DataCollector Instance { get; private set; }
+    public static DataCollector Instance { get; private set; }
 
     private string playerID, playtestName;
+    
+    public bool gameActive = false;
 
     private void Awake()
     {
@@ -54,6 +57,17 @@ public class DataCollector : MonoBehaviour
         );
         
         FirebaseHandler.Instance.SendEndOfGameEvent(PlayerID, PlaytestName, endOfGame);
+    }
+
+    public IEnumerator LoopTimestampEvent()
+    {
+        // Ensures the program waits for the game to start before starting the loop
+        yield return new WaitForSeconds(30);
+        while (gameActive)
+        {
+            RecordTimestampEvent();
+            yield return new WaitForSeconds(30);
+        }
     }
 
     public void RecordTimestampEvent()

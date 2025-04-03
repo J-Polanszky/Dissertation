@@ -152,10 +152,13 @@ public class GameManager : MonoBehaviour
 
         SpawnOres();
         StartCoroutine(CountDown());
+        StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
+        DataCollector.Instance.gameActive = true;
     }
 
     void GameOver()
     {
+        DataCollector.Instance.RecordEndOfGameEvent();
         string WinOrLose()
         {
             if (GameData.PlayerData.Score > GameData.MachineData.Score)
@@ -195,7 +198,9 @@ public class GameManager : MonoBehaviour
             GameData.TimeLeft--;
             UpdateTime();
         }
-
+        
+        DataCollector.Instance.gameActive = false;
+        DataCollector.Instance.StopAllCoroutines();
         StartCoroutine(LoadGameSceneAsync("EndScene", GameOver));
     }
 
