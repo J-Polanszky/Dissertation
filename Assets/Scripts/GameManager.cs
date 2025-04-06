@@ -71,19 +71,21 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Transform menu = GameObject.FindWithTag("Canvas").transform.Find("Menu");
-        menu.Find("StartGame").GetComponent<Button>().onClick.AddListener(StartTest1);
+        menu.Find("StartGame").GetComponent<Button>().onClick.AddListener(StartTest2);
         menu.Find("QuitGame").GetComponent<Button>().onClick.AddListener(QuitGame);
     }
 
     void StartTest1()
     {
-        StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
+        // StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
+        // The RL Agent will call the RunGameStartFunctions function when the scene is loaded.
+        StartCoroutine(LoadGameSceneAsync("GameScene"));
     }
 
     void StartTest2()
     {
         // Gather which scene to load from data.
-        bool fakeIsDDA = false;
+        bool fakeIsDDA = true;
         string gameScene = fakeIsDDA ? "GameSceneDDA" : "GameSceneRLAgent";
         StartCoroutine(LoadGameSceneAsync(gameScene));
     }
@@ -152,8 +154,8 @@ public class GameManager : MonoBehaviour
 
         SpawnOres();
         StartCoroutine(CountDown());
-        StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
-        DataCollector.Instance.gameActive = true;
+        // StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
+        // DataCollector.Instance.gameActive = true;
     }
 
     void GameOver()

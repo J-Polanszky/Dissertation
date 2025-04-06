@@ -498,7 +498,23 @@ public class RLAgent : Agent
         if(TrainingManager.instance != null)
             TrainingManager.instance.StartGame();
         else if (GameManager.instance != null)
+        {
             GameManager.instance.RunGameStartFunctions();
+            switch (GameData.Difficulty)
+            {
+                case 0:
+                    ChangeModel(Resources.Load<ModelAsset>("Agent/V3/Easy/Easy"));
+                    break;
+                case 1:
+                    ChangeModel(Resources.Load<ModelAsset>("Agent/V3/Medium/Medium"));
+                    break;
+                case 2:
+                    ChangeModel(Resources.Load<ModelAsset>("Agent/V3/Hard/Hard"));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         else
             EvaluationManager.instance.StartGame();
 
@@ -613,9 +629,8 @@ public class RLAgent : Agent
         navMeshAgent.isStopped = true;
     }
     
-    public void ChangeNNModel(ModelAsset newmodel)
+    public void ChangeModel(ModelAsset newModel)
     {
-        behaviorParameters.Model = newmodel;
-        isInference = true;
+        SetModel(behaviorParameters.name, newModel, behaviorParameters.InferenceDevice);
     }
 }
