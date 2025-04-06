@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
+using Unity.Sentis;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 
@@ -56,6 +57,7 @@ public class RLAgent : Agent
 
     GameObject player;
 
+    BehaviorParameters behaviorParameters;
     BufferSensorComponent m_BufferSensor;
     StatsRecorder statsRecorder;
 
@@ -117,7 +119,7 @@ public class RLAgent : Agent
         navMeshAgent.speed = agentFunctions.defaultSpeed;
         navMeshAgent.acceleration = agentFunctions.defaultAcceleration;
 
-        BehaviorParameters behaviorParameters = GetComponent<BehaviorParameters>();
+        behaviorParameters = GetComponent<BehaviorParameters>();
         isInference = behaviorParameters.Model != null;
         // behaviorParameters.InferenceDevice = InferenceDevice.ComputeShader;
 
@@ -609,5 +611,11 @@ public class RLAgent : Agent
     private void SetAgentToIdle()
     {
         navMeshAgent.isStopped = true;
+    }
+    
+    public void ChangeNNModel(ModelAsset newmodel)
+    {
+        behaviorParameters.Model = newmodel;
+        isInference = true;
     }
 }
