@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Sentis;
 using UnityEngine;
 
 public class DDA_System : MonoBehaviour
@@ -7,6 +8,7 @@ public class DDA_System : MonoBehaviour
     public static DDA_System Instance { get; private set; }
 
     private RLAgent rlAgent;
+    ModelAsset easyModel, mediumModel, hardModel;
     
     private void Awake()
     {
@@ -19,6 +21,11 @@ public class DDA_System : MonoBehaviour
     private void Start()
     {
         rlAgent = GameObject.FindWithTag("Agent").GetComponent<RLAgent>();
+        
+        easyModel = Resources.Load<ModelAsset>("Agent/V3/Easy/Easy");
+        mediumModel = Resources.Load<ModelAsset>("Agent/V3/Medium/Medium");
+        hardModel = Resources.Load<ModelAsset>("Agent/V3/Hard/Hard");
+        
         // Start the DDA system
         StartCoroutine(StartDDA());
     }
@@ -114,12 +121,15 @@ public class DDA_System : MonoBehaviour
         switch (difficulty)
         {
             case 0:
+                rlAgent.ChangeModel(easyModel);
                 break;
             
             case 1:
+                rlAgent.ChangeModel(mediumModel);
                 break;
             
             case 2:
+                rlAgent.ChangeModel(hardModel);
                 break;
             
             default:
