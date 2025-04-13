@@ -61,6 +61,12 @@ public class RLAgent : Agent
     BufferSensorComponent m_BufferSensor;
     StatsRecorder statsRecorder;
 
+    private string walkSfx = "event:/SFX_Events/Walk";
+    private string runSfx = "event:/SFX_Events/Run";
+    
+    FMOD.Studio.EventInstance walkInstance;
+    FMOD.Studio.EventInstance runInstance;
+    
     // [SerializeField] NNModel[] brains;
 
     // Agent Observation Data
@@ -110,6 +116,15 @@ public class RLAgent : Agent
 
         agentMining.onMine += SetAgentToIdle;
         agentMining.agentData = GameData.MachineData;
+        
+        walkInstance = FMODUnity.RuntimeManager.CreateInstance(walkSfx);
+        runInstance = FMODUnity.RuntimeManager.CreateInstance(runSfx);
+        
+        walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+        runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+
+        walkInstance.setVolume(0.15f);
+        runInstance.setVolume(0.15f);
 
         agentFunctions.agentData = GameData.MachineData;
         agentFunctions.depositBuilding = GameObject.Find("AgentDeposit").transform;
@@ -132,6 +147,9 @@ public class RLAgent : Agent
     void FixedUpdate()
     {
         agentFunctions.UpdateAnimator();
+        walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+        runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
+
     }
 
     public void Reset()
@@ -357,6 +375,7 @@ public class RLAgent : Agent
         GameObject ore = oreData.oreToMine.gameObject;
         
         navMeshAgent.SetDestination(oreData.orePos);
+        runInstance.start();
         // Not using recheck since gains are small and computational cost is high.
         // Coroutine recheckCoroutine = StartCoroutine(ReCheckOres(recheckCallback));
         // Debug.Log("Started GoToOreAndMineCoroutine");
@@ -376,6 +395,13 @@ public class RLAgent : Agent
             if (ore == null)
             {
                 Debug.LogWarning("Ore is null, punishing agent");
+                PunishOreDestinationChange();
+                break;
+            }
+            
+            if (oreData.oreScript.isBeingMined)
+            {
+                Debug.Log("Ore is being mined by another agent, punishing agent");
                 PunishOreDestinationChange();
                 break;
             }
@@ -429,15 +455,9 @@ public class RLAgent : Agent
                 // Debug.Log("Reached destination");
                 // StopCoroutine(recheckCoroutine);
 
-                if (oreData.oreScript.isBeingMined)
-                {
-                    Debug.Log("Ore is being mined by another agent, punishing agent");
-                    PunishOreDestinationChange();
-                    break;
-                }
-
                 StopCoroutine(travellingPunish);
                 // Debug.Log("Starting mining process");
+                runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
                 Coroutine mining;
                 try
                 {
@@ -473,6 +493,7 @@ public class RLAgent : Agent
     public IEnumerator GoToDepositCoroutine(Coroutine travellingPunish)
     {
         Vector3 depositWaypoint = agentFunctions.FindClosestDepositWaypoint(transform.position);
+        runInstance.start();
         navMeshAgent.SetDestination(depositWaypoint);
 
         while (true)
@@ -484,6 +505,7 @@ public class RLAgent : Agent
         }
 
         StopCoroutine(travellingPunish);
+        runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         StartCoroutine(GatherDataForAgent(GatherDataCallback));
     }
 
@@ -632,5 +654,13 @@ public class RLAgent : Agent
     public void ChangeModel(ModelAsset newModel)
     {
         SetModel(behaviorParameters.name, newModel, behaviorParameters.InferenceDevice);
+    }
+
+    private void OnDestroy()
+    {
+        walkInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        walkInstance.release();
+        runInstance.release();
     }
 }

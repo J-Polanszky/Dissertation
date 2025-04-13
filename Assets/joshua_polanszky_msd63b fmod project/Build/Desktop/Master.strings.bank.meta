@@ -1,4 +1,10 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:Assets/Scenes/GameSceneDDA.unity.meta
+guid: 4e809288cd085ce4baaef2d4bb942d1b
+========
+>>>>>>> f721b47 (bug fixes, and sound system seems to be working as intended. new bug found,)
 guid: 721f897e3405d8413bd70e128f35d425
 DefaultImporter:
   externalObjects: {}

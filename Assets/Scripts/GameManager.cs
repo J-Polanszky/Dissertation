@@ -97,6 +97,10 @@ public class GameManager : MonoBehaviour
         SetGameState(0);
         backgroundMusicInstance.setVolume(0.65f);
         backgroundMusicInstance.start();
+        
+        Transform menu = GameObject.FindWithTag("Canvas").transform.Find("Menu");
+        menu.Find("StartGame").GetComponent<Button>().onClick.AddListener(StartTest1);
+        menu.Find("QuitGame").GetComponent<Button>().onClick.AddListener(QuitGame);
     }
 
     //TODO: Change gamestate variable to change music instance
@@ -106,13 +110,6 @@ public class GameManager : MonoBehaviour
         // Debug.Log("Difficulty changed to " + difficulty);
         buttonInstance.start();
         GameData.Difficulty = difficulty;
-    }
-
-    private void Start()
-    {
-        Transform menu = GameObject.FindWithTag("Canvas").transform.Find("Menu");
-        menu.Find("StartGame").GetComponent<Button>().onClick.AddListener(StartTest2);
-        menu.Find("QuitGame").GetComponent<Button>().onClick.AddListener(QuitGame);
     }
 
     void StartTest1()

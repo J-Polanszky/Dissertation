@@ -162,18 +162,18 @@ public class SMAgent : MonoBehaviour
 
         if (agentState == AgentState.TravellingToMine)
         {
+            // Check if ore is being mined, or has been mined and destroyed:
+            if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
+            {
+                oreToMine = FindBestOre(agentFunctions.searchRadius);
+                if(oreToMine == null)
+                    return;
+                navMeshAgent.SetDestination(oreToMine.transform.position);
+                return;
+            }
+            
             if (navMeshAgent.remainingDistance < 1f)
             {
-                // Check if ore is being mined, or has been mined and destroyed:
-                if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
-                {
-                    oreToMine = FindBestOre(agentFunctions.searchRadius);
-                    if(oreToMine == null)
-                        return;
-                    navMeshAgent.SetDestination(oreToMine.transform.position);
-                    return;
-                }
-
                 agentState = AgentState.Mining;
                 runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
                 agentMining.Mine(oreToMine);
@@ -208,6 +208,7 @@ public class SMAgent : MonoBehaviour
 
     void GoToDeposit()
     {
+        runInstance.start();
         agentState = AgentState.TravellingToDeposit;
         navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
         navMeshAgent.isStopped = false;

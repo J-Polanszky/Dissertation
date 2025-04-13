@@ -1,4 +1,10 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:Assets/Scenes/EvaluationScene.unity.meta
+guid: 71d45df7d9079c14785b9eae097fcbf6
+========
+>>>>>>> f721b47 (bug fixes, and sound system seems to be working as intended. new bug found,)
 guid: ba00253eccb38323697c663034cecb49
 DefaultImporter:
   externalObjects: {}
