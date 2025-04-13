@@ -76,37 +76,94 @@ public class DDA_System : MonoBehaviour
 
     int MakeDecision(AgentCollectedData playerData, AgentCollectedData opponentData)
     {
-        //TODO: Analyse every part of player and agent data, and calculate if difficulty is within acceptable limits.
-        
-        // Calculate performance metrics to see how well the player is doing compared to the opponent
-        float scoreRatio = float.Parse(playerData.score) / Mathf.Max(float.Parse(opponentData.score), 1);
-        float inventoryRatio = float.Parse(playerData.scoreOfInventory) / Mathf.Max(float.Parse(opponentData.scoreOfInventory), 1);
-        float timeEfficiencyRatio = float.Parse(playerData.timeSpentMining) / Mathf.Max(float.Parse(opponentData.timeSpentMining), 1);
+        // Root node (implicitly a selector node that returns the first success)
+        return EvaluateDifficultyBehaviorTree(playerData, opponentData);
+    }
 
-        // Define thresholds for difficulty adjustment
-        // float upperScoreThreshold = 1.3f; // Player is outperforming the opponent by 30%
-        // float lowerScoreThreshold = 0.7f; // Player is underperforming the opponent by 30%
-
-        // float upperInventoryThreshold = 1.3f; // Player is outperforming the opponent by 30%
-        // float lowerInventoryThreshold = 0.7f; // Player is underperforming the opponent by 30%
+    int EvaluateDifficultyBehaviorTree(AgentCollectedData playerData, AgentCollectedData opponentData)
+    {
+        // Parse the data once
+        float playerScore = float.Parse(playerData.score);
+        float opponentScore = float.Parse(opponentData.score);
+        float playerInventoryScore = float.Parse(playerData.scoreOfInventory);
+        float opponentInventoryScore = float.Parse(opponentData.scoreOfInventory);
+        float playerTimeSpentMining = float.Parse(playerData.timeSpentMining);
+        float opponentTimeSpentMining = float.Parse(opponentData.timeSpentMining);
         
-        // Calculate overall performance based on the ratios
-        // Adjust weights as needed
+        // Calculate metrics
+        float scoreRatio = playerScore / Mathf.Max(opponentScore, 1);
+        float inventoryRatio = playerInventoryScore / Mathf.Max(opponentInventoryScore, 1);
+        float timeEfficiencyRatio = playerTimeSpentMining / Mathf.Max(opponentTimeSpentMining, 1);
+        
+        // Calculate composite performance
         float overallPerformance = (scoreRatio * 0.5f) + (inventoryRatio * 0.3f) + (timeEfficiencyRatio * 0.2f);
-
+        
         Debug.Log($"Score Ratio: {scoreRatio}, Inventory Ratio: {inventoryRatio}, Time Efficiency Ratio: {timeEfficiencyRatio}");
         Debug.Log($"Overall Performance: {overallPerformance}");
-
-        if (overallPerformance > 1.25f)
-            return GameData.Difficulty + 1; // Increase difficulty
-
-        if (overallPerformance < 0.5f)
-            return 0; // Set difficulty to minimum
-
-        if (overallPerformance < 0.75f)
-            return GameData.Difficulty - 1; // Decrease difficulty
         
-        return GameData.Difficulty; // Keep difficulty the same
+        // Behavior Tree Structure:
+        
+        // First sequence: Check if player is struggling severely (sequence must pass all conditions)
+        if (CheckPlayerStrugglingBadly(scoreRatio, inventoryRatio, overallPerformance))
+        {
+            return ExecuteSetMinimumDifficulty();
+        }
+        
+        // Second sequence: Check if player is doing exceptionally well
+        if (CheckPlayerDominating(scoreRatio, inventoryRatio, overallPerformance))
+        {
+            return ExecuteIncreaseDifficulty();
+        }
+        
+        // Third sequence: Check if player is somewhat struggling
+        if (CheckPlayerStrugglingSlightly(scoreRatio, inventoryRatio, overallPerformance))
+        {
+            return ExecuteDecreaseDifficulty();
+        }
+        
+        // Fallback action: maintain current difficulty
+        return ExecuteMaintainDifficulty();
+    }
+
+    // Condition nodes
+    bool CheckPlayerStrugglingBadly(float scoreRatio, float inventoryRatio, float overallPerformance)
+    {
+        return overallPerformance < 0.5f || (scoreRatio < 0.4f && inventoryRatio < 0.4f);
+    }
+
+    bool CheckPlayerDominating(float scoreRatio, float inventoryRatio, float overallPerformance)
+    {
+        return overallPerformance > 1.25f || (scoreRatio > 1.3f && inventoryRatio > 1.3f);
+    }
+
+    bool CheckPlayerStrugglingSlightly(float scoreRatio, float inventoryRatio, float overallPerformance)
+    {
+        return overallPerformance < 0.75f || (scoreRatio < 0.7f && inventoryRatio < 0.7f);
+    }
+
+    // Action nodes
+    int ExecuteSetMinimumDifficulty()
+    {
+        Debug.Log("Behavior Tree Action: Setting minimum difficulty");
+        return 0; // Easy difficulty
+    }
+
+    int ExecuteIncreaseDifficulty()
+    {
+        Debug.Log("Behavior Tree Action: Increasing difficulty");
+        return GameData.Difficulty + 1;
+    }
+
+    int ExecuteDecreaseDifficulty()
+    {
+        Debug.Log("Behavior Tree Action: Decreasing difficulty");
+        return GameData.Difficulty - 1;
+    }
+
+    int ExecuteMaintainDifficulty()
+    {
+        Debug.Log("Behavior Tree Action: Maintaining current difficulty");
+        return GameData.Difficulty;
     }
 
     void AdjustDifficulty(int difficulty)
