@@ -22,8 +22,8 @@ public class Player : MonoBehaviour
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
 
-        walkInstance.setVolume(0.25f);
-        runInstance.setVolume(0.25f);
+        walkInstance.setVolume(0.15f);
+        runInstance.setVolume(0.15f);
 
         cc = GetComponent<vThirdPersonController>();
         cc.strafeSpeed.walkSpeed = defaultWalkSpeed;

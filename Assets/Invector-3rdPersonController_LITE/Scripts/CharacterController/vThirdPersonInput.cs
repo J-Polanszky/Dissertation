@@ -78,7 +78,8 @@ namespace Invector.vCharacterController
             CameraInput();
             SprintInput();
             StrafeInput();
-            JumpInput();
+            // Disabling jump since its not worth the effort to implement it with the sfx.
+            // JumpInput();
         }
 
         public virtual void MoveInput()
