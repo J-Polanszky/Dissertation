@@ -1,5 +1,6 @@
 using Invector.vCharacterController;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -108,5 +109,13 @@ public class Player : MonoBehaviour
         runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         walkInstance.release();
         runInstance.release();
+    }
+
+    public void ChangeSound(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            GameManager.Instance.ChangeSoundState();
+        }
     }
 }

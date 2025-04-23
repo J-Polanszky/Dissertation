@@ -80,6 +80,8 @@ public static class GameData
 
     public static readonly int InitialTime = 480;
 
+    public static SoundsEnabled SoundState = SoundsEnabled.ALL;
+
     public static Dictionary<OreType, int> InvStorageQty
     {
         get => invStorageQty;

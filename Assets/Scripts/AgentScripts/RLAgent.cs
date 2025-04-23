@@ -519,9 +519,9 @@ public class RLAgent : Agent
 
         if(TrainingManager.instance != null)
             TrainingManager.instance.StartGame();
-        else if (GameManager.instance != null)
+        else if (GameManager.Instance != null)
         {
-            GameManager.instance.RunGameStartFunctions();
+            GameManager.Instance.RunGameStartFunctions();
             switch (GameData.Difficulty)
             {
                 case 0:

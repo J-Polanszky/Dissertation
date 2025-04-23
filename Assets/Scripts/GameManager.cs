@@ -6,6 +6,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+public enum SoundsEnabled
+{
+    ALL,
+    SFX,
+    NONE
+}
+
 public class GameManager : MonoBehaviour
 {
     private string backgroundMusic = "event:/Music_Events/BackingTrack";
@@ -18,7 +25,7 @@ public class GameManager : MonoBehaviour
     FMOD.Studio.EventInstance clockInstance;
     FMOD.Studio.EventInstance buttonInstance;
 
-    public static GameManager instance;
+    public static GameManager Instance;
 
     private TextMeshProUGUI playerText, machineText, timeText, goldText, silverText, copperText;
 
@@ -77,9 +84,9 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -88,7 +95,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        FMODUnity.RuntimeManager.GetBus("bus:/").setVolume(0.7f);
+        RuntimeManager.GetBus("bus:/").setVolume(0.7f);
 
         backgroundMusicInstance = RuntimeManager.CreateInstance(backgroundMusic);
         clockInstance = RuntimeManager.CreateInstance(clockSfx);
@@ -288,5 +295,25 @@ public class GameManager : MonoBehaviour
     void SetGameState(int state)
     {
         backgroundMusicInstance.setParameterByName("GameState", state);
+    }
+
+    public void ChangeSoundState()
+    {
+        switch (GameData.SoundState)
+        {
+            case SoundsEnabled.ALL:
+                GameData.SoundState = SoundsEnabled.SFX;
+                backgroundMusicInstance.setVolume(0);
+                break;
+            case SoundsEnabled.SFX:
+                GameData.SoundState = SoundsEnabled.NONE;
+                RuntimeManager.GetBus("bus:/").setVolume(0);
+                break;
+            case SoundsEnabled.NONE:
+                GameData.SoundState = SoundsEnabled.ALL;
+                RuntimeManager.GetBus("bus:/").setVolume(0.7f);
+                GameData.SoundState = SoundsEnabled.ALL;
+                break;
+        }
     }
 }
