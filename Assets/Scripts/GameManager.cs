@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(LoadGameSceneAsync(gameScene));
     }
 
-    void QuitGame()
+    public void QuitGame()
     {
         buttonInstance.start();
 #if UNITY_EDITOR
@@ -312,7 +312,6 @@ public class GameManager : MonoBehaviour
             case SoundsEnabled.NONE:
                 GameData.SoundState = SoundsEnabled.ALL;
                 RuntimeManager.GetBus("bus:/").setVolume(0.7f);
-                GameData.SoundState = SoundsEnabled.ALL;
                 break;
         }
     }

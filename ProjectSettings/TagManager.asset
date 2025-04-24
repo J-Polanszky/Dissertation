@@ -13,6 +13,8 @@ TagManager:
   - Agent
   - Copper
   - Canvas
+  - LoginPanel
+  - MenuPanel
   layers:
   - Default
   - TransparentFX
