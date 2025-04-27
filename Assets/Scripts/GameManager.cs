@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using FMODUnity;
 using TMPro;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -31,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     int playTest = 0;
 
-    bool clockStarted = false;
+    bool clockStarted, isDDA = false;
 
     void UpdatePlayerScore(int score)
     {
@@ -48,7 +50,7 @@ public class GameManager : MonoBehaviour
         int minutes = GameData.TimeLeft / 60;
         int seconds = GameData.TimeLeft % 60;
         timeText.text = minutes.ToString("00") + "m " + seconds.ToString("00") + "s";
-        
+
         if (!clockStarted && minutes == 0 && seconds <= 30)
         {
             clockInstance.setVolume(0);
@@ -104,7 +106,7 @@ public class GameManager : MonoBehaviour
         SetGameState(0);
         backgroundMusicInstance.setVolume(0.65f);
         backgroundMusicInstance.start();
-        
+
         Transform menu = GameObject.FindWithTag("Canvas").transform.Find("Menu");
         menu.Find("StartGame").GetComponent<Button>().onClick.AddListener(StartTest1);
         menu.Find("QuitGame").GetComponent<Button>().onClick.AddListener(QuitGame);
@@ -123,14 +125,16 @@ public class GameManager : MonoBehaviour
     {
         buttonInstance.start();
         SetGameState(1);
+        DataCollector.Instance.PlaytestName = "Playtest1";
         StartCoroutine(LoadGameSceneAsync("GameScene", RunGameStartFunctions));
     }
 
     void StartTest2()
     {
-        // Gather which scene to load from data.
+        // TODO: Gather which scene to load from data.
         bool fakeIsDDA = true;
         string gameScene = fakeIsDDA ? "GameSceneDDA" : "GameSceneRLAgent";
+        DataCollector.Instance.PlaytestName = $"Playtest2_{gameScene}";
         StartCoroutine(LoadGameSceneAsync(gameScene));
     }
 
@@ -147,14 +151,14 @@ public class GameManager : MonoBehaviour
     public void RunGameStartFunctions()
     {
         Debug.Log("Game started");
-        
+
         GameData.PlayerData.Reset();
         GameData.MachineData.Reset();
-        
+
         playTest++;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
+
         Transform canvas = GameObject.FindWithTag("Canvas").transform;
         timeText = canvas.Find("Time").GetComponent<TextMeshProUGUI>();
         machineText = canvas.Find("EnemyScore").GetComponent<TextMeshProUGUI>();
@@ -199,13 +203,15 @@ public class GameManager : MonoBehaviour
 
         SpawnOres();
         StartCoroutine(CountDown());
-        // StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
-        // DataCollector.Instance.gameActive = true;
+
+        DataCollector.Instance.gameActive = true;
+        StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
     }
 
     void GameOver()
     {
         DataCollector.Instance.RecordEndOfGameEvent();
+
         string WinOrLose()
         {
             if (GameData.PlayerData.Score > GameData.MachineData.Score)
@@ -213,7 +219,7 @@ public class GameManager : MonoBehaviour
                 SetGameState(3);
                 return "You Win!";
             }
-            
+
             if (GameData.PlayerData.Score < GameData.MachineData.Score)
             {
                 SetGameState(4);
@@ -237,7 +243,7 @@ public class GameManager : MonoBehaviour
                 QuitGame();
         });
         continueButton.GetChild(0).GetComponent<TextMeshProUGUI>().text = playTest == 1 ? "CONTINUE" : "QUIT";
-        
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -254,7 +260,7 @@ public class GameManager : MonoBehaviour
             GameData.TimeLeft--;
             UpdateTime();
         }
-        
+
         clockInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         DataCollector.Instance.gameActive = false;
         DataCollector.Instance.StopAllCoroutines();
@@ -265,7 +271,7 @@ public class GameManager : MonoBehaviour
     void SpawnOres()
     {
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
-        
+
         terrainPopulator.SetOreSpawns(10, 5, 20, 75);
     }
 
@@ -314,5 +320,12 @@ public class GameManager : MonoBehaviour
                 RuntimeManager.GetBus("bus:/").setVolume(0.7f);
                 break;
         }
+    }
+
+    public IEnumerator IsDDA()
+    {
+        Task<bool> isDDATask = DataCollector.Instance.GetUserData(AuthenticationService.Instance.PlayerInfo.Username);
+        yield return new WaitUntil(() => isDDATask.IsCompleted);
+        isDDA = isDDATask.Result;
     }
 }

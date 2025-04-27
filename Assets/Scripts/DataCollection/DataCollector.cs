@@ -1,13 +1,26 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Unity.Services.Authentication;
 using UnityEngine;
+using UnityEngine.Networking;
+
+[Serializable]
+public class ApiResponse
+{
+    public bool isDDA;
+}
 
 public class DataCollector : MonoBehaviour
 {
     public static DataCollector Instance { get; private set; }
 
-    private string playerID, playtestName;
-    
+    private const string API_URL = "http://localhost:8000"; //"https://your-fastapi-vercel-url/api"
+
+    private string playtestName;
+
     public bool gameActive = false;
 
     private void Awake()
@@ -23,12 +36,6 @@ public class DataCollector : MonoBehaviour
         }
     }
 
-    public string PlayerID
-    {
-        get => playerID;
-        set => playerID = value;
-    }
-
     public string PlaytestName
     {
         get => playtestName;
@@ -37,9 +44,6 @@ public class DataCollector : MonoBehaviour
 
     public void RecordEndOfGameEvent()
     {
-        // To figure out where to set this properly
-        PlayerID = "12345";
-
         string difficulty = GameData.Difficulty switch
         {
             0 => "Easy",
@@ -55,8 +59,10 @@ public class DataCollector : MonoBehaviour
             playerScore,
             opponentScore
         );
-        
-        FirebaseHandler.Instance.SendEndOfGameEvent(PlayerID, PlaytestName, endOfGame);
+
+        string json = JsonUtility.ToJson(endOfGame);
+
+        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/end_of_game", json);
     }
 
     public IEnumerator LoopTimestampEvent()
@@ -81,23 +87,26 @@ public class DataCollector : MonoBehaviour
             _ => "Unknown"
         };
         string timePassed = (GameData.InitialTime - GameData.TimeLeft).ToString();
-        
+
         // Player data
-        
+
         string playerTimeSpentMining = GameData.PlayerData.TimeSpentMining.ToString();
         string playerTimeSpentWTravelling =
-            Math.Round((float) (GameData.InitialTime - GameData.TimeLeft) - GameData.PlayerData.TimeSpentMining, 2).ToString();
+            Math.Round((float)(GameData.InitialTime - GameData.TimeLeft) - GameData.PlayerData.TimeSpentMining, 2)
+                .ToString();
         string playerScore = GameData.PlayerData.Score.ToString();
         string playerInventoryUsed = GameData.PlayerData.TotalInventory.ToString();
-        
+
         int totalScoreOfInventory = 0;
-        
+
         foreach (var (key, value) in GameData.PlayerData.inventory)
         {
             totalScoreOfInventory += value.Score;
         }
-        
+
         string playerScoreOfInventory = totalScoreOfInventory.ToString();
+
+        Debug.Log($"Player Data: Mining: {playerTimeSpentMining}, Travelling: {playerTimeSpentWTravelling}, Score: {playerScore}, Inv: {playerInventoryUsed}, InvScore: {playerScoreOfInventory}");
         
         AgentCollectedData playerCollectedData = new AgentCollectedData(
             playerTimeSpentMining,
@@ -106,32 +115,35 @@ public class DataCollector : MonoBehaviour
             playerInventoryUsed,
             playerScoreOfInventory
         );
-        
+
         // Opponent data
-        
+
         string opponentTimeSpentMining = GameData.MachineData.TimeSpentMining.ToString();
         string opponentTimeSpentWTravelling =
-            Math.Round((float) (GameData.InitialTime - GameData.TimeLeft) - GameData.MachineData.TimeSpentMining, 2).ToString();
+            Math.Round((float)(GameData.InitialTime - GameData.TimeLeft) - GameData.MachineData.TimeSpentMining, 2)
+                .ToString();
         string opponentScore = GameData.MachineData.Score.ToString();
         string opponentInventoryUsed = GameData.MachineData.TotalInventory.ToString();
-        
+
         totalScoreOfInventory = 0;
-        
+
         foreach (var (key, value) in GameData.MachineData.inventory)
         {
             totalScoreOfInventory += value.Score;
         }
-        
+
         string opponentScoreOfInventory = totalScoreOfInventory.ToString();
+
+        Debug.Log($"Opponent Data: Mining: {opponentTimeSpentMining}, Travelling: {opponentTimeSpentWTravelling}, Score: {opponentScore}, Inv: {opponentInventoryUsed}, InvScore: {opponentScoreOfInventory}");
         
         AgentCollectedData opponentCollectedData = new AgentCollectedData(
             opponentTimeSpentMining,
-            opponentTimeSpentWTravelling.ToString(),
+            opponentTimeSpentWTravelling,
             opponentScore,
             opponentInventoryUsed,
             opponentScoreOfInventory
         );
-        
+
         TimeStampEvent timestampEvent = new TimeStampEvent(
             difficulty,
             timePassed,
@@ -139,6 +151,77 @@ public class DataCollector : MonoBehaviour
             opponentCollectedData
         );
 
-        FirebaseHandler.Instance.SendTimestampEvent(PlayerID, PlaytestName, timestamp, timestampEvent);
+        string json = JsonUtility.ToJson(timestampEvent);
+        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/{timestamp}", json);
+    }
+
+    private async Task SendToApi(string url, string json)
+    {
+        Debug.Log($"Sending data to API: {url}");
+        Debug.Log($"Data: {json}");
+        
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+        
+            var operation = request.SendWebRequest();
+        
+            while (!operation.isDone)
+                await Task.Yield();
+            
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error sending data to API: {request.error}");
+            }
+            else
+            {
+                Debug.Log("Data sent to API successfully!");
+            }
+        }
+    }
+
+    public async Task<bool> GetUserData(string playerID)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get($"{API_URL}/users/{playerID}/isdda"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(new byte[0]);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            
+            var operation = request.SendWebRequest();
+            
+            while (!operation.isDone)
+                await Task.Yield();
+            
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error retrieving data from API: {request.error}");
+            }
+            else
+            {
+                // Return should be a json like this {"isDDA": true}
+                string json = request.downloadHandler.text;
+                Debug.Log($"Data retrieved from API successfully: {json}");
+                
+                // Parse the JSON response
+                var response = JsonUtility.FromJson<ApiResponse>(json);
+                if (response != null)
+                {
+                    Debug.Log($"isDDA: {response.isDDA}");
+                    return response.isDDA;
+                }
+                
+                Debug.LogError("Invalid JSON format");
+            }
+        }
+
+        Debug.LogError("Failed to retrieve data from API");
+        // Wait 5 seconds before retrying
+        await Task.Delay(5000);
+        // Retry the request
+        return await GetUserData(playerID);
     }
 }

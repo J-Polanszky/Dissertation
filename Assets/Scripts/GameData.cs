@@ -78,7 +78,7 @@ public static class GameData
     
     public static readonly int MaximumInvQty = 30;
 
-    public static readonly int InitialTime = 480;
+    public static readonly int InitialTime = 35;
 
     public static SoundsEnabled SoundState = SoundsEnabled.ALL;
 

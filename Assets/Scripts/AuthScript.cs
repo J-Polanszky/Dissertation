@@ -82,23 +82,13 @@ public class AuthScript : MonoBehaviour
                     usernameInput.text,
                     passwordInput.text);
             }
-            else
-            {
-                // For demo purposes, use anonymous auth but set the player name
-                SignInOptions loginOptions = new SignInOptions
-                {
-                    CreateAccount = true
-                };
-                await AuthenticationService.Instance.SignInAnonymouslyAsync(loginOptions);
-
-                // Set player name to match username input
-                await AuthenticationService.Instance.UpdatePlayerNameAsync(usernameInput.text);
-            }
 
             Debug.Log($"Signed in to Unity services as: {AuthenticationService.Instance.PlayerId}");
             
             loginPanel.SetActive(false);
             menuPanel.SetActive(true);
+
+            GameManager.Instance.StartCoroutine(GameManager.Instance.IsDDA());
         }
         catch (Exception e)
         {
@@ -131,6 +121,8 @@ public class AuthScript : MonoBehaviour
             
             loginPanel.SetActive(false);
             menuPanel.SetActive(true);
+            
+            GameManager.Instance.StartCoroutine(GameManager.Instance.IsDDA());
         }
         catch (Exception e)
         {

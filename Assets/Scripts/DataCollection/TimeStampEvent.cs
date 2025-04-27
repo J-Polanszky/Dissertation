@@ -34,8 +34,8 @@ public class TimeStampEvent
     // public string playerID;
     public string difficulty;
     public string timePassed;
-    AgentCollectedData playerCollectedData;
-    AgentCollectedData opponentCollectedData;
+    public AgentCollectedData playerCollectedData;
+    public AgentCollectedData opponentCollectedData;
 
     // Maybe make the time stamp the id of the event, and like that it will automatically be under the same playerID, and right scene name.
     public TimeStampEvent(

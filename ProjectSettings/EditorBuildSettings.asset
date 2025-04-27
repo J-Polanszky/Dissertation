@@ -14,9 +14,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GameSceneRLAgent.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/Plugins/FMOD/Cache
+    guid: 2dd7d9f01aa77ab4f90b9e38affd29c1
   - enabled: 1
     path: Assets/Scenes/GameSceneDDA.unity
-    guid: 2dd7d9f01aa77ab4f90b9e38affd29c1
+    guid: 13141be38fd3c6440be36b1780e6b11b
   - enabled: 1
     path: Assets/Scenes/EndScene.unity
     guid: af59987b41ad1714a9903430831fb297
