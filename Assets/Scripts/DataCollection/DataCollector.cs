@@ -17,8 +17,9 @@ public class DataCollector : MonoBehaviour
 {
     public static DataCollector Instance { get; private set; }
 
-    private const string API_URL = "http://localhost:8000"; //"https://your-fastapi-vercel-url/api"
-
+    // private const string API_URL = "http://localhost:8000";
+    private const string API_URL = "https://jp-dissertation.up.railway.app";
+    
     private string playtestName;
 
     public bool gameActive = false;

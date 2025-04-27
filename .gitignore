@@ -78,6 +78,6 @@ venv/
 *FirebaseCppApp-12_7_0.so
 fmod_editor.log
 
-FastApi/.env
+.env
 __pycache__/
 Dissertation_Form/
