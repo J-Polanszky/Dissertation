@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
@@ -199,6 +200,35 @@ public class DataCollector : MonoBehaviour
         Debug.Log($"Sending data to API: {url}");
         Debug.Log($"Data: {json}");
 
+        // Save a copy to persistent storage
+        try
+        {
+            // Extract the path after the base API URL
+            Uri uri = new Uri(url);
+            string relativePath = uri.AbsolutePath.Replace(API_URL, "").TrimStart('/');
+
+            // Construct the full directory path in persistent storage
+            string directoryPath = Path.Combine(Application.persistentDataPath, relativePath);
+            directoryPath = Path.GetDirectoryName(directoryPath); // Remove the file name
+
+            // Ensure the directory exists
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            // Save the JSON data to a file
+            string filePath = Path.Combine(directoryPath, "data.json");
+            File.WriteAllText(filePath, json);
+
+            Debug.Log($"Data saved to persistent storage: {filePath}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save data to persistent storage: {e.Message}");
+        }
+        
+        // Send data to the API
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
@@ -226,7 +256,7 @@ public class DataCollector : MonoBehaviour
     {
         using (UnityWebRequest request = UnityWebRequest.Get($"{API_URL}/users/{playerID}/isdda"))
         {
-            request.uploadHandler = new UploadHandlerRaw(new byte[0]);
+            request.uploadHandler = new UploadHandlerRaw(Array.Empty<byte>());
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 

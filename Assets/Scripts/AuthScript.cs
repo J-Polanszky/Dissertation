@@ -85,10 +85,14 @@ public class AuthScript : MonoBehaviour
 
             Debug.Log($"Signed in to Unity services as: {AuthenticationService.Instance.PlayerId}");
             
+            loginStatusText.text = "Login successful!. Retrieving data...";
+
+            bool result = await GameManager.Instance.IsDDA();
+            
+            loginStatusText.text = result ? "Success" : "Failed to retrieve data. Shutting down...";
+            
             loginPanel.SetActive(false);
             menuPanel.SetActive(true);
-
-            GameManager.Instance.StartCoroutine(GameManager.Instance.IsDDA());
         }
         catch (Exception e)
         {
@@ -122,7 +126,11 @@ public class AuthScript : MonoBehaviour
             loginPanel.SetActive(false);
             menuPanel.SetActive(true);
             
-            GameManager.Instance.StartCoroutine(GameManager.Instance.IsDDA());
+            loginStatusText.text = "Login successful!. Retrieving data...";
+
+            bool result = await GameManager.Instance.IsDDA();
+            
+            loginStatusText.text = result ? "Success" : "Failed to retrieve data. Shutting down...";
         }
         catch (Exception e)
         {
