@@ -156,24 +156,28 @@ public class DDA_System : MonoBehaviour
     int ExecuteSetMinimumDifficulty()
     {
         Debug.Log("Behavior Tree Action: Setting minimum difficulty");
+        DataCollector.Instance.RecordDDAEvent(GameData.Difficulty, 0);
         return 0; // Easy difficulty
     }
     
     int ExecuteSetMaximumDifficulty()
     {
         Debug.Log("Behavior Tree Action: Setting maximum difficulty");
+        DataCollector.Instance.RecordDDAEvent(GameData.Difficulty, 2);
         return 2; // Hard difficulty
     }
 
     int ExecuteIncreaseDifficulty()
     {
         Debug.Log("Behavior Tree Action: Increasing difficulty");
+        DataCollector.Instance.RecordDDAEvent(GameData.Difficulty, Math.Min(GameData.Difficulty + 1, 2));
         return GameData.Difficulty + 1;
     }
 
     int ExecuteDecreaseDifficulty()
     {
         Debug.Log("Behavior Tree Action: Decreasing difficulty");
+        DataCollector.Instance.RecordDDAEvent(GameData.Difficulty, Math.Max(GameData.Difficulty - 1, 0));
         return GameData.Difficulty - 1;
     }
 
