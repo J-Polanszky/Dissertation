@@ -653,6 +653,10 @@ public class RLAgent : Agent
     
     public void ChangeModel(ModelAsset newModel)
     {
+        // This causes a delay where the agent wont be able to make decisions. 
+        // This is the best option, as the agent will continue the current decision while the model is being changed.
+        // Also preloading the model in memory will speed up the process.
+        // Having them all loaded is not a good idea, as it will triple the performance requirements.
         SetModel(behaviorParameters.name, newModel, behaviorParameters.InferenceDevice);
     }
 

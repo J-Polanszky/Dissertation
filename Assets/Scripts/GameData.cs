@@ -48,6 +48,7 @@ public class AgentData
         
         TotalInventory = 0;
         Score = 0;
+        TimeSpentMining = 0;
         foreach (var (key, value) in inventory)
         {
             value.Quantity = 0;

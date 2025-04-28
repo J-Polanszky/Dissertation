@@ -131,9 +131,7 @@ public class GameManager : MonoBehaviour
 
     void StartTest2()
     {
-        // TODO: Gather which scene to load from data.
-        bool fakeIsDDA = true;
-        string gameScene = fakeIsDDA ? "GameSceneDDA" : "GameSceneRLAgent";
+        string gameScene = isDDA ? "GameSceneDDA" : "GameSceneRLAgent";
         DataCollector.Instance.PlaytestName = $"Playtest2_{gameScene}";
         StartCoroutine(LoadGameSceneAsync(gameScene));
     }

@@ -19,7 +19,7 @@ public class DataCollector : MonoBehaviour
 
     // private const string API_URL = "http://localhost:8000";
     private const string API_URL = "https://jp-dissertation.up.railway.app";
-    
+
     private string playtestName;
 
     public bool gameActive = false;
@@ -63,7 +63,8 @@ public class DataCollector : MonoBehaviour
 
         string json = JsonUtility.ToJson(endOfGame);
 
-        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/end_of_game", json);
+        Task send = SendToApi(
+            $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/end_of_game", json);
     }
 
     public IEnumerator LoopTimestampEvent()
@@ -107,8 +108,9 @@ public class DataCollector : MonoBehaviour
 
         string playerScoreOfInventory = totalScoreOfInventory.ToString();
 
-        Debug.Log($"Player Data: Mining: {playerTimeSpentMining}, Travelling: {playerTimeSpentWTravelling}, Score: {playerScore}, Inv: {playerInventoryUsed}, InvScore: {playerScoreOfInventory}");
-        
+        Debug.Log(
+            $"Player Data: Mining: {playerTimeSpentMining}, Travelling: {playerTimeSpentWTravelling}, Score: {playerScore}, Inv: {playerInventoryUsed}, InvScore: {playerScoreOfInventory}");
+
         AgentCollectedData playerCollectedData = new AgentCollectedData(
             playerTimeSpentMining,
             playerTimeSpentWTravelling.ToString(),
@@ -135,8 +137,9 @@ public class DataCollector : MonoBehaviour
 
         string opponentScoreOfInventory = totalScoreOfInventory.ToString();
 
-        Debug.Log($"Opponent Data: Mining: {opponentTimeSpentMining}, Travelling: {opponentTimeSpentWTravelling}, Score: {opponentScore}, Inv: {opponentInventoryUsed}, InvScore: {opponentScoreOfInventory}");
-        
+        Debug.Log(
+            $"Opponent Data: Mining: {opponentTimeSpentMining}, Travelling: {opponentTimeSpentWTravelling}, Score: {opponentScore}, Inv: {opponentInventoryUsed}, InvScore: {opponentScoreOfInventory}");
+
         AgentCollectedData opponentCollectedData = new AgentCollectedData(
             opponentTimeSpentMining,
             opponentTimeSpentWTravelling,
@@ -153,26 +156,61 @@ public class DataCollector : MonoBehaviour
         );
 
         string json = JsonUtility.ToJson(timestampEvent);
-        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/{timestamp}", json);
+        Task send = SendToApi(
+            $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/{timestamp}", json);
+    }
+
+    public void RecordDDAEvent(int difficulty, int newDifficulty)
+    {
+        string previousDifficulty = difficulty switch
+        {
+            0 => "Easy",
+            1 => "Medium",
+            2 => "Hard",
+            _ => "Unknown"
+        };
+
+        string newDifficult = newDifficulty switch
+        {
+            0 => "Easy",
+            1 => "Medium",
+            2 => "Hard",
+            _ => "Unknown"
+        };
+
+        string timestamp = (GameData.InitialTime - GameData.TimeLeft).ToString();
+
+        DDAChange ddaEvent = new DDAChange(
+            previousDifficulty,
+            newDifficult,
+            timestamp
+        );
+
+
+        Debug.Log($"DDA Event: Previous: {previousDifficulty}, New: {newDifficult}");
+
+        string json = JsonUtility.ToJson(ddaEvent);
+        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda",
+            json);
     }
 
     private async Task SendToApi(string url, string json)
     {
         Debug.Log($"Sending data to API: {url}");
         Debug.Log($"Data: {json}");
-        
+
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
-        
+
             var operation = request.SendWebRequest();
-        
+
             while (!operation.isDone)
                 await Task.Yield();
-            
+
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error sending data to API: {request.error}");
@@ -191,12 +229,12 @@ public class DataCollector : MonoBehaviour
             request.uploadHandler = new UploadHandlerRaw(new byte[0]);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
-            
+
             var operation = request.SendWebRequest();
-            
+
             while (!operation.isDone)
                 await Task.Yield();
-            
+
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error retrieving data from API: {request.error}");
@@ -206,7 +244,7 @@ public class DataCollector : MonoBehaviour
                 // Return should be a json like this {"isDDA": true}
                 string json = request.downloadHandler.text;
                 Debug.Log($"Data retrieved from API successfully: {json}");
-                
+
                 // Parse the JSON response
                 var response = JsonUtility.FromJson<ApiResponse>(json);
                 if (response != null)
@@ -214,7 +252,7 @@ public class DataCollector : MonoBehaviour
                     Debug.Log($"isDDA: {response.isDDA}");
                     return response.isDDA;
                 }
-                
+
                 Debug.LogError("Invalid JSON format");
             }
         }

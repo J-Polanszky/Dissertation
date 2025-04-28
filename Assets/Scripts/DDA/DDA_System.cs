@@ -109,16 +109,22 @@ public class DDA_System : MonoBehaviour
             return ExecuteSetMinimumDifficulty();
         }
         
-        // Second sequence: Check if player is doing exceptionally well
-        if (CheckPlayerDominating(scoreRatio, inventoryRatio, overallPerformance))
-        {
-            return ExecuteIncreaseDifficulty();
-        }
-        
-        // Third sequence: Check if player is somewhat struggling
+        // Second sequence: Check if player is struggling
         if (CheckPlayerStrugglingSlightly(scoreRatio, inventoryRatio, overallPerformance))
         {
             return ExecuteDecreaseDifficulty();
+        }
+        
+        // Third sequence: Check if player is doing very well
+        if (CheckPlayerDominating(scoreRatio, inventoryRatio, overallPerformance))
+        {
+            return ExecuteSetMaximumDifficulty();
+        }
+        
+        // Fourth sequence: Check if player is doing well
+        if (CheckPlayerWinning(scoreRatio, inventoryRatio, overallPerformance))
+        {
+            return ExecuteIncreaseDifficulty();
         }
         
         // Fallback action: maintain current difficulty
@@ -131,14 +137,19 @@ public class DDA_System : MonoBehaviour
         return overallPerformance < 0.5f || (scoreRatio < 0.4f && inventoryRatio < 0.4f);
     }
 
-    bool CheckPlayerDominating(float scoreRatio, float inventoryRatio, float overallPerformance)
-    {
-        return overallPerformance > 1.25f || (scoreRatio > 1.3f && inventoryRatio > 1.3f);
-    }
-
     bool CheckPlayerStrugglingSlightly(float scoreRatio, float inventoryRatio, float overallPerformance)
     {
         return overallPerformance < 0.75f || (scoreRatio < 0.7f && inventoryRatio < 0.7f);
+    }
+    
+    bool CheckPlayerDominating(float scoreRatio, float inventoryRatio, float overallPerformance)
+    {
+        return overallPerformance > 1.5f || (scoreRatio > 1.5f && inventoryRatio > 1.5f);
+    }
+    
+    bool CheckPlayerWinning(float scoreRatio, float inventoryRatio, float overallPerformance)
+    {
+        return overallPerformance > 1.25f || (scoreRatio > 1.3f && inventoryRatio > 1.3f);
     }
 
     // Action nodes
@@ -146,6 +157,12 @@ public class DDA_System : MonoBehaviour
     {
         Debug.Log("Behavior Tree Action: Setting minimum difficulty");
         return 0; // Easy difficulty
+    }
+    
+    int ExecuteSetMaximumDifficulty()
+    {
+        Debug.Log("Behavior Tree Action: Setting maximum difficulty");
+        return 2; // Hard difficulty
     }
 
     int ExecuteIncreaseDifficulty()
