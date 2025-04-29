@@ -207,6 +207,8 @@ public class GameManager : MonoBehaviour
 
         DataCollector.Instance.gameActive = true;
         StartCoroutine(DataCollector.Instance.LoopTimestampEvent());
+        
+        PerformanceLogger.Instance.StartLogging();
     }
 
     void GameOver()

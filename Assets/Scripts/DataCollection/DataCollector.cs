@@ -46,6 +46,7 @@ public class DataCollector : MonoBehaviour
 
     public void RecordEndOfGameEvent()
     {
+        PerformanceLog log = PerformanceLogger.Instance.EndLogging();
         string difficulty = GameData.Difficulty switch
         {
             0 => "Easy",
@@ -59,7 +60,8 @@ public class DataCollector : MonoBehaviour
         EndOfGame endOfGame = new EndOfGame(
             difficulty,
             playerScore,
-            opponentScore
+            opponentScore,
+            log
         );
 
         string json = JsonUtility.ToJson(endOfGame);
