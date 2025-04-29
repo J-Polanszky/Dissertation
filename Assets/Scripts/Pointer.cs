@@ -5,7 +5,9 @@ public class Pointer : MonoBehaviour
 {
     public Vector3 playerBase; // Assign the player's base transform in the Inspector
     public RectTransform pointerUI; // Assign the UI element (e.g., an arrow) in the Inspector
-    public Camera mainCamera; // Assign the main camera in the Inspector
+    public Camera mainCamera;
+    private bool wasOffScreen = false;
+    private float edgeMargin = 20f; // pixels
 
     private void Start()
     {
@@ -23,25 +25,39 @@ public class Pointer : MonoBehaviour
 
         bool isInFrontOfCamera =
             Vector3.Dot(mainCamera.transform.forward, playerBase - mainCamera.transform.position) > 0;
-        bool isOffScreen = screenPos.x <= 0 || screenPos.x >= Screen.width || screenPos.y <= 0 ||
-                           screenPos.y >= Screen.height;
-        bool isPlayerBaseOffScreen = !isInFrontOfCamera || isOffScreen;
 
-        // Calculate the inner radius based on the canvas size
-        float innerRadius = Mathf.Min(Screen.width, Screen.height) / 4f; // Adjust as needed
+        // Hysteresis: no margin for going off-screen, margin for coming back on-screen
+        bool isOffScreenNow = 
+            screenPos.x < 0 || screenPos.x > Screen.width ||
+            screenPos.y < 0 || screenPos.y > Screen.height;
+
+        bool isOnScreenWithMargin = 
+            screenPos.x > edgeMargin && screenPos.x < Screen.width - edgeMargin &&
+            screenPos.y > edgeMargin && screenPos.y < Screen.height - edgeMargin;
+
+        if (wasOffScreen)
+        {
+            // Only switch to on-screen if well inside the screen
+            wasOffScreen = !isOnScreenWithMargin;
+        }
+        else
+        {
+            // Switch to off-screen as soon as it's outside
+            wasOffScreen = isOffScreenNow;
+        }
+
+        bool isPlayerBaseOffScreen = !isInFrontOfCamera || wasOffScreen;
+
+        // ...rest of your code remains unchanged...
+        float innerRadius = Mathf.Min(Screen.width, Screen.height) / 4f;
 
         if (!isInFrontOfCamera)
         {
-            // Flip the pointer direction if the base is behind the camera
             angle += 180;
         }
-        
-        //TODO: When the base is on the edge of the screen, but the transform barely is not, the pointer freaks out. 
-        //More polish is necessary, if time allows.
 
         if (isPlayerBaseOffScreen)
         {
-            // Place the pointer at the edge of the canvas based on the angle
             float canvasHalfWidth = Screen.width / 2f;
             float canvasHalfHeight = Screen.height / 2f;
             float radians = angle * Mathf.Deg2Rad;
@@ -51,7 +67,6 @@ public class Pointer : MonoBehaviour
         }
         else
         {
-            // Move the pointer towards the edge of the screen if outside the inner radius
             if (direction.magnitude > innerRadius)
             {
                 direction = direction.normalized * innerRadius;
@@ -60,7 +75,5 @@ public class Pointer : MonoBehaviour
         }
 
         pointerUI.rotation = Quaternion.Euler(0, 0, angle);
-
-        // Debug.Log(isPlayerBaseOffScreen ? "playerBase is off-screen" : "playerBase is on-screen");
     }
 }

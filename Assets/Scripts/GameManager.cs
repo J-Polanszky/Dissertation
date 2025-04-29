@@ -131,6 +131,7 @@ public class GameManager : MonoBehaviour
 
     void StartTest2()
     {
+        SetGameState(1);
         string gameScene = isDDA ? "GameSceneDDA" : "GameSceneRLAgent";
         DataCollector.Instance.PlaytestName = $"Playtest2_{gameScene}";
         StartCoroutine(LoadGameSceneAsync(gameScene));
@@ -316,6 +317,7 @@ public class GameManager : MonoBehaviour
             case SoundsEnabled.NONE:
                 GameData.SoundState = SoundsEnabled.ALL;
                 RuntimeManager.GetBus("bus:/").setVolume(0.7f);
+                backgroundMusicInstance.setVolume(0.65f);
                 break;
         }
     }
