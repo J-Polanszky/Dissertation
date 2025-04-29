@@ -90,6 +90,8 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            QualitySettings.vSyncCount = 0;  // Disable VSync
+            Application.targetFrameRate = 60;
         }
         else
             Destroy(gameObject);
@@ -271,7 +273,8 @@ public class GameManager : MonoBehaviour
     {
         TerrainPopulator terrainPopulator = GameObject.FindGameObjectWithTag("Ground").GetComponent<TerrainPopulator>();
 
-        terrainPopulator.SetOreSpawns(10, 5, 20, 75);
+        // Reduced number of ore spawns to force more agent-player collisions
+        terrainPopulator.SetOreSpawns(8, 5, 20, 75);
     }
 
     IEnumerator LoadGameSceneAsync(string sceneName, System.Action callback = null)
@@ -322,10 +325,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public IEnumerator IsDDA()
+    IEnumerator ShutDown()
     {
-        Task<bool> isDDATask = DataCollector.Instance.GetUserData(AuthenticationService.Instance.PlayerInfo.Username);
-        yield return new WaitUntil(() => isDDATask.IsCompleted);
-        isDDA = isDDATask.Result;
+        yield return new WaitForSeconds(5);
+        backgroundMusicInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        clockInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        buttonInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        QuitGame();
+    }
+    
+    public async Task<bool> IsDDA()
+    {
+        try
+        {
+            isDDA = await DataCollector.Instance.GetUserData(AuthenticationService.Instance.PlayerInfo.Username);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to get user data: {e.Message}");
+            StartCoroutine(ShutDown());
+            return false;
+        }
     }
 }

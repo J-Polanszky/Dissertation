@@ -78,6 +78,20 @@ async def timestamp_event(
     )
     return JSONResponse({"status": "success"})
 
+@app.post("/{playtest_type}/{player_id}/dda")
+async def dda_event(playtest_type: str, player_id: str, request: Request):
+    data = await request.json()
+    collection = db[playtest_type]
+    doc = {
+        "player_id": player_id,
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "data": data,
+    }
+    # Store under: DB > playtest_type > player_id > "dda"
+    collection.update_one(
+        {"_id": player_id}, {"$set": {f"dda": doc}}, upsert=True
+    )
+    return JSONResponse({"status": "success"})
 
 @app.get("/users/{user_id}/isdda")
 async def get_isdda(user_id: str):
