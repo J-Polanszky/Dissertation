@@ -29,7 +29,7 @@ public class Sample
 public class PerformanceLogger : MonoBehaviour
 {
     public static PerformanceLogger Instance { get; private set; }
-    
+
     private Process process;
     private TimeSpan lastTotalProcessorTime;
     private float lastSampleTime;
@@ -49,7 +49,8 @@ public class PerformanceLogger : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null){
+        if (Instance == null)
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
@@ -100,7 +101,7 @@ public class PerformanceLogger : MonoBehaviour
                 lastSampleTime = now;
 
                 // Memory usage (MB)
-                float memMB = process.WorkingSet64 / (1024f * 1024f);
+                float memMB = process.WorkingSet64 / (1024f * 1024f); // Convert bytes to MB
                 memoryUsages.Add(memMB);
 
                 // FPS
@@ -109,6 +110,7 @@ public class PerformanceLogger : MonoBehaviour
 
                 nextSampleTime += logInterval;
             }
+
             yield return null;
         }
     }
@@ -142,6 +144,7 @@ public class PerformanceLogger : MonoBehaviour
                 fps = frameRates[i]
             });
         }
+
         return samples;
     }
 }

@@ -20,13 +20,11 @@ public class Pointer : MonoBehaviour
     public void BecameVisible()
     {
         isVisible = true;
-        Debug.Log("Pointer: Target became visible");
     }
 
     public void BecameInvisible()
     {
         isVisible = false;
-        Debug.Log("Pointer: Target became invisible");
     }
 
     void FixedUpdate()
@@ -37,9 +35,6 @@ public class Pointer : MonoBehaviour
 
         bool isInFrontOfCamera =
             Vector3.Dot(mainCamera.transform.forward, playerBase - mainCamera.transform.position) > 0;
-
-        Debug.Log("infront: " + isInFrontOfCamera);
-        Debug.Log("isVisible: " + isVisible);
 
         // The building is off-screen if either:
         // 1. It's behind the camera OR

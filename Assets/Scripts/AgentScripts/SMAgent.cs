@@ -19,10 +19,10 @@ public class SMAgent : MonoBehaviour
 {
     private string walkSfx = "event:/SFX_Events/Walk";
     private string runSfx = "event:/SFX_Events/Run";
-    
+
     FMOD.Studio.EventInstance walkInstance;
     FMOD.Studio.EventInstance runInstance;
-    
+
     private NavMeshAgent navMeshAgent;
 
     AgentMining agentMining;
@@ -39,7 +39,7 @@ public class SMAgent : MonoBehaviour
     delegate GameObject DecideOnOreType(List<GameObject> gameObjects);
 
     private DecideOnOreType decideOnOreFunction;
-    
+
     int mistakesDone = 0;
 
     protected void Awake()
@@ -53,13 +53,13 @@ public class SMAgent : MonoBehaviour
     {
         walkInstance = FMODUnity.RuntimeManager.CreateInstance(walkSfx);
         runInstance = FMODUnity.RuntimeManager.CreateInstance(runSfx);
-        
+
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
 
         walkInstance.setVolume(0.15f);
         runInstance.setVolume(0.15f);
-        
+
         navMeshAgent = GetComponent<NavMeshAgent>();
         agentMining = GetComponent<AgentMining>();
         agentFunctions = GetComponent<AgentFunctions>();
@@ -113,22 +113,56 @@ public class SMAgent : MonoBehaviour
         walkInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
         runInstance.set3DAttributes(FMODUnity.RuntimeUtils.To3DAttributes(transform.position));
 
+        agentFunctions.UpdateAnimator();
+        
         if (!startAgent || agentState == AgentState.Mining)
             return;
 
-        agentFunctions.UpdateAnimator();
-
         if (GameData.TimeLeft <= 20)
         {
-            if (agentState == AgentState.TravellingToDeposit)
+            // Handle case where agent just finished mining (Idle with inventory)
+            if (agentState == AgentState.Idle && agentData.TotalInventory > 0)
+            {
+                // Go directly to deposit instead of looking for more ore
+                agentState = AgentState.TravellingToDeposit;
+                navMeshAgent.isStopped = false;
+                navMeshAgent.SetDestination(agentFunctions.FindClosestDepositWaypoint(transform.position));
+                runInstance.start(); // Make sure audio plays
+                return;
+            }
+
+            if (agentState == AgentState.Idle)
             {
                 //This normally means there is not enough time to mine and depo in time, so to save resources, the agent will be disabled.
                 startAgent = false;
+            }
+
+            if (agentState == AgentState.TravellingToDeposit)
+            {
+                if (navMeshAgent.remainingDistance < 1f)
+                {
+                    agentState = AgentState.Idle;
+                    runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                    navMeshAgent.isStopped = true;
+                }
+
                 return;
             }
 
             if (agentState == AgentState.TravellingToMine)
             {
+                if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
+                    oreToMine = FindBestOre(agentFunctions.searchRadius);
+
+                if (navMeshAgent.remainingDistance < 1f)
+                {
+                    agentState = AgentState.Mining;
+                    runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                    agentMining.Mine(oreToMine);
+                    oreToMine = null;
+                    return;
+                }
+
                 float timeNeededToMine =
                     (agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position) / navMeshAgent.speed) +
                     agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
@@ -166,12 +200,12 @@ public class SMAgent : MonoBehaviour
             if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
             {
                 oreToMine = FindBestOre(agentFunctions.searchRadius);
-                if(oreToMine == null)
+                if (oreToMine == null)
                     return;
                 navMeshAgent.SetDestination(oreToMine.transform.position);
                 return;
             }
-            
+
             if (navMeshAgent.remainingDistance < 1f)
             {
                 agentState = AgentState.Mining;
@@ -221,7 +255,7 @@ public class SMAgent : MonoBehaviour
         {
             int depoRand = UnityEngine.Random.Range(0, 10);
             // Debug.Log("DepoRand: " + depoRand);
-            if (depoRand == 0)  // 1 in 10 chance (10%)
+            if (depoRand == 0) // 1 in 10 chance (10%)
             {
                 GoToDeposit();
                 return null;
@@ -254,7 +288,7 @@ public class SMAgent : MonoBehaviour
         if (!CheckIfInventoryFull(closestOre))
             return closestOre;
 
-        
+
         // 75% chance to over mine, with a maximum of 3 mistakes.
         int random = UnityEngine.Random.Range(0, 4);
         random -= mistakesDone;
@@ -282,7 +316,7 @@ public class SMAgent : MonoBehaviour
             // 50% chance if inventory is 90% full or higher
             int depoRand = UnityEngine.Random.Range(0, 10);
             depoRand -= Math.Min(5, (int)((float)agentData.TotalInventory / GameData.MaximumInvQty * 10) - 4);
-            if (depoRand > 0) 
+            if (depoRand > 0)
             {
                 GoToDeposit();
                 return null;
@@ -311,10 +345,10 @@ public class SMAgent : MonoBehaviour
             closestOre = ore;
             closestOrePos = closestOre.transform.position;
         }
-        
+
         if (!CheckIfInventoryFull(closestOre))
             return closestOre;
-        
+
         // 25% chance to over mine, but will only do it once
         int random = UnityEngine.Random.Range(0, 4);
         random -= mistakesDone;
@@ -369,10 +403,10 @@ public class SMAgent : MonoBehaviour
                 bestOreType = curOreType;
             }
         }
-        
+
         if (!CheckIfInventoryFull(bestOre))
             return bestOre;
-        
+
         GoToDeposit();
         return null;
     }
@@ -392,7 +426,7 @@ public class SMAgent : MonoBehaviour
         agentState = AgentState.Idle;
         navMeshAgent.isStopped = true;
     }
-    
+
     private void OnDestroy()
     {
         walkInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);

@@ -79,7 +79,7 @@ public static class GameData
     
     public static readonly int MaximumInvQty = 30;
 
-    public static readonly int InitialTime = 100; // 6 minutes (10 is way too long, and 8 also felt a bit long and boring, but 5 and less was too short)
+    public static readonly int InitialTime = 120; // 6 minutes (10 is way too long, and 8 also felt a bit long and boring, but 5 and less was too short)
 
     public static SoundsEnabled SoundState = SoundsEnabled.ALL;
 

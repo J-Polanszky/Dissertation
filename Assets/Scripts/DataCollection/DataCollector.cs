@@ -56,18 +56,22 @@ public class DataCollector : MonoBehaviour
         };
         string playerScore = GameData.PlayerData.Score.ToString();
         string opponentScore = GameData.MachineData.Score.ToString();
+        
+        AgentCollectedData playerCollectedData = GatherData(GameData.PlayerData);
+        AgentCollectedData opponentCollectedData = GatherData(GameData.MachineData);
 
         EndOfGame endOfGame = new EndOfGame(
             difficulty,
             playerScore,
             opponentScore,
+            playerCollectedData,
+            opponentCollectedData,
             log
         );
 
         string json = JsonUtility.ToJson(endOfGame);
 
-        Task save = SaveToDisk($"{PlaytestName}/end_of_game",
-            json);
+        Task save = SaveToDisk($"{PlaytestName}", "end_of_game", json);
         Task send = SendToApi(
             $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/end_of_game", json);
     }
@@ -83,6 +87,40 @@ public class DataCollector : MonoBehaviour
         }
     }
 
+    AgentCollectedData GatherData(AgentData agentData)
+    {
+        // Player data
+
+        string timeSpentMining = agentData.TimeSpentMining.ToString();
+        string timeSpentWTravelling =
+            Math.Round((float)(GameData.InitialTime - GameData.TimeLeft) - agentData.TimeSpentMining, 2)
+                .ToString();
+        string score = agentData.Score.ToString();
+        string inventoryUsed = agentData.TotalInventory.ToString();
+
+        int totalScoreOfInventory = 0;
+
+        foreach (var (key, value) in agentData.inventory)
+        {
+            totalScoreOfInventory += value.Score;
+        }
+
+        string scoreOfInventory = totalScoreOfInventory.ToString();
+
+        Debug.Log(
+            $"Data: Mining: {timeSpentMining}, Travelling: {timeSpentWTravelling}, Score: {score}, Inv: {inventoryUsed}, InvScore: {scoreOfInventory}");
+
+        AgentCollectedData collectedData = new AgentCollectedData(
+            timeSpentMining,
+            timeSpentWTravelling,
+            score,
+            inventoryUsed,
+            scoreOfInventory
+        );
+
+        return collectedData;
+    }
+
     public void RecordTimestampEvent()
     {
         string timestamp = (GameData.InitialTime - GameData.TimeLeft).ToString();
@@ -95,63 +133,9 @@ public class DataCollector : MonoBehaviour
         };
         string timePassed = (GameData.InitialTime - GameData.TimeLeft).ToString();
 
-        // Player data
-
-        string playerTimeSpentMining = GameData.PlayerData.TimeSpentMining.ToString();
-        string playerTimeSpentWTravelling =
-            Math.Round((float)(GameData.InitialTime - GameData.TimeLeft) - GameData.PlayerData.TimeSpentMining, 2)
-                .ToString();
-        string playerScore = GameData.PlayerData.Score.ToString();
-        string playerInventoryUsed = GameData.PlayerData.TotalInventory.ToString();
-
-        int totalScoreOfInventory = 0;
-
-        foreach (var (key, value) in GameData.PlayerData.inventory)
-        {
-            totalScoreOfInventory += value.Score;
-        }
-
-        string playerScoreOfInventory = totalScoreOfInventory.ToString();
-
-        Debug.Log(
-            $"Player Data: Mining: {playerTimeSpentMining}, Travelling: {playerTimeSpentWTravelling}, Score: {playerScore}, Inv: {playerInventoryUsed}, InvScore: {playerScoreOfInventory}");
-
-        AgentCollectedData playerCollectedData = new AgentCollectedData(
-            playerTimeSpentMining,
-            playerTimeSpentWTravelling.ToString(),
-            playerScore,
-            playerInventoryUsed,
-            playerScoreOfInventory
-        );
-
-        // Opponent data
-
-        string opponentTimeSpentMining = GameData.MachineData.TimeSpentMining.ToString();
-        string opponentTimeSpentWTravelling =
-            Math.Round((float)(GameData.InitialTime - GameData.TimeLeft) - GameData.MachineData.TimeSpentMining, 2)
-                .ToString();
-        string opponentScore = GameData.MachineData.Score.ToString();
-        string opponentInventoryUsed = GameData.MachineData.TotalInventory.ToString();
-
-        totalScoreOfInventory = 0;
-
-        foreach (var (key, value) in GameData.MachineData.inventory)
-        {
-            totalScoreOfInventory += value.Score;
-        }
-
-        string opponentScoreOfInventory = totalScoreOfInventory.ToString();
-
-        Debug.Log(
-            $"Opponent Data: Mining: {opponentTimeSpentMining}, Travelling: {opponentTimeSpentWTravelling}, Score: {opponentScore}, Inv: {opponentInventoryUsed}, InvScore: {opponentScoreOfInventory}");
-
-        AgentCollectedData opponentCollectedData = new AgentCollectedData(
-            opponentTimeSpentMining,
-            opponentTimeSpentWTravelling,
-            opponentScore,
-            opponentInventoryUsed,
-            opponentScoreOfInventory
-        );
+        AgentCollectedData playerCollectedData = GatherData(GameData.PlayerData);
+        
+        AgentCollectedData opponentCollectedData = GatherData(GameData.MachineData);
 
         TimeStampEvent timestampEvent = new TimeStampEvent(
             difficulty,
@@ -161,8 +145,7 @@ public class DataCollector : MonoBehaviour
         );
 
         string json = JsonUtility.ToJson(timestampEvent);
-        Task save = SaveToDisk($"{PlaytestName}/{timestamp}",
-            json);
+        Task save = SaveToDisk($"{PlaytestName}", timestamp, json);
         Task send = SendToApi(
             $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/{timestamp}", json);
     }
@@ -196,20 +179,19 @@ public class DataCollector : MonoBehaviour
         Debug.Log($"DDA Event: Previous: {previousDifficulty}, New: {newDifficult}");
 
         string json = JsonUtility.ToJson(ddaEvent);
-        Task save = SaveToDisk($"{PlaytestName}/dda/{timestamp}",
-            json);
-        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda/{timestamp}",
+        Task save = SaveToDisk($"{PlaytestName}/dda", timestamp, json);
+        Task send = SendToApi(
+            $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda/{timestamp}",
             json);
     }
 
-    private async Task SaveToDisk(string path, string json)
+    private async Task SaveToDisk(string path, string filename, string json)
     {
         // Save a copy to persistent storage
         try
         {
             // Construct the full directory path in persistent storage
             string directoryPath = Path.Combine(Application.persistentDataPath, path);
-            directoryPath = Path.GetDirectoryName(directoryPath); // Remove the file name
 
             // Ensure the directory exists
             if (!Directory.Exists(directoryPath))
@@ -218,7 +200,7 @@ public class DataCollector : MonoBehaviour
             }
 
             // Save the JSON data to a file
-            string filePath = Path.Combine(directoryPath, "data.json");
+            string filePath = Path.Combine(directoryPath, filename + ".json");
             File.WriteAllText(filePath, json);
 
             Debug.Log($"Data saved to persistent storage: {filePath}");
@@ -233,7 +215,7 @@ public class DataCollector : MonoBehaviour
     {
         Debug.Log($"Sending data to API: {url}");
         Debug.Log($"Data: {json}");
-        
+
         // Send data to the API
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {

@@ -160,7 +160,7 @@ MonoBehaviour:
   - {fileID: 8774378401937120492}
   StringsBanks:
   - {fileID: 2995650648216428987}
-  cacheTime: 638816111350259970
+  cacheTime: 638816196517753980
   cacheVersion: 131846
 --- !u!114 &2995650648216428987
 MonoBehaviour:
@@ -252,10 +252,10 @@ MonoBehaviour:
   Path: Assets/joshua_polanszky_msd63b fmod project/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 638816111350259970
+  lastModified: 638816196517753980
   FileSizes:
   - Name: Desktop
-    Value: 1843872
+    Value: 1843904
   Exists: 1
 --- !u!114 &9009514785204373265
 MonoBehaviour:

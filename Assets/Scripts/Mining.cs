@@ -97,5 +97,9 @@ public class Mining : MonoBehaviour
         PostMine();
     }
 
-    
+    private void OnDestroy()
+    {
+        mineInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        mineInstance.release();
+    }
 }
