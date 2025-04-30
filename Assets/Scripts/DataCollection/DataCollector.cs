@@ -66,6 +66,8 @@ public class DataCollector : MonoBehaviour
 
         string json = JsonUtility.ToJson(endOfGame);
 
+        Task save = SaveToDisk($"{PlaytestName}/end_of_game",
+            json);
         Task send = SendToApi(
             $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/end_of_game", json);
     }
@@ -159,6 +161,8 @@ public class DataCollector : MonoBehaviour
         );
 
         string json = JsonUtility.ToJson(timestampEvent);
+        Task save = SaveToDisk($"{PlaytestName}/{timestamp}",
+            json);
         Task send = SendToApi(
             $"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/{timestamp}", json);
     }
@@ -192,24 +196,19 @@ public class DataCollector : MonoBehaviour
         Debug.Log($"DDA Event: Previous: {previousDifficulty}, New: {newDifficult}");
 
         string json = JsonUtility.ToJson(ddaEvent);
+        Task save = SaveToDisk($"{PlaytestName}/dda/{timestamp}",
+            json);
         Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda/{timestamp}",
             json);
     }
 
-    private async Task SendToApi(string url, string json)
+    private async Task SaveToDisk(string path, string json)
     {
-        Debug.Log($"Sending data to API: {url}");
-        Debug.Log($"Data: {json}");
-
         // Save a copy to persistent storage
         try
         {
-            // Extract the path after the base API URL
-            Uri uri = new Uri(url);
-            string relativePath = uri.AbsolutePath.Replace(API_URL, "").TrimStart('/');
-
             // Construct the full directory path in persistent storage
-            string directoryPath = Path.Combine(Application.persistentDataPath, relativePath);
+            string directoryPath = Path.Combine(Application.persistentDataPath, path);
             directoryPath = Path.GetDirectoryName(directoryPath); // Remove the file name
 
             // Ensure the directory exists
@@ -228,6 +227,12 @@ public class DataCollector : MonoBehaviour
         {
             Debug.LogError($"Failed to save data to persistent storage: {e.Message}");
         }
+    }
+
+    private async Task SendToApi(string url, string json)
+    {
+        Debug.Log($"Sending data to API: {url}");
+        Debug.Log($"Data: {json}");
         
         // Send data to the API
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
