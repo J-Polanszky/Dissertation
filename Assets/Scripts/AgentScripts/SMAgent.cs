@@ -115,7 +115,7 @@ public class SMAgent : MonoBehaviour
 
         agentFunctions.UpdateAnimator();
         
-        if (!startAgent || agentState == AgentState.Mining)
+        if (!startAgent)
             return;
 
         if (GameData.TimeLeft <= 20)
@@ -123,6 +123,24 @@ public class SMAgent : MonoBehaviour
             // Handle case where agent just finished mining (Idle with inventory)
             if (agentState == AgentState.Idle && agentData.TotalInventory > 0)
             {
+                oreToMine = FindBestOre(agentFunctions.searchRadius);
+                float timeNeededToMine =
+                    (agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position) / navMeshAgent.speed) +
+                    agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
+                float timeNeededToDeposit =
+                    agentFunctions.CalculatePathRemainingDistance(
+                        agentFunctions.FindClosestDepositWaypoint(oreToMine.transform.position),
+                        oreToMine.transform.position) / navMeshAgent.speed;
+                if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
+                {
+                    Debug.Log("Travelling to min at end");
+                    agentState = AgentState.TravellingToMine;
+                    navMeshAgent.SetDestination(oreToMine.transform.position);
+                    runInstance.start();
+                    navMeshAgent.isStopped = false;
+                    return;
+                }
+
                 // Go directly to deposit instead of looking for more ore
                 agentState = AgentState.TravellingToDeposit;
                 navMeshAgent.isStopped = false;
@@ -133,13 +151,40 @@ public class SMAgent : MonoBehaviour
 
             if (agentState == AgentState.Idle)
             {
+                Debug.Log("End Game Idle");
                 //This normally means there is not enough time to mine and depo in time, so to save resources, the agent will be disabled.
+                oreToMine = FindBestOre(agentFunctions.searchRadius);
+                float timeNeededToMine =
+                    (agentFunctions.CalculatePathRemainingDistance(oreToMine.transform.position) / navMeshAgent.speed) +
+                    agentMining.OreMiningTime[Enum.Parse<OreType>(oreToMine.tag)];
+                float timeNeededToDeposit =
+                    agentFunctions.CalculatePathRemainingDistance(
+                        agentFunctions.FindClosestDepositWaypoint(oreToMine.transform.position),
+                        oreToMine.transform.position) / navMeshAgent.speed;
+                if (timeNeededToMine + timeNeededToDeposit < GameData.TimeLeft)
+                {
+                    Debug.Log("Travelling to min at end");
+                    agentState = AgentState.TravellingToMine;
+                    navMeshAgent.SetDestination(oreToMine.transform.position);
+                    runInstance.start();
+                    navMeshAgent.isStopped = false;
+                    return;
+                }
+                Debug.Log("Disabling Agent");
                 startAgent = false;
+                navMeshAgent.ResetPath();
+                navMeshAgent.isStopped = true;
+                navMeshAgent.enabled = false;
+                agentState = AgentState.Idle;
+                walkInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                return;
             }
 
             if (agentState == AgentState.TravellingToDeposit)
             {
-                if (navMeshAgent.remainingDistance < 1f)
+                // Sometimes remaining distance is not updated in time.
+                if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(transform.position, navMeshAgent.destination) < 1f)
                 {
                     agentState = AgentState.Idle;
                     runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
@@ -154,7 +199,7 @@ public class SMAgent : MonoBehaviour
                 if (oreToMine == null || oreToMine.GetComponent<OreScript>().isBeingMined)
                     oreToMine = FindBestOre(agentFunctions.searchRadius);
 
-                if (navMeshAgent.remainingDistance < 1f)
+                if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(transform.position, oreToMine.transform.position) < 1f)
                 {
                     agentState = AgentState.Mining;
                     runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
@@ -206,7 +251,7 @@ public class SMAgent : MonoBehaviour
                 return;
             }
 
-            if (navMeshAgent.remainingDistance < 1f)
+            if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(transform.position, oreToMine.transform.position) < 1f)
             {
                 agentState = AgentState.Mining;
                 runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
@@ -219,7 +264,7 @@ public class SMAgent : MonoBehaviour
 
         if (agentState == AgentState.TravellingToDeposit)
         {
-            if (navMeshAgent.remainingDistance < 1f)
+            if (navMeshAgent.remainingDistance < 1f && Vector3.Distance(transform.position, navMeshAgent.destination) < 1f)
             {
                 agentState = AgentState.Idle;
                 runInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);

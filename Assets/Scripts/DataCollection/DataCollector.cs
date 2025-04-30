@@ -47,6 +47,7 @@ public class DataCollector : MonoBehaviour
     public void RecordEndOfGameEvent()
     {
         PerformanceLog log = PerformanceLogger.Instance.EndLogging();
+
         string difficulty = GameData.Difficulty switch
         {
             0 => "Easy",

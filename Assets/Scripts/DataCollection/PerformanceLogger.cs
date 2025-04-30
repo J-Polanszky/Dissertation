@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using Unity.Services.Authentication;
+using Debug = UnityEngine.Debug;
 
 [Serializable]
 public class PerformanceLog
@@ -21,8 +22,7 @@ public class PerformanceLog
 public class Sample
 {
     public int second;
-    public float cpu;
-    public float memory;
+    public float cpu_percent;
     public float fps;
 }
 
@@ -95,17 +95,15 @@ public class PerformanceLogger : MonoBehaviour
                 TimeSpan currentTotalProcessorTime = process.TotalProcessorTime;
                 double cpuUsedMs = (currentTotalProcessorTime - lastTotalProcessorTime).TotalMilliseconds;
                 double elapsedMs = (now - lastSampleTime) * 1000.0;
-                float cpuUsagePercent = (float)((cpuUsedMs / (elapsedMs * cpuCores)) * 100.0);
+                float cpuUsagePercent = (float)((cpuUsedMs / (elapsedMs * cpuCores)) * 100.0f);
+                cpuUsagePercent = (float)Math.Round(cpuUsagePercent, 2); // Round to 2 dp
                 cpuUsages.Add(cpuUsagePercent);
                 lastTotalProcessorTime = currentTotalProcessorTime;
                 lastSampleTime = now;
 
-                // Memory usage (MB)
-                float memMB = process.WorkingSet64 / (1024f * 1024f); // Convert bytes to MB
-                memoryUsages.Add(memMB);
-
                 // FPS
                 float fps = 1.0f / Time.deltaTime;
+                fps = (float)Math.Round(fps, 2); // Round to 2 dp
                 frameRates.Add(fps);
 
                 nextSampleTime += logInterval;
@@ -139,8 +137,7 @@ public class PerformanceLogger : MonoBehaviour
             samples.Add(new Sample
             {
                 second = i * (int)logInterval,
-                cpu = cpuUsages[i],
-                memory = memoryUsages[i],
+                cpu_percent = cpuUsages[i],
                 fps = frameRates[i]
             });
         }
