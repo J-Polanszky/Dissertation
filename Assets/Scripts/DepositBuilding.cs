@@ -14,6 +14,8 @@ public class DepositBuilding : MonoBehaviour
     public AgentData agentData;
     bool agentCooldown = false;
     
+    public Pointer pointer;
+    
     void Deposit(AgentData data)
     {
         foreach (var (key, value) in data.inventory)
@@ -60,6 +62,21 @@ public class DepositBuilding : MonoBehaviour
                 StartCoroutine(CountDown());
             }
         }
-        
+    }
+
+    private void OnBecameVisible()
+    {
+        if (pointer == null)
+            return;
+
+        pointer.BecameVisible();
+    }
+    
+    private void OnBecameInvisible()
+    {
+        if (pointer == null)
+            return;
+
+        pointer.BecameInvisible();
     }
 }

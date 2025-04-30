@@ -6,8 +6,8 @@ public class Pointer : MonoBehaviour
     public Vector3 playerBase; // Assign the player's base transform in the Inspector
     public RectTransform pointerUI; // Assign the UI element (e.g., an arrow) in the Inspector
     public Camera mainCamera;
-    private bool wasOffScreen = false;
-    private float edgeMargin = 20f; // pixels
+
+    [HideInInspector] public bool isVisible = false;
 
     private void Start()
     {
@@ -17,7 +17,19 @@ public class Pointer : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    void Update()
+    public void BecameVisible()
+    {
+        isVisible = true;
+        Debug.Log("Pointer: Target became visible");
+    }
+
+    public void BecameInvisible()
+    {
+        isVisible = false;
+        Debug.Log("Pointer: Target became invisible");
+    }
+
+    void FixedUpdate()
     {
         Vector3 screenPos = mainCamera.WorldToScreenPoint(playerBase);
         Vector3 direction = screenPos - pointerUI.position;
@@ -26,29 +38,14 @@ public class Pointer : MonoBehaviour
         bool isInFrontOfCamera =
             Vector3.Dot(mainCamera.transform.forward, playerBase - mainCamera.transform.position) > 0;
 
-        // Hysteresis: no margin for going off-screen, margin for coming back on-screen
-        bool isOffScreenNow = 
-            screenPos.x < 0 || screenPos.x > Screen.width ||
-            screenPos.y < 0 || screenPos.y > Screen.height;
+        Debug.Log("infront: " + isInFrontOfCamera);
+        Debug.Log("isVisible: " + isVisible);
 
-        bool isOnScreenWithMargin = 
-            screenPos.x > edgeMargin && screenPos.x < Screen.width - edgeMargin &&
-            screenPos.y > edgeMargin && screenPos.y < Screen.height - edgeMargin;
+        // The building is off-screen if either:
+        // 1. It's behind the camera OR
+        // 2. It's not visible (as reported by OnBecameInvisible)
+        bool isPlayerBaseOffScreen = !isInFrontOfCamera || !isVisible;
 
-        if (wasOffScreen)
-        {
-            // Only switch to on-screen if well inside the screen
-            wasOffScreen = !isOnScreenWithMargin;
-        }
-        else
-        {
-            // Switch to off-screen as soon as it's outside
-            wasOffScreen = isOffScreenNow;
-        }
-
-        bool isPlayerBaseOffScreen = !isInFrontOfCamera || wasOffScreen;
-
-        // ...rest of your code remains unchanged...
         float innerRadius = Mathf.Min(Screen.width, Screen.height) / 4f;
 
         if (!isInFrontOfCamera)
@@ -58,6 +55,7 @@ public class Pointer : MonoBehaviour
 
         if (isPlayerBaseOffScreen)
         {
+            // Position the pointer at the edge of the screen pointing toward the building
             float canvasHalfWidth = Screen.width / 2f;
             float canvasHalfHeight = Screen.height / 2f;
             float radians = angle * Mathf.Deg2Rad;
@@ -67,10 +65,12 @@ public class Pointer : MonoBehaviour
         }
         else
         {
+            // Position the pointer within the inner radius
             if (direction.magnitude > innerRadius)
             {
                 direction = direction.normalized * innerRadius;
             }
+
             pointerUI.position = screenPos - direction;
         }
 

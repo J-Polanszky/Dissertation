@@ -185,15 +185,14 @@ public class DataCollector : MonoBehaviour
 
         DDAChange ddaEvent = new DDAChange(
             previousDifficulty,
-            newDifficult,
-            timestamp
+            newDifficult
         );
 
 
         Debug.Log($"DDA Event: Previous: {previousDifficulty}, New: {newDifficult}");
 
         string json = JsonUtility.ToJson(ddaEvent);
-        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda",
+        Task send = SendToApi($"{API_URL}/{PlaytestName}/{AuthenticationService.Instance.PlayerInfo.Username}/dda/{timestamp}",
             json);
     }
 

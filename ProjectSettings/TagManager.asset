@@ -15,6 +15,7 @@ TagManager:
   - Canvas
   - LoginPanel
   - MenuPanel
+  - Pointer
   layers:
   - Default
   - TransparentFX

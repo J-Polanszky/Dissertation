@@ -197,7 +197,12 @@ public class GameManager : MonoBehaviour
         foreach (GameObject deposit in deposits)
         {
             if (deposit.name == "PlayerDeposit")
-                deposit.GetComponent<DepositBuilding>().agentData = GameData.PlayerData;
+            {
+                DepositBuilding depositBuilding = deposit.GetComponent<DepositBuilding>();
+                depositBuilding.agentData = GameData.PlayerData;
+                depositBuilding.pointer = GameObject.FindWithTag("Pointer").GetComponent<Pointer>();
+
+            }
             else
                 deposit.GetComponent<DepositBuilding>().agentData = GameData.MachineData;
         }
