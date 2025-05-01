@@ -305,6 +305,11 @@ public class RLAgent : Agent
 
             foreach (GameObject ore in ores)
             {
+                OreScript oreScript = ore.GetComponent<OreScript>();
+                
+                if (oreScript.isBeingMined)
+                    continue;
+                
                 //TODO: Make a invalid path checker (is this needed, as the agent seems quite proficient at navigating)
                 float distanceFromAgent = agentFunctions.CalculatePathRemainingDistance(ore.transform.position);
                 float distanceFromPlayer =

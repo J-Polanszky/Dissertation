@@ -312,8 +312,8 @@ public class SMAgent : MonoBehaviour
 
         foreach (GameObject ore in ores)
         {
-            // if (ore.GetComponent<OreScript>().isBeingMined)
-            //     continue;
+            if (ore.GetComponent<OreScript>().isBeingMined)
+                continue;
 
             if (closestOre == null)
             {
@@ -373,8 +373,8 @@ public class SMAgent : MonoBehaviour
 
         foreach (GameObject ore in ores)
         {
-            // if (ore.GetComponent<OreScript>().isBeingMined)
-            //     continue;
+            if (ore.GetComponent<OreScript>().isBeingMined)
+                continue;
 
             if (closestOre == null)
             {
