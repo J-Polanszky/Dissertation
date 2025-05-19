@@ -91,9 +91,9 @@ public class DDA_System : MonoBehaviour
         float opponentTimeSpentMining = float.Parse(opponentData.timeSpentMining);
         
         // Calculate metrics
-        float scoreRatio = playerScore / opponentScore;
-        float inventoryRatio = playerInventoryScore / opponentInventoryScore;
-        float timeEfficiencyRatio = playerTimeSpentMining / opponentTimeSpentMining;
+        float scoreRatio = playerScore / Mathf.Max(opponentScore, 1);
+        float inventoryRatio = playerInventoryScore / Mathf.Max(opponentInventoryScore, 1);
+        float timeEfficiencyRatio = playerTimeSpentMining / Mathf.Max(opponentTimeSpentMining, 1);
         
         // Calculate composite performance
         float overallPerformance = (scoreRatio * 0.5f) + (inventoryRatio * 0.3f) + (timeEfficiencyRatio * 0.2f);
